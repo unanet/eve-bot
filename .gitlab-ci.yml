@@ -1,8 +1,10 @@
-default:
-  image:
-    name: golang:1.14.1-alpine
+image: golang:1.14.1-alpine
 
-build-image:
+stages:
+  - build
+
+build:
+  stage: build
   script:
     - make push
   tags:
