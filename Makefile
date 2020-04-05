@@ -1,9 +1,10 @@
 .ONESHELL:
 .SHELL := /bin/bash
 
+
+GO_VERSION?=1.14.1
 GO_FMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
-GO_VERSION?=$(shell go version)
-# GO_VERSION?=1.14.1
+# GO_VERSION?=$(shell go version)
 GO_VERSION_NUMBER?=$(word 3, $(GO_VERSION))
 GO_BUILD_PLATFORM?=$(subst /,-,$(lastword $(GO_VERSION)))
 BUILD_PLATFORM:=$(subst /,-,$(lastword $(GO_VERSION)))
@@ -20,15 +21,27 @@ VERSION?=$(shell $(BUILD_SCRIPTS_DIR)/version.sh)
 FEATURE_TAG?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 GIT_TAG?="$(shell git describe)"
 GIT_COMMIT?="$(shell git rev-list -1 HEAD)"
-# GIT_BRANCH?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 CI_COMMIT_BRANCH?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 GIT_AUTHOR=$(shell git show -s --format='%ae' $(GIT_COMMIT}))
 DOCKER_IMAGE_NAME:=unanet-docker.jfrog.io/eve-bot
 DOCKER_IMAGE_TAG?=$(shell $(BUILD_SCRIPTS_DIR)/docker-image-tag.sh $(VERSION) $(FEATURE_TAG))
 TIMESTAMP_UTC:=$(shell /bin/date -u "+%Y%m%d%H%M%S")
 TS:=$(shell /bin/date "+%Y%m%d%H%M%S")
+DOCKER_UID=$(shell id -u)
+DOCKER_GID=$(shell id -g)
+BUILD_IMAGE:=unanet-docker.jfrog.io/java-jdk
 
 export CI_COMMIT_BRANCH
+
+
+
+docker-exec = docker run --rm \
+	-e DOCKER_UID=${DOCKER_UID} \
+	-e DOCKER_GID=${DOCKER_GID} \
+	-v ${CUR_DIR}:/src \
+	-w /src \
+	${BUILD_IMAGE}
+
 
 default: build
 
