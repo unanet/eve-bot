@@ -6,6 +6,7 @@ require (
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/lib/pq v1.3.0
+	github.com/nlopes/slack v0.6.0
 	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644
 	github.com/opentracing-contrib/go-stdlib v0.0.0-20190519235532-cf7a6c988dc9
 	github.com/opentracing/opentracing-go v1.1.0

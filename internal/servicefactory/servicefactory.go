@@ -18,6 +18,7 @@ type Container struct {
 	Logger        evelogger.Container
 	TraceProvider tracer.Provider
 	SlackClient   *slack.Client
+	// SlackProvider internalslack.Provider
 }
 
 var zlogger *zap.Logger
@@ -43,6 +44,7 @@ func Initialize(vInfo version.Info) *Container {
 		Metrics:       metrics.New(),
 		Logger:        logger,
 		TraceProvider: tracer.New("EveBot", logger, true),
-		SlackClient:   slack.New(cfg.SlackSecrets.BotOAuthToken),
+		// SlackProvider: internalslack.NewProvider(cfg, logger),
+		SlackClient: slack.New(cfg.SlackSecrets.BotOAuthToken),
 	}
 }
