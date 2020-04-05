@@ -4,6 +4,6 @@ stages:
 build-image:
   stage: build
   script:
-    - make
+    - make push
   tags:
     - linux
