@@ -1,0 +1,24 @@
+stages:
+  - test
+  - build
+
+test:
+  stage: build
+  script:
+    - make test
+  tags:
+    - linux
+
+build-binary:
+  stage: build
+  script:
+    - make build
+  tags:
+    - linux
+
+build-image:
+  stage: build
+  script:
+    - make docker-push
+  tags:
+    - linux

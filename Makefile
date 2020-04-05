@@ -77,7 +77,7 @@ show-build-details:
 .PHONY: docker
 docker:
 	@echo
-	@echo "===> Docker Image..."
+	@echo "===> Building Docker Image..."
 	@docker build \
 		--build-arg BUILD_HOST="${BUILD_HOST}" \
 		--build-arg BUILDER="${BUILD_BUILDER}" \
@@ -91,6 +91,12 @@ docker:
 	@docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
 	@echo "Docker Image(s) built"
 
+.PHONY: docker-push
+docker-push: docker
+	@echo
+	@echo "===> Pushing Docker Image..."
+	@docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+	@docker push ${DOCKER_IMAGE_NAME}:latest
 
 .PHONY: build
 build:
