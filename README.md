@@ -1,5 +1,7 @@
 # eve-bot
 
+[![pipeline status](https://gitlab.unanet.io/devops/eve-bot/badges/master/pipeline.svg)](https://gitlab.unanet.io/devops/eve-bot/-/commits/master)
+
 ## Summary
 
 This is the `eve-bot` ChatOps service. It is responsible for handling all communication between the User (Slack) and the Backend Pipeline API.
