@@ -3,7 +3,9 @@ stages:
 
 build-image:
   stage: build
-  image: 'golang:latest'
+  services:
+    - golang:latest
+  image: golang:latest
   script:
     - make push
   tags:
