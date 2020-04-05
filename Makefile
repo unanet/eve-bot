@@ -2,11 +2,10 @@
 .SHELL := /bin/bash
 
 GO_FMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
-GO_VERSION?=$(shell go version)
+# GO_VERSION?=$(shell go version)
+GO_VERSION?=1.14.1
 GO_VERSION_NUMBER?=$(word 3, $(GO_VERSION))
 GO_BUILD_PLATFORM?=$(subst /,-,$(lastword $(GO_VERSION)))
-GO_PATH:=$(firstword $(subst :, ,$(shell go env GOPATH)))
-GO_PRE_111?=$(shell echo $(GO_VERSION_NUMBER) | grep -E 'go1\.(10|[0-9])\.')
 BUILD_PLATFORM:=$(subst /,-,$(lastword $(GO_VERSION)))
 BUILD_BUILDER:=$(shell whoami)
 BUILD_HOST:=$(shell hostname)
@@ -49,8 +48,8 @@ git-details:
 	@echo "	author: $(GIT_AUTHOR)"
 	@echo
 
-.PHONY: show-build-details
-show-build-details:
+.PHONY: build-details
+build-details:
 	@echo
 	@echo "===> Build Details..."
 	@echo "	golang: $(GO_VERSION_NUMBER)"
