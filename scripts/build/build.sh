@@ -52,7 +52,7 @@ function buildBinary() {
 		-osarch="${XC_EXCLUDE_OSARCH}" \
 		-ldflags "${LD_FLAGS}" \
 		-output "bin/{{.OS}}_{{.Arch}}/${PWD##*/}" \
-		${PROJECT_DIR}/cmd/token-svc/
+		${PROJECT_DIR}/cmd/eve-bot/
 }
 
 function printBuildResults() {
