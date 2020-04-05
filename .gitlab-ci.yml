@@ -1,15 +1,9 @@
-default:
-  image: 'golang:latest'
-  before_script:
-    - echo Hello World
-
 stages:
   - build
 
 build-image:
   stage: build
-  inherit:
-    default: [image]  
+  image: 'golang:latest'
   script:
     - make push
   tags:
