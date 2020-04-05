@@ -3,7 +3,6 @@
 
 GO_OPTS?=
 GO_VERSION_MIN?=1.14
-GO_FMT?=gofmt
 GO_FMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 GO_VERSION?=$(shell go version)
 GO_VERSION_NUMBER?=$(word 3, $(GO_VERSION))
@@ -36,7 +35,7 @@ TS:=$(shell /bin/date "+%Y%m%d%H%M%S")
 pkgs?=./...
 
 .PHONY: all
-all: clean show-version version-check unused fmt fmtcheck vet style build test
+all: clean show-version version-check unused fmt fmtcheck vet build test
 
 .PHONY: clean
 clean:
@@ -112,19 +111,9 @@ git-tag:
 	@echo "===> Git Tag: ${VERSION}"
 	git tag -a ${VERSION} -m "${VERSION}"
 
-.PHONY: sign
-sign:
-	@echo "===> Signing Release Artifacts"
-	@sh -c "'$(BUILD_SCRIPTS_DIR)/gpg-sign.sh'"
-
-.PHONY: verify
-verify:
-	@echo "===> Verify Release Signatures"
-	@sh -c "'$(BUILD_SCRIPTS_DIR)/gpg-verify.sh'"
-
 
 .PHONY: prep
-prep: clean show-version version-check unused fmtcheck vet
+prep: clean show-version unused fmtcheck vet
 
 default: all
 
@@ -185,20 +174,6 @@ vet:
 run: 
 	@echo "===> running server..."
 	go run $(SERVICE_CMD)
-
-.PHONY: version-check
-version-check: 
-	@sh -c "'$(BUILD_SCRIPTS_DIR)/goversioncheck.sh' '$(GO_VERSION_MIN)'"
-
-.PHONY: style
-style:
-	@echo "===> server code style check..."
-	@fmtRes=$$($(GO_FMT) -d $$(find . -path ./vendor -prune -o -name '*.go' -print)); \
-	if [ -n "$${fmtRes}" ]; then \
-		echo "gofmt checking failed!"; echo "$${fmtRes}"; echo; \
-		echo "Please ensure you are using $$(go version) for formatting code."; \
-		exit 1; \
-	fi
 
 .PHONY: tidy
 tidy:
