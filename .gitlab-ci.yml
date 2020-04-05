@@ -9,12 +9,12 @@ test:
   tags:
     - linux
 
-build-binary:
-  stage: build
-  script:
-    - make build
-  tags:
-    - linux
+# build-binary:
+#   stage: build
+#   script:
+#     - make build
+#   tags:
+#     - linux
 
 build-image:
   stage: build
