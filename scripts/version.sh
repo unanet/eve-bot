@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 short_git_commit=$(git rev-parse --short=10 HEAD)
 git_branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 git_tag=$(git tag -l --merged master --sort='-*authordate' | head -n1)
