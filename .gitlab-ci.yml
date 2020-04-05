@@ -1,11 +1,23 @@
 stages:
-  - build
+  - details
+  # - build
 
-build:
-  stage: build
+details:
+  stage: details
   script:
-    - make
+    - make show-version
+    - make git-details
+    - make build-details
   tags:
     - linux
   only:
-    - master
+    - master  
+
+# build:
+#   stage: build
+#   script:
+#     - make
+#   tags:
+#     - linux
+#   only:
+#     - master
