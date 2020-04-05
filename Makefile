@@ -2,8 +2,8 @@
 .SHELL := /bin/bash
 
 GO_FMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
-# GO_VERSION?=$(shell go version)
-GO_VERSION?=1.14.1
+GO_VERSION?=$(shell go version)
+# GO_VERSION?=1.14.1
 GO_VERSION_NUMBER?=$(word 3, $(GO_VERSION))
 GO_BUILD_PLATFORM?=$(subst /,-,$(lastword $(GO_VERSION)))
 BUILD_PLATFORM:=$(subst /,-,$(lastword $(GO_VERSION)))
@@ -21,14 +21,14 @@ FEATURE_TAG?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 GIT_TAG?="$(shell git describe)"
 GIT_COMMIT?="$(shell git rev-list -1 HEAD)"
 # GIT_BRANCH?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-CI_COMMIT_REF_SLUG?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+CI_COMMIT_BRANCH?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 GIT_AUTHOR=$(shell git show -s --format='%ae' $(GIT_COMMIT}))
 DOCKER_IMAGE_NAME:=unanet-docker.jfrog.io/eve-bot
 DOCKER_IMAGE_TAG?=$(shell $(BUILD_SCRIPTS_DIR)/docker-image-tag.sh $(VERSION) $(FEATURE_TAG))
 TIMESTAMP_UTC:=$(shell /bin/date -u "+%Y%m%d%H%M%S")
 TS:=$(shell /bin/date "+%Y%m%d%H%M%S")
 
-export CI_COMMIT_REF_SLUG
+export CI_COMMIT_BRANCH
 
 default: build
 
@@ -46,7 +46,7 @@ git-details:
 	@echo
 	@echo "===> Git Details..."
 	@echo "	sha: $(GIT_COMMIT)"
-	@echo "	branch: $(CI_COMMIT_REF_SLUG)"
+	@echo "	branch: $(CI_COMMIT_BRANCH)"
 	@echo "	tag: $(GIT_TAG)"
 	@echo "	author: $(GIT_AUTHOR)"
 	@echo
@@ -74,7 +74,7 @@ build:
 		--build-arg GIT_COMMIT_AUTHOR="${GIT_AUTHOR}" \
 		--build-arg BUILD_DATE="${TIMESTAMP_UTC}" \
 		--build-arg VERSION="${VERSION}" \
-		--build-arg GIT_BRANCH="${CI_COMMIT_REF_SLUG}" \
+		--build-arg GIT_BRANCH="${CI_COMMIT_BRANCH}" \
 		--build-arg PRERELEASE="${PRERELEASE}" \
 		. -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
 	@docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
