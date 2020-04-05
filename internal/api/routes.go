@@ -16,7 +16,7 @@ import (
 func (a *app) registerRoutes(svcFactory *servicefactory.Container) {
 	a.router.Handle("/", middleware.Handler{AppCtx: svcFactory, RouteHandler: pingHandler}).Methods("GET")
 	a.router.Handle("/ping", middleware.Handler{AppCtx: svcFactory, RouteHandler: pingHandler}).Methods("GET")
-	a.router.Handle("/slack-event", middleware.Handler{AppCtx: svcFactory, RouteHandler: slackEventHandler}).Methods("GET")
+	a.router.Handle("/slack-events", middleware.Handler{AppCtx: svcFactory, RouteHandler: slackEventHandler}).Methods("POST")
 }
 
 func pingHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
@@ -24,7 +24,6 @@ func pingHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, 
 }
 
 func slackEventHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
-
 	verifier, err := slack.NewSecretsVerifier(req.Header, svcFactory.Config.SlackSecrets.SigningSecret)
 	if err != nil {
 		return httphelper.AppErr(err, "failed new secret verifier")
@@ -50,8 +49,9 @@ func slackEventHandler(svcFactory *servicefactory.Container, res http.ResponseWr
 		return httphelper.AppErr(err, "failed parse slack event")
 	}
 
+	svcFactory.Logger.For(req.Context()).Info("slack event", zap.String("event", slackAPIEvent.Type))
+
 	if slackAPIEvent.Type == slackevents.URLVerification {
-		svcFactory.Logger.For(req.Context()).Info("slack event", zap.String("event", slackevents.URLVerification))
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
 		if err != nil {
@@ -61,16 +61,14 @@ func slackEventHandler(svcFactory *servicefactory.Container, res http.ResponseWr
 	}
 
 	if slackAPIEvent.Type == slackevents.CallbackEvent {
-		svcFactory.Logger.For(req.Context()).Info("slack event", zap.String("event", slackevents.CallbackEvent))
 		innerEvent := slackAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
-			svcFactory.SlackClient.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+			svcFactory.SlackClient.PostMessage(ev.Channel, slack.MsgOptionText("Yes, App Mention Event hello.", false))
 			return httphelper.AppResponse(http.StatusOK, "")
 		}
 	}
 
-	svcFactory.Logger.For(req.Context()).Info("slack event", zap.String("event", "unknown"))
-	return httphelper.AppResponse(http.StatusOK, "unknown slack event")
+	return httphelper.AppResponse(http.StatusGone, "unknown slack event")
 
 }
