@@ -4,7 +4,7 @@ stages:
 build:
   stage: build
   script:
-    - make push
+    - make
   tags:
     - linux
   only:
