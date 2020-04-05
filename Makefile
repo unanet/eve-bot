@@ -39,8 +39,8 @@ git-tag:
 show-version:
 	@echo "$(VERSION)"
 
-.PHONY: show-git-details
-show-git-details:
+.PHONY: git-details
+git-details:
 	@echo
 	@echo "===> Git Details..."
 	@echo "	sha: $(GIT_COMMIT)"
