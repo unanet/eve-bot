@@ -8,6 +8,8 @@ stages:
 
 build-image:
   stage: build
+  inherit:
+    default: [image]  
   script:
     - make push
   tags:
