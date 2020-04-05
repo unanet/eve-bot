@@ -3,6 +3,8 @@ stages:
   # - build
 
 details:
+  variables:
+    CI_DEBUG_TRACE: "true"  
   stage: details
   script:
     - make show-version
