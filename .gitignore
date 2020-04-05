@@ -1,0 +1,8 @@
+evebot
+eve-bot
+.DS_Store
+.vscode/
+.cover
+/bin
+.env
+
