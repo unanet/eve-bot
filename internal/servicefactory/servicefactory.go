@@ -5,20 +5,17 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 	"gitlab.unanet.io/devops/eve-bot/internal/evelogger"
 	"gitlab.unanet.io/devops/eve-bot/internal/metrics"
-	"gitlab.unanet.io/devops/eve-bot/internal/tracer"
 	"gitlab.unanet.io/devops/eve-bot/internal/version"
 	"go.uber.org/zap"
 )
 
 // Container contains the shared services
 type Container struct {
-	VersionInfo   version.Info
-	Config        *config.Config
-	Metrics       *metrics.Provider
-	Logger        evelogger.Container
-	TraceProvider tracer.Provider
-	SlackClient   *slack.Client
-	// SlackProvider internalslack.Provider
+	VersionInfo version.Info
+	Config      *config.Config
+	Metrics     *metrics.Provider
+	Logger      evelogger.Container
+	SlackClient *slack.Client
 }
 
 var zlogger *zap.Logger
@@ -39,12 +36,10 @@ func Initialize(vInfo version.Info) *Container {
 	logger := evelogger.NewLogContainer(cfg, zlogger.With(zap.String("package", "servicefactory")))
 
 	return &Container{
-		VersionInfo:   vInfo,
-		Config:        cfg,
-		Metrics:       metrics.New(),
-		Logger:        logger,
-		TraceProvider: tracer.New("EveBot", logger, true),
-		// SlackProvider: internalslack.NewProvider(cfg, logger),
+		VersionInfo: vInfo,
+		Config:      cfg,
+		Metrics:     metrics.New(),
+		Logger:      logger,
 		SlackClient: slack.New(cfg.SlackSecrets.BotOAuthToken),
 	}
 }

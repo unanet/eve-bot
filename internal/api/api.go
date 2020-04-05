@@ -50,8 +50,7 @@ func New(svcFactory *servicefactory.Container) App {
 			)(middleware.Adapt(
 				router,
 				middleware.LogMetricsHandler(svcFactory.Logger, svcFactory.Metrics),
-				middleware.TimeoutHandler(svcFactory.Config.API.TimeoutSecs),
-				middleware.TracingHandler(svcFactory))),
+				middleware.TimeoutHandler(svcFactory.Config.API.TimeoutSecs))),
 			ReadTimeout:  time.Duration(svcFactory.Config.API.ReadTimeOutSecs) * time.Second,
 			WriteTimeout: time.Duration(svcFactory.Config.API.WriteTimeOutSecs) * time.Second,
 			IdleTimeout:  time.Duration(svcFactory.Config.API.IdleTimeOutSecs) * time.Second,
@@ -119,7 +118,7 @@ func (a *app) Serve() error {
 	atomic.StoreInt32(&a.healthy, 1)
 
 	// log server start details
-	a.logger.Bg().Info("server up ===========>",
+	a.logger.Bg().Debug("server up ===========>",
 		zap.String("port", a.svcFactory.Config.API.Port),
 		zap.String("metrics_port", a.svcFactory.Config.API.MetricsPort),
 		zap.String("full_version", a.svcFactory.VersionInfo.FullVersionNumber(true)),

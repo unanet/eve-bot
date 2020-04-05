@@ -18,7 +18,6 @@ import (
 
 func (a *app) registerRoutes(svcFactory *servicefactory.Container) {
 	a.router.Handle("/", middleware.Handler{AppCtx: svcFactory, RouteHandler: pingHandler}).Methods("GET")
-	a.router.Handle("/ping", middleware.Handler{AppCtx: svcFactory, RouteHandler: pingHandler}).Methods("GET")
 	a.router.Handle("/slack-events", middleware.Handler{AppCtx: svcFactory, RouteHandler: slackEventHandler}).Methods("POST")
 }
 

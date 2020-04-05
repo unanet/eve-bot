@@ -9,8 +9,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/metrics"
 	"gitlab.unanet.io/devops/eve-bot/internal/servicefactory"
 
-	"github.com/opentracing-contrib/go-gorilla/gorilla"
-	nethttp "github.com/opentracing-contrib/go-stdlib/nethttp"
 	"go.uber.org/zap"
 )
 
@@ -19,19 +17,6 @@ import (
 func TimeoutHandler(timeoutSecs uint16) Adapter {
 	return func(h http.Handler) http.Handler {
 		return http.TimeoutHandler(h, time.Duration(timeoutSecs)*time.Second, fmt.Sprintf("Sorry! Service Timeout Exceeded: %v", timeoutSecs))
-	}
-}
-
-// TracingHandler will adding jaeger tracing to all http requests
-func TracingHandler(appCtxProvider *servicefactory.Container) Adapter {
-	return func(h http.Handler) http.Handler {
-		return gorilla.Middleware(
-			appCtxProvider.TraceProvider.Tracer,
-			h,
-			nethttp.OperationNameFunc(func(r *http.Request) string {
-				return "HTTP " + r.Method + " " + r.RequestURI
-			}),
-		)
 	}
 }
 
