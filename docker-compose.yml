@@ -1,0 +1,24 @@
+version: "3.7"
+networks:
+  evebot-net:
+    driver: "bridge"
+services:
+  evebot:
+    container_name: evebot
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    working_dir: "/go/src/eve-bot"
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - "./:/go/src/eve-bot"
+    environment:
+      - EVEBOT_SLACK_SIGNING_SECRET=${EVEBOT_SLACK_SIGNING_SECRET}
+      - EVEBOT_SLACK_VERIFICATION_TOKEN=${EVEBOT_SLACK_VERIFICATION_TOKEN}
+      - EVEBOT_SLACK_BOT_OAUTH=${EVEBOT_SLACK_BOT_OAUTH}
+      - EVEBOT_SLACK_OAUTH=${EVEBOT_SLACK_OAUTH}
+    networks:
+      - evebot-net 

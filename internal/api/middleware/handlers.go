@@ -45,7 +45,8 @@ func LogMetricsHandler(logger evelogger.Container, metricProvider *metrics.Provi
 			ctx := newWrappedReqCtx(r)
 
 			// Log the incoming Request
-			logger.For(ctx).Info("incoming request",
+			// Too noisey for prod, use debug
+			logger.For(ctx).Debug("incoming request",
 				zap.Time("request_start", RequestStartTimeFromContext(ctx)),
 				zap.String("request_id", RequestIDFromContext(ctx)),
 				zap.String("user_agent", r.UserAgent()),
@@ -67,7 +68,8 @@ func LogMetricsHandler(logger evelogger.Container, metricProvider *metrics.Provi
 				ms := float64(time.Since(RequestStartTimeFromContext(ctx))) / float64(time.Millisecond)
 
 				// Log the outgoing response
-				logger.For(ctx).Info("outgoing response",
+				// Too noisey for prod, use debug
+				logger.For(ctx).Debug("outgoing response",
 					zap.String("request_id", RequestIDFromContext(ctx)),
 					zap.Float64("duration_ms", ms),
 					zap.String("user_agent", r.UserAgent()),

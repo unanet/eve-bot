@@ -1,11 +1,7 @@
-##########################################
-# STEP 1 build binary in Build Stage Image
-##########################################
-FROM golang:alpine AS builder
-
-LABEL maintainer="Unanet DevOps <ops@unanet.io>"
-
 # Build ARGS
+ARG GOOS="linux"
+ARG GOARCH="amd64"
+ARG GO_VERSION="1.14.1-alpine"
 ARG VERSION=0.0.0
 ARG GIT_BRANCH=""
 ARG GIT_COMMIT_AUTHOR=""
@@ -15,9 +11,13 @@ ARG GIT_COMMIT=""
 ARG BUILD_DATE=""
 ARG PRERELEASE=""
 
-# ENVIRONMENT VARIABLES
-# set go modules on
-ENV GO111MODULE=on
+
+##########################################
+# STEP 1 build binary in Build Stage Image
+##########################################
+FROM golang:${GO_VERSION} AS builder
+
+LABEL maintainer="Unanet DevOps <ops@unanet.io>"
 
 # Golang buildtime ldflags
 ENV LDFLAGS=" -X main.BuildHost=${BUILD_HOST} \
@@ -33,7 +33,7 @@ ENV LDFLAGS=" -X main.BuildHost=${BUILD_HOST} \
 # Git is required for fetching the dependencies.
 # Ca-certificates is required to call HTTPS endpoints.
 # tzdata is for timezone data
-RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
+RUN apk update && apk add --no-cache gcc musl-dev git ca-certificates tzdata && update-ca-certificates
 
 # create appuser.
 RUN adduser -D -g '' appuser
@@ -44,15 +44,11 @@ WORKDIR $GOPATH/eve-bot
 # Copy The source assets from the CWD (project root) into the container WORKDIR ($GOPATH/eve-bot)
 COPY . .
 
-# Verify the Go Modules (we are vendoring the go modules)
-RUN go mod verify
+# Test It
+RUN GOOS=${GOOS} GOARCH=${GOARCH} go test -v ./...
 
-# Build the golang binary
-RUN CGO_ENABLED=0 \
-    GOOS=linux \
-    go build -ldflags "${LDFLAGS}" \
-    -a -installsuffix cgo \
-    -o /go/bin/eve-bot ./cmd/eve-bot/
+# Build It
+RUN GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags "${LDFLAGS}" -o /go/bin/eve-bot ./cmd/eve-bot/
 
 
 ######################################
@@ -73,11 +69,10 @@ USER appuser
 
 WORKDIR /go/bin
 
-
 # Set the entrypoint to the golang executable binary
 ENTRYPOINT ["/go/bin/eve-bot"]
 
-# Expose the service ports (4000 for app and 4001 for metrics)
+# Expose the service ports (3000 for app and 3001 for metrics)
 EXPOSE 3000
 EXPOSE 3001
 

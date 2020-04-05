@@ -15,11 +15,6 @@ type spanLogger struct {
 	span   opentracing.Span
 }
 
-func (sl spanLogger) Audit(msg string, fields ...zapcore.Field) {
-	sl.logToSpan("audit", msg, fields...)
-	sl.logger.Info(msg, fields...)
-}
-
 func (sl spanLogger) Panic(msg string, fields ...zapcore.Field) {
 	sl.logToSpan("panic", msg, fields...)
 	sl.logger.Panic(msg, fields...)

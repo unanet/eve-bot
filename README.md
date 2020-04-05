@@ -6,19 +6,13 @@ This is the `eve-bot` ChatOps service. It is responsible for handling all commun
 
 ## Building
 
-This project utilizes `Make` for the build process. The `Makefile` calls shell scripts for various tasks, and acts like a think wrapper
+This project utilizes `Make` for the build process.
 
-### Build Standard Golang Binary (Go is required)
-
-1. `make build`
-
-### Build Docker Image (Docker is required)
-
-1. `make docker`
+1. `make`
 
 ## Running
 
-This application uses sane defaults for most of the config, but there are some required secrets that need to be set as  `Environment Variables`. **All application config use EnvVars.**
+This application uses sane defaults for most of the config, but there are some required secrets that need to be set as `Environment Variables`. **All application config use EnvVars.**
 
 ### Application Environment Variables
 

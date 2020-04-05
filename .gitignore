@@ -2,6 +2,6 @@ evebot
 .DS_Store
 .vscode/
 .cover
-/bin
 .env
-
+main
+eve-bot

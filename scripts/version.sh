@@ -1,7 +1,4 @@
-FULL_GIT_COMMIT=$(git rev-parse HEAD)
-SHORT_GIT_COMMIT=$(git rev-parse --short=10 HEAD)
-
-git_full_version=$(git describe --always)
+short_git_commit=$(git rev-parse --short=10 HEAD)
 git_branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 git_tag=$(git tag -l --merged master --sort='-*authordate' | head -n1)
 
@@ -21,7 +18,7 @@ patch)
 	version=${major}.${minor}.$((patch + 1))
 	;;	
 *)
-	version=${major}.${minor}.${patch}-${SHORT_GIT_COMMIT}-${count}
+	version=${major}.${minor}.${patch}-${short_git_commit}-${count}
 	;;
 esac
 
