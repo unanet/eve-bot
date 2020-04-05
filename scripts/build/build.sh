@@ -37,7 +37,7 @@ PRERELEASE="${PRERELEASE:-}"
 export CGO_ENABLED=0
 
 # If its dev mode, only build for the local dev environment
-if [ "${BUILD_DEV}x" != "x" ]; then
+if [ "${BUILD_DEV}" -eq 1 ]; then
 	XC_OS=$(go env GOOS)
 	XC_ARCH=$(go env GOARCH)
 fi

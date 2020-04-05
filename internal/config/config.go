@@ -50,34 +50,51 @@ func getenv(key, fallback string) string {
 	return ""
 }
 
+const (
+	envVarAPIServiceName         = "EVEBOT_API_SERVICENAME"
+	envVarAPIPort                = "EVEBOT_API_PORT"
+	envVarAPIMetricPort          = "EVEBOT_API_METRICSPORT"
+	envVarAPIAllowedMethods      = "EVEBOT_API_ALLOWEDMETHODS"
+	envVarAPIAllowedOrigins      = "EVEBOT_API_ALLOWEDORIGINS"
+	envVarAPIAllowedHeaders      = "EVEBOT_API_ALLOWEDHEADERS"
+	envVarLoggerLevel            = "EVEBOT_LOGGER_LEVEL"
+	envVarLoggerEncoding         = "EVEBOT_LOGGER_ENCODING"
+	envVarLoggerOutputPaths      = "EVEBOT_LOGGER_OUTPUTPATHS"
+	envVarLoggerErrOutputPaths   = "EVEBOT_LOGGER_ERROUTPUTPATHS"
+	envVarSlackSigningSecret     = "EVEBOT_SLACK_SIGNING_SECRET"
+	envVarSlackVerificationToken = "EVEBOT_SLACK_VERIFICATION_TOKEN"
+	envVarSlackBotOAuth          = "EVEBOT_SLACK_BOT_OAUTH"
+	envVarSlackOAuth             = "EVEBOT_SLACK_OAUTH"
+)
+
 // Read the config values (iether sane default or required, all EnvVars)
 // this should only be called once on app startup
 func Read() *Config {
 	return &Config{
 		API: api{
-			ServiceName:         getenv("EVEBOT_API_SERVICENAME", "EveBot"),
+			ServiceName:         getenv(envVarAPIServiceName, "EveBot"),
 			ShutdownTimeoutSecs: 120,
 			ReadTimeOutSecs:     5,
 			WriteTimeOutSecs:    30,
 			IdleTimeOutSecs:     90,
 			TimeoutSecs:         30,
-			Port:                getenv("EVEBOT_API_PORT", "3000"),
-			MetricsPort:         getenv("EVEBOT_API_METRICSPORT", "3001"),
-			AllowedMethods:      strings.Split(getenv("EVEBOT_API_ALLOWEDMETHODS", "GET,HEAD,POST,PUT,OPTIONS,DELETE"), ","),
-			AllowedOrigins:      strings.Split(getenv("EVEBOT_API_ALLOWEDORIGINS", "*"), ","),
-			AllowedHeaders:      strings.Split(getenv("EVEBOT_API_ALLOWEDHEADERS", "*"), ","),
+			Port:                getenv(envVarAPIPort, "3000"),
+			MetricsPort:         getenv(envVarAPIMetricPort, "3001"),
+			AllowedMethods:      strings.Split(getenv(envVarAPIAllowedMethods, "GET,HEAD,POST,PUT,OPTIONS,DELETE"), ","),
+			AllowedOrigins:      strings.Split(getenv(envVarAPIAllowedOrigins, "*"), ","),
+			AllowedHeaders:      strings.Split(getenv(envVarAPIAllowedHeaders, "*"), ","),
 		},
 		Logger: logger{
-			Level:            getenv("EVEBOT_LOGGER_LEVEL", "debug"),
-			Encoding:         getenv("EVEBOT_LOGGER_ENCODING", "json"),
-			OutputPaths:      strings.Split(getenv("EVEBOT_LOGGER_OUTPUT_PATHS", "stdout,/tmp/evebot.logs"), ","),
-			ErrorOutputPaths: strings.Split(getenv("EVEBOT_LOGGER_ERR_OUTPUT_PATHS", "stderr"), ","),
+			Level:            getenv(envVarLoggerLevel, "debug"),
+			Encoding:         getenv(envVarLoggerEncoding, "json"),
+			OutputPaths:      strings.Split(getenv(envVarLoggerOutputPaths, "stdout,/tmp/evebot.logs"), ","),
+			ErrorOutputPaths: strings.Split(getenv(envVarLoggerErrOutputPaths, "stderr"), ","),
 		},
 		SlackSecrets: slackSecrets{
-			SigningSecret:     getenv("EVEBOT_SLACK_SIGNING_SECRET", ""),
-			VerificationToken: getenv("EVEBOT_SLACK_VERIFICATION_TOKEN", ""),
-			BotOAuthToken:     getenv("EVEBOT_SLACK_BOT_OAUTH", ""),
-			OAuthToken:        getenv("EVEBOT_SLACK_OAUTH", ""),
+			SigningSecret:     getenv(envVarSlackSigningSecret, ""),
+			VerificationToken: getenv(envVarSlackVerificationToken, ""),
+			BotOAuthToken:     getenv(envVarSlackBotOAuth, ""),
+			OAuthToken:        getenv(envVarSlackOAuth, ""),
 		},
 	}
 }

@@ -11,6 +11,7 @@ GO_VERSION_NUMBER?= $(word 3, $(GO_VERSION))
 GO_BUILD_PLATFORM?= $(subst /,-,$(lastword $(GO_VERSION)))
 GO_PATH:= $(firstword $(subst :, ,$(shell $(GO) env GOPATH)))
 GO_PRE_111?= $(shell echo $(GO_VERSION_NUMBER) | grep -E 'go1\.(10|[0-9])\.')
+BUILD_DEV?=1
 BUILD_PLATFORM:=$(subst /,-,$(lastword $(GO_VERSION)))
 BUILD_BUILDER:=$(shell whoami)
 BUILD_HOST:=$(shell hostname)
@@ -29,7 +30,7 @@ GIT_TAG?="$(shell git describe)"
 GIT_COMMIT?="$(shell git rev-list -1 HEAD)"
 GIT_BRANCH?= $(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 GIT_AUTHOR=$(shell git show -s --format='%ae' $(GIT_COMMIT}))
-DOCKER_IMAGE_NAME := unanet-docker.jfrog.io/evebot
+DOCKER_IMAGE_NAME := unanet-docker.jfrog.io/eve-bot
 DOCKER_IMAGE_TAG?=$(shell $(BUILD_SCRIPTS_DIR)/docker-image-tag.sh $(VERSION) $(FEATURE_TAG))
 TIMESTAMP_UTC:=$(shell /bin/date -u "+%Y%m%d%H%M%S")
 TS:=$(shell /bin/date "+%Y%m%d%H%M%S")
@@ -73,8 +74,8 @@ show-build-details:
 	@echo
 
 ## Used for local development. Detects OS/ARCH (good when on Mac or not linux_ amd64)
-.PHONY: docker-image
-docker-image:
+.PHONY: docker
+docker:
 	@echo
 	@echo "===> Docker Image..."
 	@docker build \
@@ -94,7 +95,7 @@ docker-image:
 .PHONY: build
 build:
 	@echo "===> Dev Build..."
-	@BUILD_DEV=1 \
+	@BUILD_DEV=${BUILD_DEV} \
 	GIT_BRANCH=${GIT_BRANCH} \
 	VERSION=${VERSION} \
 	OUTPUT_DIR=${BIN_DIR} \
