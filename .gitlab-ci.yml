@@ -1,25 +1,27 @@
 stages:
   - details
-  # - build
+  - build
+  - publish
 
 details:
-  variables:
-    CI_DEBUG_TRACE: "true"  
   stage: details
   script:
-    - make show-version
-    - make git-details
-    - make build-details
+    - make details
+  tags:
+    - linux
+
+build:
+  stage: build
+  script:
+    - make build
+  tags:
+    - linux
+
+publish:
+  stage: publish
+  script:
+    - make publish
   tags:
     - linux
   only:
-    - master  
-
-# build:
-#   stage: build
-#   script:
-#     - make
-#   tags:
-#     - linux
-#   only:
-#     - master
+    - master

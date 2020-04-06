@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-short_git_commit=$(git rev-parse --short=10 HEAD)
-git_branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-#git_tag=$(git tag -l --merged master --sort='-*authordate' | head -n1)
-git_tag=$(git describe --abbrev=0)
+short_git_commit=$1
+git_branch=$2
+git_tag=$3
 
 semver_parts=(${git_tag//./ })
 major=${semver_parts[0]}
