@@ -62,11 +62,10 @@ release:
 	@git log v0.4.0...${GIT_TAG} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
 	@echo
 	@echo "===> Uploading ${GIT_TAG} Changelog..."
-	$(eval UPLOAD_URL := $(shell curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --data-urlencode file@CHANGELOG.md ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads | jq .url | sed -e 's/^"//' -e 's/"$//'))
-	@echo
-	@echo "===> Attaching ${GIT_TAG} Changelog to $(UPLOAD_URL)..."
-	@curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md]($(UPLOAD_URL))" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release		
-	@echo		
+	@set -e ;\
+	 UPLOAD_URL=$$(curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --data-urlencode file@CHANGELOG.md ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads | jq .url | sed -e 's/^"//' -e 's/"$//') ;\
+	 curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md]($$UPLOAD_URL)" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release;\
+	
 
 .PHONY: tag
 tag:
