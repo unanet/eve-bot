@@ -61,7 +61,7 @@ release:
 	@git log v0.4.0...${GIT_TAG} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
 	@echo
 	@echo "===> ${GIT_TAG} Uploading Changelog..."
-	@uploadURL:=$(shell $(PWD)/scripts/changelog-upload.sh)
+	$(eval uploadURL := $(shell $(PWD)/scripts/changelog-upload.sh))
 	@echo
 	@echo "===> ${GIT_TAG} Attaching Changelog to Release..."
 	@curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md](${uploadURL})" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release		
