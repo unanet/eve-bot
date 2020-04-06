@@ -10,6 +10,8 @@ details:
     - make details
   tags:
     - linux
+  except:
+    - tags    
 
 build:
   stage: build
@@ -17,6 +19,8 @@ build:
     - make build
   tags:
     - linux
+  except:
+    - tags    
 
 publish:
   stage: publish
@@ -26,6 +30,7 @@ publish:
     - linux
   only:
     - master
+    - patch
 
 tag:
   stage: tag
@@ -34,4 +39,5 @@ tag:
   tags:
     - linux
   only:
-    - master    
+    - master
+    - patch
