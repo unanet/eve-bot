@@ -55,30 +55,6 @@ DOCKER_IMAGE_LABELS := \
 
 default: details build
 
-.PHONY: release
-release:
-	@echo
-	@echo "===> Generate ${GIT_TAG} Changelog..."
-	@git log v0.4.0...${GIT_TAG} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
-	@echo
-	@echo "===> Uploading ${GIT_TAG} Changelog..."
-	@set -e ;\
-	 UPLOAD_URL=$$(curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --data-urlencode file@CHANGELOG.md ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads | jq .url | sed -e 's/^"//' -e 's/"$//') ;\
-	 curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md]($$UPLOAD_URL)" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release;\
-	
-
-.PHONY: tag
-tag:
-	@echo
-	@echo "===> Git Tag Version: ${VERSION}"
-	@git remote remove origin
-	@git remote add origin https://${BUILD_ADMIN_USER}:${BUILD_ADMIN_KEY}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
-	@git config user.email "${GITLAB_USER_EMAIL}"
-	@git config user.name "${GITLAB_USER_NAME}"
-	@git tag -a ${VERSION} -m "${VERSION}"
-	@git push origin ${VERSION}
-	@echo
-
 .PHONY: details
 details:
 	@echo
@@ -121,3 +97,26 @@ publish:
 	@docker push ${DOCKER_IMAGE_NAME}:latest
 	@echo "===> Docker Image Pushed..."
 	@echo
+
+.PHONY: tag
+tag:
+	@echo
+	@echo "===> Git Tag Version: ${VERSION}"
+	@git remote remove origin
+	@git remote add origin https://${BUILD_ADMIN_USER}:${BUILD_ADMIN_KEY}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+	@git config user.email "${GITLAB_USER_EMAIL}"
+	@git config user.name "${GITLAB_USER_NAME}"
+	@git tag -a ${VERSION} -m "${VERSION}"
+	@git push origin ${VERSION}
+	@echo
+
+.PHONY: release
+release:
+	@echo
+	@echo "===> Generate ${GIT_TAG} Changelog..."
+	@git log v0.4.0...${GIT_TAG} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
+	@echo
+	@echo "===> Uploading ${GIT_TAG} Changelog..."
+	set -e ;\
+	UPLOAD_URL=$$(curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --data-urlencode file@CHANGELOG.md ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads | jq .url | sed -e 's/^"//' -e 's/"$//') ;\
+	curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md]($$UPLOAD_URL)" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release;\	
