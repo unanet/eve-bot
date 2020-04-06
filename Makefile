@@ -53,11 +53,19 @@ DOCKER_IMAGE_LABELS := \
 
 default: details build
 
+
+[Slack App Creds](https://api.slack.com/apps/A011B3L27P1/general?)
+
 .PHONY: changelog
 changelog:
 	@echo
 	@echo "===> Changelog..."
-	@git log v0.4.0..v0.5.0 --pretty=format:'<li> <a href="${CI_PROJECT_URL}/-/commit/%H">view commit &bull;</a> %s</li> ' --reverse
+	@git log v0.4.0...v0.5.0 --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
+	# @git log v0.4.0...v0.5.0 --pretty=format:'<li> <a href="${CI_PROJECT_URL}/-/commit/%H">view commit &bull;</a> %s</li> ' --reverse | tee CHANGELOG.md
+	# @git log ${GIT_TAG}...${VERSION} --pretty=format:'<li> <a href="${CI_PROJECT_URL}/-/commit/%H">view commit &bull;</a> %s</li> ' --reverse | tee CHANGELOG.md
+	# @curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" \
+    #  	--data '{ "name": "${VERSION} Release", "tag_name": "${VERSION}", "description": "Release ${VERSION} from ${GIT_AUTHOR}", "assets": { "links": [{ "name": "hoge", "url": "https://google.com", "filepath": "/binaries/linux-amd64" }] } }' \
+    #  	--request POST https://gitlab.example.com/api/v4/projects/24/releases
 
 .PHONY: tag
 tag:

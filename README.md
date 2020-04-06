@@ -8,9 +8,7 @@ This is the `eve-bot` ChatOps service. It is responsible for handling all commun
 
 ## Building
 
-This project utilizes `Make` for the build process.
-
-1. `make`
+run: `make`
 
 ## Running
 
@@ -47,6 +45,8 @@ export EVEBOT_LOGGER_ERROUTPUTPATHS="stderr"
 
 ### Required Environment Variables
 
+These secrets are required for the application to run. The source of truth is Slack, but we store them in Vault for safe keeping.
+
 ```bash
 export EVEBOT_SLACK_SIGNING_SECRET=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_SIGNING_SECRET`
 export EVEBOT_SLACK_VERIFICATION_TOKEN=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_VERIFICATION_TOKEN`
@@ -54,9 +54,9 @@ export EVEBOT_SLACK_BOT_OAUTH=`vault kv get --format=json kv/devops/evebot | jq 
 export EVEBOT_SLACK_OAUTH=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_OAUTH`
 ```
 
-These secrets are required for the application to run. The source of truth is Slack, but we store them in Vault for safe keeping. If we need to roll the secrets (generate knew ones) that should be done through the Slack UI, and then pushed up to Vault.
-
 ### Slack Links
+
+New secrets should be generated through the Slack UI, and then pushed up to Vault.
 
 [Slack OAuth Tokens](https://api.slack.com/apps/A011B3L27P1/oauth)
 

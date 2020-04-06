@@ -3,7 +3,7 @@ stages:
   - build
   - publish
   - tag
-  - changelogq
+  - changelog
 
 details:
   stage: details
@@ -46,7 +46,7 @@ tag:
 changelog:
   stage: changelog
   script:
-    - make changelog | tee release_changelog.txt
+    - make changelog
   tags:
     - linux
   only:
