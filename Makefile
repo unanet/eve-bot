@@ -59,9 +59,11 @@ release:
 	@echo
 	@echo "===> ${VERSION} Generate Changelog..."
 	@git log ${GIT_TAG}...${VERSION} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
+	@echo "===> ${VERSION} Uploading Changelog..."
 	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "file=@CHANGELOG.md" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads
+	@echo "===> ${VERSION} Attaching Changelog to Release..."
 	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md](/uploads/${CI_COMMIT_SHA}/CHANGELOG.md)" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${VERSION}/release		
-		
+	@echo		
 
 .PHONY: tag
 tag:
