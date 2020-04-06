@@ -48,27 +48,23 @@ DOCKER_IMAGE_LABELS := \
 	--label "${LABEL_PREFIX}.gitlab_project_id=${CI_PROJECT_ID}" \
 	--label "${LABEL_PREFIX}.build_number=${BUILD_NUMBER}" \
 	--label "${LABEL_PREFIX}.build_date=${TIMESTAMP_UTC}" \
-	--label "${LABEL_PREFIX}.version=${VERSION}" 
+	--label "${LABEL_PREFIX}.version=${VERSION}" \
+	--label "${LABEL_PREFIX}.maintainer=${BUILD_ADMIN_USER} <${BUILD_ADMIN_EMAIL}>" \
 
 
 default: details build
 
-
-.PHONY: release-notes
-release-notes:
+.PHONY: release
+release:
 	@echo
-	@echo "===> Cut Release ${VERSION}..."
+	@echo "===> ${VERSION} Changelog Release Notes..."
+	@git log ${GIT_TAG}...${VERSION} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
+	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" \
+		--form "file=@CHANGELOG.md" \
+		${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads
 	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" \
 		--form "description=Changelog File: [CHANGELOG.md](/uploads/${CI_COMMIT_SHA}/CHANGELOG.md)" \
-		${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${VERSION}/release
-
-
-.PHONY: changelog
-changelog:
-	@echo
-	@echo "===> Changelog..."
-	@git log ${GIT_TAG}...${VERSION} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
-	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "file=@CHANGELOG.md" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads
+		${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${VERSION}/release		
 		
 
 .PHONY: tag

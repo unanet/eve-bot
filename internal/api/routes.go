@@ -25,34 +25,44 @@ func pingHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, 
 	return httphelper.AppResponse(http.StatusOK, "pong")
 }
 
-func slackEventHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
-
-	cleanErr := func(oerr error, msg string, status int) (error, string) {
+func verifyRequestSig(req *http.Request, signingSecret *string) ([]byte, error) {
+	cleanErr := func(oerr error, msg string, status int) error {
 		return &resterror.RestError{
 			Code:          http.StatusUnauthorized,
 			Message:       msg,
 			OriginalError: oerr,
-		}, msg
+		}
 	}
 
-	verifier, err := slack.NewSecretsVerifier(req.Header, svcFactory.Config.SlackSecrets.SigningSecret)
+	verifier, err := slack.NewSecretsVerifier(req.Header, *signingSecret)
 	if err != nil {
-		return httphelper.AppErr(cleanErr(err, "failed new secret verifier", http.StatusUnauthorized))
+		return []byte{}, cleanErr(err, "failed new secret verifier", http.StatusUnauthorized)
 	}
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return httphelper.AppErr(cleanErr(err, "failed readAll req body", http.StatusBadRequest))
+		return []byte{}, cleanErr(err, "failed readAll req body", http.StatusBadRequest)
 	}
 
 	_, err = verifier.Write(body)
 	if err != nil {
-		return httphelper.AppErr(cleanErr(err, "failed verifier write", http.StatusUnauthorized))
+		return []byte{}, cleanErr(err, "failed verifier write", http.StatusUnauthorized)
 	}
 
 	err = verifier.Ensure()
 	if err != nil {
-		return httphelper.AppErr(cleanErr(err, "failed verifier ensure", http.StatusUnauthorized))
+		return []byte{}, cleanErr(err, "failed verifier ensure", http.StatusUnauthorized)
+	}
+
+	return body, nil
+}
+
+func slackEventHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
+
+	body, err := verifyRequestSig(req, &svcFactory.Config.SlackSecrets.SigningSecret)
+
+	if err != nil {
+		return httphelper.AppErr(err, "failed slack verification")
 	}
 
 	slackAPIEvent, err := slackevents.ParseEvent(

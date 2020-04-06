@@ -11,13 +11,23 @@ ARG GIT_COMMIT=""
 ARG BUILD_DATE=""
 ARG PRERELEASE=""
 
-
 ##########################################
-# STEP 1 build binary in Build Stage Image
+# STEP 1 Unit Test & Build the Binary
 ##########################################
 FROM ${BUILD_IMAGE} AS builder
 
-LABEL maintainer="Unanet DevOps <ops@unanet.io>"
+# create appuser.
+RUN adduser -D -g '' appuser
+
+# set app working dir
+WORKDIR $GOPATH/eve-bot
+
+# Copy The source assets from the CWD (project root) into the container WORKDIR ($GOPATH/eve-bot)
+COPY . .
+
+# Unit Test 
+# NOTE: (issues here with race due to alpine base gcc musl libs)
+RUN GOOS=${GOOS} GOARCH=${GOARCH} go test -v ./...
 
 # Golang buildtime ldflags
 ENV LDFLAGS=" -X main.BuildHost=${BUILD_HOST} \
@@ -29,25 +39,7 @@ ENV LDFLAGS=" -X main.BuildHost=${BUILD_HOST} \
     -X main.GitCommitAuthor=${GIT_COMMIT_AUTHOR} \
     -X main.VersionPrerelease=${PRERELEASE} "
 
-# Install git + SSL ca certificates.
-# Git is required for fetching the dependencies.
-# Ca-certificates is required to call HTTPS endpoints.
-# tzdata is for timezone data
-RUN apk update && apk add --no-cache gcc musl-dev git ca-certificates tzdata && update-ca-certificates
-
-# create appuser.
-RUN adduser -D -g '' appuser
-
-# set app working dir
-WORKDIR $GOPATH/eve-bot
-
-# Copy The source assets from the CWD (project root) into the container WORKDIR ($GOPATH/eve-bot)
-COPY . .
-
-# Test It
-RUN GOOS=${GOOS} GOARCH=${GOARCH} go test -v ./...
-
-# Build It
+# Build the binary
 RUN GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags "${LDFLAGS}" -o /go/bin/eve-bot ./cmd/eve-bot/
 
 
@@ -56,15 +48,13 @@ RUN GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags "${LDFLAGS}" -o /go/bin/eve-
 ######################################
 FROM scratch
 
-LABEL maintainer="Unanet DevOps <ops@unanet.io>"
-
 # Import assets from the build stage image
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /go/bin/eve-bot /go/bin/eve-bot
 
-# Use the unprivileged user (created in the build stage image)
+# Use the unprivileged user (created in the build stage)
 USER appuser
 
 WORKDIR /go/bin
@@ -78,4 +68,4 @@ EXPOSE 3001
 
 # Setup Container HealthCheck
 HEALTHCHECK --interval=1m --timeout=2s --start-period=10s \
-    CMD curl -f http://localhost:3000/ping || exit 1
+    CMD curl -f http://localhost:3000/ || exit 1

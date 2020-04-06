@@ -3,7 +3,7 @@ stages:
   - build
   - publish
   - tag
-  - changelog
+  - release
 
 details:
   stage: details
@@ -43,13 +43,12 @@ tag:
     - master
     - patch
 
-changelog:
-  stage: changelog
+release:
+  stage: release
   script:
-    - make changelog
+    - make release
   tags:
     - linux
   only:
-    - master
-    - patch  
+    - tags
   
