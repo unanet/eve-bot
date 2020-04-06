@@ -1,23 +1,13 @@
 stages:
-  - details
   - build
   - publish
   - tag
   - release
 
-details:
-  stage: details
-  script:
-    - make details
-  tags:
-    - linux
-  except:
-    - tags    
-
 build:
   stage: build
   script:
-    - make build
+    - make
   tags:
     - linux
   except:
