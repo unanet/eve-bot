@@ -39,7 +39,7 @@ tag:
 	@echo
 	@echo "===> Git Tag Version: ${VERSION}"
 	@git remote remove origin
-	@git remote set-url origin ${CI_REPOSITORY_URL}
+	@git remote add origin ${CI_REPOSITORY_URL}
 	@git tag -a ${VERSION} -m "${VERSION}"
 	@git push origin ${VERSION}
 	@echo
