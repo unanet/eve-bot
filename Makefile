@@ -9,10 +9,15 @@ CI_PROJECT_NAME?=$(shell basename $(CURDIR))
 CI_COMMIT_SHA?=$(shell git rev-list -1 HEAD)
 CI_COMMIT_SHORT_SHA?=$(shell git rev-parse --short=8 HEAD)
 
+# Export the CI variables
+export CI_COMMIT_BRANCH
+export CI_PROJECT_NAME
+export CI_COMMIT_SHA
+export CI_COMMIT_SHORT_SHA
+
 PRERELEASE?=
 GO_FILES:=$$(find . -name '*.go' | grep -v vendor)
 GIT_TAG:=$(shell git describe --abbrev=0)
-
 
 GIT_AUTHOR:=$(shell git show -s --format='%ae' $(CI_COMMIT_SHA}))
 BUILD_BUILDER:=$(shell whoami)
@@ -22,15 +27,28 @@ VERSION:=$(shell $(PWD)/scripts/version.sh $(CI_COMMIT_SHORT_SHA) $(CI_COMMIT_BR
 FEATURE_TAG:=$(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 DOCKER_IMAGE_TAG:=$(shell $(PWD)/scripts/docker-image-tag.sh $(VERSION) $(FEATURE_TAG) $(CI_COMMIT_BRANCH) $(GIT_TAG))
 DOCKER_IMAGE_NAME:=unanet-docker.jfrog.io/$(CI_PROJECT_NAME)
-DOCKER_BUILD_IMAGE:=golang:1.14.1-alpine
+DOCKER_BUILD_IMAGE:=unanet-docker.jfrog.io/golang-base
+
+DOCKER_IMAGE_ARGS := \
+	--build-arg BUILD_HOST="${BUILD_HOST}" \
+	--build-arg BUILDER="${BUILD_BUILDER}" \
+	--build-arg GIT_COMMIT="${CI_COMMIT_SHA}" \
+	--build-arg GIT_COMMIT_AUTHOR="${GIT_AUTHOR}" \
+	--build-arg BUILD_DATE="${TIMESTAMP_UTC}" \
+	--build-arg VERSION="${VERSION}" \
+	--build-arg GIT_BRANCH="${CI_COMMIT_BRANCH}" \
+	--build-arg PRERELEASE="${PRERELEASE}" \
+	--build-arg BUILD_IMAGE="${DOCKER_BUILD_IMAGE}"
 
 
+LABEL_PREFIX := com.unanet
+DOCKER_IMAGE_LABELS := \
+	--label "${LABEL_PREFIX}.git_commit_sha=${CI_COMMIT_SHORT_SHA}" \
+	--label "${LABEL_PREFIX}.gitlab_project_id=${CI_PROJECT_ID}" \
+	--label "${LABEL_PREFIX}.build_number=${BUILD_NUMBER}" \
+	--label "${LABEL_PREFIX}.build_date=${TIMESTAMP_UTC}" \
+	--label "${LABEL_PREFIX}.version=${VERSION}" 
 
-# Export the CI variables
-export CI_COMMIT_BRANCH
-export CI_PROJECT_NAME
-export CI_COMMIT_SHA
-export CI_COMMIT_SHORT_SHA
 
 default: details build
 
@@ -39,9 +57,9 @@ tag:
 	@echo
 	@echo "===> Git Tag Version: ${VERSION}"
 	@git remote remove origin
-	@git remote add origin https://${BUILD_ADMIN_USER}:${BUILD_ADMIN_KEY}@gitlab.unanet.io/devops/eve-bot.git
-	@git config user.email "build-admind@unanet.io"
-	@git config user.name "build-admind"
+	@git remote add origin https://${BUILD_ADMIN_USER}:${BUILD_ADMIN_KEY}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+	@git config user.email "${BUILD_ADMIN_EMAIL}"
+	@git config user.name "${BUILD_ADMIN_USER}"
 	@git tag -a ${VERSION} -m "${VERSION}"
 	@git push origin ${VERSION}
 	@echo
@@ -75,17 +93,7 @@ details:
 build:
 	@echo
 	@echo "===> Building Docker Image..."
-	@docker build \
-		--build-arg BUILD_HOST="${BUILD_HOST}" \
-		--build-arg BUILDER="${BUILD_BUILDER}" \
-		--build-arg GIT_COMMIT="${CI_COMMIT_SHA}" \
-		--build-arg GIT_COMMIT_AUTHOR="${GIT_AUTHOR}" \
-		--build-arg BUILD_DATE="${TIMESTAMP_UTC}" \
-		--build-arg VERSION="${VERSION}" \
-		--build-arg GIT_BRANCH="${CI_COMMIT_BRANCH}" \
-		--build-arg PRERELEASE="${PRERELEASE}" \
-		--build-arg BUILD_IMAGE="${DOCKER_BUILD_IMAGE}" \
-		. -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+	@docker build ${DOCKER_IMAGE_ARGS} . ${DOCKER_IMAGE_LABELS} -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
 	@docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
 	@echo "Docker Image(s) built"
 	@echo
