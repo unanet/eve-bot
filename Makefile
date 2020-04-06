@@ -57,14 +57,10 @@ default: details build
 .PHONY: release
 release:
 	@echo
-	@echo "===> ${VERSION} Changelog Release Notes..."
+	@echo "===> ${VERSION} Generate Changelog..."
 	@git log ${GIT_TAG}...${VERSION} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
-	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" \
-		--form "file=@CHANGELOG.md" \
-		${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads
-	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" \
-		--form "description=Changelog File: [CHANGELOG.md](/uploads/${CI_COMMIT_SHA}/CHANGELOG.md)" \
-		${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${VERSION}/release		
+	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "file=@CHANGELOG.md" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads
+	@curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md](/uploads/${CI_COMMIT_SHA}/CHANGELOG.md)" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${VERSION}/release		
 		
 
 .PHONY: tag
