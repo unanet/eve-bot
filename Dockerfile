@@ -1,7 +1,7 @@
 # Build ARGS
 ARG GOOS="linux"
 ARG GOARCH="amd64"
-ARG GO_VERSION="1.14.1-alpine"
+ARG BUILD_IMAGE="golang:1.14.1-alpine"
 ARG VERSION=0.0.0
 ARG GIT_BRANCH=""
 ARG GIT_COMMIT_AUTHOR=""
@@ -15,7 +15,7 @@ ARG PRERELEASE=""
 ##########################################
 # STEP 1 build binary in Build Stage Image
 ##########################################
-FROM golang:${GO_VERSION} AS builder
+FROM ${BUILD_IMAGE} AS builder
 
 LABEL maintainer="Unanet DevOps <ops@unanet.io>"
 

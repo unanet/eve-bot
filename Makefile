@@ -1,81 +1,66 @@
 .ONESHELL:
 .SHELL := /bin/bash
 
+TIMESTAMP_UTC:=$(shell /bin/date -u "+%Y%m%d%H%M%S")
 
-GO_VERSION?=1.14.1
-GO_FMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
-# GO_VERSION?=$(shell go version)
-GO_VERSION_NUMBER?=$(word 3, $(GO_VERSION))
-GO_BUILD_PLATFORM?=$(subst /,-,$(lastword $(GO_VERSION)))
-BUILD_PLATFORM:=$(subst /,-,$(lastword $(GO_VERSION)))
+# CI Variables: Use CI when on CI Server, otherwise set explicitly when running locally
+CI_COMMIT_BRANCH?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+CI_PROJECT_NAME?=$(shell basename $(CURDIR))
+
+PRERELEASE?=
+GO_FILES:=$$(find . -name '*.go' | grep -v vendor)
+GIT_TAG:=$(shell git describe --abbrev=0)
+GIT_COMMIT:=$(shell git rev-list -1 HEAD)
+GIT_SHORT_SHA:=$(shell git rev-parse --short=10 HEAD)
+GIT_AUTHOR:=$(shell git show -s --format='%ae' $(GIT_COMMIT}))
 BUILD_BUILDER:=$(shell whoami)
 BUILD_HOST:=$(shell hostname)
 BUILD_DATE:=$(shell /bin/date -u)
-PRERELEASE?=
-PROJECT_DIR?=$(PWD)
-BIN_DIR?="$(PROJECT_DIR)/bin"
-SERVICE_BINARY?=$(shell basename $(CURDIR))
-SERVICE_CMD?="$(PROJECT_DIR)/cmd/$(SERVICE_BINARY)/"
-BUILD_SCRIPTS_DIR?="$(PROJECT_DIR)/scripts"
-VERSION?=$(shell $(BUILD_SCRIPTS_DIR)/version.sh)
-FEATURE_TAG?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
-GIT_TAG?="$(shell git describe)"
-GIT_COMMIT?="$(shell git rev-list -1 HEAD)"
-CI_COMMIT_BRANCH?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-GIT_AUTHOR=$(shell git show -s --format='%ae' $(GIT_COMMIT}))
-DOCKER_IMAGE_NAME:=unanet-docker.jfrog.io/eve-bot
-DOCKER_IMAGE_TAG?=$(shell $(BUILD_SCRIPTS_DIR)/docker-image-tag.sh $(VERSION) $(FEATURE_TAG))
-TIMESTAMP_UTC:=$(shell /bin/date -u "+%Y%m%d%H%M%S")
-TS:=$(shell /bin/date "+%Y%m%d%H%M%S")
-DOCKER_UID=$(shell id -u)
-DOCKER_GID=$(shell id -g)
-BUILD_IMAGE:=unanet-docker.jfrog.io/java-jdk
+VERSION:=$(shell $(PWD)/scripts/version.sh $(GIT_SHORT_SHA) $(CI_COMMIT_BRANCH) $(GIT_TAG))
+FEATURE_TAG:=$(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
+DOCKER_IMAGE_TAG:=$(shell $(PWD)/scripts/docker-image-tag.sh $(VERSION) $(FEATURE_TAG))
+DOCKER_IMAGE_NAME:=unanet-docker.jfrog.io/$(CI_PROJECT_NAME)
+DOCKER_BUILD_IMAGE:=golang:1.14.1-alpine
 
+# Export and CI variables
 export CI_COMMIT_BRANCH
+export CI_PROJECT_NAME
 
+default: details build
 
-
-docker-exec = docker run --rm \
-	-e DOCKER_UID=${DOCKER_UID} \
-	-e DOCKER_GID=${DOCKER_GID} \
-	-v ${CUR_DIR}:/src \
-	-w /src \
-	${BUILD_IMAGE}
-
-
-default: build
-
-.PHONY: git-tag
-git-tag:
-	@echo "===> Git Tag: ${VERSION}"
-	git tag -a ${VERSION} -m "${VERSION}"
-
-.PHONY: show-version
-show-version:
-	@echo "$(VERSION)"
-
-.PHONY: git-details
-git-details:
+.PHONY: tag
+tag:
 	@echo
-	@echo "===> Git Details..."
-	@echo "	sha: $(GIT_COMMIT)"
-	@echo "	branch: $(CI_COMMIT_BRANCH)"
-	@echo "	tag: $(GIT_TAG)"
-	@echo "	author: $(GIT_AUTHOR)"
+	@echo "===> Git Tag Version: ${VERSION}"
+	@git tag -a ${VERSION} -m "${VERSION}"
+	@git push origin ${VERSION}
 	@echo
 
-.PHONY: build-details
-build-details:
+.PHONY: details
+details:
 	@echo
 	@echo "===> Build Details..."
-	@echo "	golang: $(GO_VERSION_NUMBER)"
-	@echo "	platform: $(BUILD_PLATFORM)"
 	@echo "	builder: $(BUILD_BUILDER)"
 	@echo "	host: $(BUILD_HOST)"
 	@echo "	date: $(BUILD_DATE)"
 	@echo
+	@echo "===> Git Details..."
+	@echo "	full sha: $(GIT_COMMIT)"
+	@echo "	short sha: $(GIT_SHORT_SHA)"	
+	@echo "	branch: $(CI_COMMIT_BRANCH)"
+	@echo "	tag: $(GIT_TAG)"
+	@echo "	author: $(GIT_AUTHOR)"
+	@echo
+	@echo "===> Version Details..."
+	@echo "	build: $(VERSION)"
+	@echo "	feature: $(FEATURE_TAG)"
+	@echo
+	@echo "===> Docker Details..."
+	@echo "	builder: $(DOCKER_BUILD_IMAGE)"	
+	@echo "	tag: $(DOCKER_IMAGE_TAG)"	
+	@echo "	image: $(DOCKER_IMAGE_NAME)"	
+	@echo
 
-## Used for local development. Detects OS/ARCH (good when on Mac or not linux_ amd64)
 .PHONY: build
 build:
 	@echo
@@ -89,20 +74,17 @@ build:
 		--build-arg VERSION="${VERSION}" \
 		--build-arg GIT_BRANCH="${CI_COMMIT_BRANCH}" \
 		--build-arg PRERELEASE="${PRERELEASE}" \
+		--build-arg BUILD_IMAGE="${DOCKER_BUILD_IMAGE}" \
 		. -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
 	@docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE_NAME}:latest
 	@echo "Docker Image(s) built"
-
-.PHONY: push
-push: build
 	@echo
-	@echo "===> Pushing Docker Image..."
+
+.PHONY: publish
+publish: build
+	@echo
+	@echo "===> Publish Docker Image..."
 	@docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
 	@docker push ${DOCKER_IMAGE_NAME}:latest
-
-# Code Cyclomatic Complexity
-cyclomatic-top:
-	gocyclo -top 10 $(GO_FMT_FILES)
-
-cyclomatic-over:
-	gocyclo -over 10 $(GO_FMT_FILES)
+	@echo "===> Docker Image Pushed..."
+	@echo
