@@ -81,7 +81,7 @@ build:
 	@echo
 
 .PHONY: publish
-publish: build
+publish:
 	@echo
 	@echo "===> Publish Docker Image..."
 	@docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
