@@ -63,3 +63,7 @@ New secrets should be generated through the Slack UI, and then pushed up to Vaul
 [Slack Event Subscriptions](https://api.slack.com/apps/A011B3L27P1/event-subscriptions)
 
 [Slack App Creds](https://api.slack.com/apps/A011B3L27P1/general?)
+
+### Local Dev
+
+To run/develop locally: `docker-compose up` **Note:Still need to setup ngrok to proxy bot/slack request**

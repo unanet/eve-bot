@@ -17,6 +17,7 @@ export CI_COMMIT_SHA
 export CI_COMMIT_SHORT_SHA
 
 PRERELEASE?=
+UPLOAD_URL?=
 GO_FILES:=$$(find . -name '*.go' | grep -v vendor)
 GIT_TAG:=$(shell git describe --abbrev=0)
 
@@ -61,9 +62,8 @@ release:
 	@git log v0.4.0...${GIT_TAG} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
 	@echo
 	@echo "===> Uploading ${GIT_TAG} Changelog..."
-	$(eval UPLOAD_URL := $(shell $(PWD)/scripts/changelog-upload.sh))
+	$(eval UPLOAD_URL := $(shell curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --data-urlencode file@CHANGELOG.md ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads | jq .url | sed -e 's/^"//' -e 's/"$//'))
 	@echo
-	UPLOAD_URL
 	@echo "===> Attaching ${GIT_TAG} Changelog to $(UPLOAD_URL)..."
 	@curl -v --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md]($(UPLOAD_URL))" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release		
 	@echo		
