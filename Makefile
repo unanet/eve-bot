@@ -73,8 +73,8 @@ tag:
 	@echo "===> Git Tag Version: ${VERSION}"
 	@git remote remove origin
 	@git remote add origin https://${BUILD_ADMIN_USER}:${BUILD_ADMIN_KEY}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
-	@git config user.email "${BUILD_ADMIN_EMAIL}"
-	@git config user.name "${BUILD_ADMIN_USER}"
+	@git config user.email "${GITLAB_USER_EMAIL}"
+	@git config user.name "${GITLAB_USER_NAME}"
 	@git tag -a ${VERSION} -m "${VERSION}"
 	@git push origin ${VERSION}
 	@echo
