@@ -39,7 +39,7 @@ tag:
 	@echo
 	@echo "===> Git Tag Version: ${VERSION}"
 	@git remote remove origin
-	@git remote add origin ${CI_REPOSITORY_URL}
+	@git remote add origin https://${BUILD_ADMIN_USER}:${BUILD_ADMIN_KEY}@gitlab.unanet.io/devops/eve-bot.git
 	@git config user.email "build-admind@unanet.io"
 	@git config user.name "build-admind"
 	@git tag -a ${VERSION} -m "${VERSION}"
