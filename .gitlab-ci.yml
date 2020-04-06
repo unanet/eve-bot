@@ -2,6 +2,7 @@ stages:
   - details
   - build
   - publish
+  - tag
 
 details:
   stage: details
@@ -25,3 +26,12 @@ publish:
     - linux
   only:
     - master
+
+tag:
+  stage: tag
+  script:
+    - make tag
+  tags:
+    - linux
+  only:
+    - master    
