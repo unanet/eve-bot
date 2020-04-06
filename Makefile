@@ -30,6 +30,9 @@ FEATURE_TAG:=$(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 DOCKER_IMAGE_TAG:=$(shell $(PWD)/scripts/docker-image-tag.sh $(VERSION) $(FEATURE_TAG) $(CI_COMMIT_BRANCH) $(GIT_TAG))
 DOCKER_IMAGE_NAME:=unanet-docker.jfrog.io/$(CI_PROJECT_NAME)
 DOCKER_BUILD_IMAGE:=unanet-docker.jfrog.io/golang-base
+DOCKER_UID = $(shell id -u)
+DOCKER_GID = $(shell id -g)
+
 
 DOCKER_IMAGE_ARGS := \
 	--build-arg BUILD_HOST="${BUILD_HOST}" \
@@ -51,6 +54,14 @@ DOCKER_IMAGE_LABELS := \
 	--label "${LABEL_PREFIX}.build_date=${TIMESTAMP_UTC}" \
 	--label "${LABEL_PREFIX}.version=${VERSION}" \
 	--label "${LABEL_PREFIX}.maintainer=${BUILD_ADMIN_USER} <${BUILD_ADMIN_EMAIL}>" \
+
+
+docker-exec = docker run --rm \
+	-e DOCKER_UID=${DOCKER_UID} \
+	-e DOCKER_GID=${DOCKER_GID} \
+	-v ${CUR_DIR}:/src \
+	-w /src \
+	${DOCKER_BUILD_IMAGE}
 
 
 default: details build
@@ -117,7 +128,12 @@ release:
 	@git log v0.4.0...${GIT_TAG} --pretty=format:'1. [view commit](${CI_PROJECT_URL}/-/commit/%H)	%cn	`%s`	(%ci)' --reverse | tee CHANGELOG.md
 	@echo
 	@echo "===> Uploading ${GIT_TAG} Changelog..."
-		UPLOAD_URL="$(shell curl --request POST --header "PRIVATE-TOKEN: $$BUILD_ADMIN_KEY" --data-urlencode file@CHANGELOG.md $$CI_API_V4_URL/projects/$$CI_PROJECT_ID/uploads | jq .url | sed -e 's/^"//' -e 's/"$$//')"; curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "description=Changelog File: [CHANGELOG.md]($$UPLOAD_URL)" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release
+	uploadedURL=$$($(docker-exec) curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" --form "file=@CHANGELOG.md" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/uploads | jq .url | sed -e 's/^"//' -e 's/"$$//')") && \
+	curl --request POST --header "PRIVATE-TOKEN: ${BUILD_ADMIN_KEY}" \
+		--form "description=Changelog File: [CHANGELOG.md]($$uploadedURL)" ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags/${GIT_TAG}/release
 	
 	
 	
+
+
+# --data-urlencode file@CHANGELOG.md	
