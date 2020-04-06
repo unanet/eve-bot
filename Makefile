@@ -8,6 +8,7 @@ CI_COMMIT_BRANCH?=$(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 CI_PROJECT_NAME?=$(shell basename $(CURDIR))
 CI_COMMIT_SHA?=$(shell git rev-list -1 HEAD)
 CI_COMMIT_SHORT_SHA?=$(shell git rev-parse --short=8 HEAD)
+CI_PROJECT_URL?=https://gitlab.unanet.io/devops/eve-bot
 
 # Export the CI variables
 export CI_COMMIT_BRANCH
@@ -51,6 +52,12 @@ DOCKER_IMAGE_LABELS := \
 
 
 default: details build
+
+.PHONY: changelog
+changelog:
+	@echo
+	@echo "===> Changelog..."
+	@git log v0.4.0..v0.5.0 --pretty=format:'<li> <a href="${CI_PROJECT_URL}/-/commit/%H">view commit &bull;</a> %s</li> ' --reverse
 
 .PHONY: tag
 tag:
