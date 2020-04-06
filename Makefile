@@ -18,7 +18,7 @@ BUILD_HOST:=$(shell hostname)
 BUILD_DATE:=$(shell /bin/date -u)
 VERSION:=$(shell $(PWD)/scripts/version.sh $(GIT_SHORT_SHA) $(CI_COMMIT_BRANCH) $(GIT_TAG))
 FEATURE_TAG:=$(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
-DOCKER_IMAGE_TAG:=$(shell $(PWD)/scripts/docker-image-tag.sh $(VERSION) $(FEATURE_TAG))
+DOCKER_IMAGE_TAG:=$(shell $(PWD)/scripts/docker-image-tag.sh $(VERSION) $(FEATURE_TAG) $(CI_COMMIT_BRANCH) $(GIT_TAG))
 DOCKER_IMAGE_NAME:=unanet-docker.jfrog.io/$(CI_PROJECT_NAME)
 DOCKER_BUILD_IMAGE:=golang:1.14.1-alpine
 
