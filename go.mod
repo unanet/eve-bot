@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
+	github.com/gorilla/sessions v1.2.0 // indirect
 	github.com/lib/pq v1.3.0
 	github.com/nlopes/slack v0.6.0
 	github.com/opentracing-contrib/go-gorilla v0.0.0-20190110000444-ced666783644

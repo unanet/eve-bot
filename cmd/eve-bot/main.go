@@ -1,12 +1,10 @@
 package main
 
 import (
-	"time"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/api"
-	"gitlab.unanet.io/devops/eve-bot/internal/servicefactory"
-	"gitlab.unanet.io/devops/eve-bot/internal/version"
-	"go.uber.org/zap"
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
+	"net/http"
 )
 
 // Public/Global Variables Passed in dynamically during Build time
@@ -35,24 +33,62 @@ var (
 )
 
 func main() {
-	svcFactory := servicefactory.Initialize(
-		version.New(
-			Version,
-			GitCommit,
-			GitBranch,
-			GitCommitAuthor,
-			GitDescribe,
-			BuildDate,
-			VersionPrerelease,
-			VersionMetaData,
-			Builder,
-			BuildHost,
-			time.Now(),
-		),
-	)
+	// svcFactory := servicefactory.Initialize(
+	// 	version.New(
+	// 		Version,
+	// 		GitCommit,
+	// 		GitBranch,
+	// 		GitCommitAuthor,
+	// 		GitDescribe,
+	// 		BuildDate,
+	// 		VersionPrerelease,
+	// 		VersionMetaData,
+	// 		Builder,
+	// 		BuildHost,
+	// 		time.Now(),
+	// 	),
+	// )
 
-	// Serve up the main server API
-	if err := api.New(svcFactory).Serve(); err != nil {
-		svcFactory.Logger.Bg().Fatal("api serve failed", zap.Error(err))
+	// // Serve up the main server API
+	// if err := api.New(svcFactory).Serve(); err != nil {
+	// 	svcFactory.Logger.Bg().Fatal("api serve failed", zap.Error(err))
+	// }
+	http.HandleFunc("/login", loginHandler)
+	http.ListenAndServe(":3000", nil)
+}
+
+// GenerateNonce is is to generate random bytes for Okta
+func generateNonce() (string, error) {
+	nonceBytes := make([]byte, 32)
+	_, err := rand.Read(nonceBytes)
+	if err != nil {
+		return "", fmt.Errorf("could not generate nonce")
 	}
+
+	return base64.URLEncoding.EncodeToString(nonceBytes), nil
+}
+
+var state = "ApplicationState"
+var nonce = "NonceNotSetYet"
+
+func loginHandler(res http.ResponseWriter, req *http.Request) {
+	// nonce, _ = generateNonce()
+	// //var redirectPath string
+
+	// q := req.URL.Query()
+	// q.Add("client_id", TOKEN)
+	// q.Add("response_type", "code")
+	// q.Add("response_mode", "query")
+	// q.Add("scope", "openid profile email")
+	// q.Add("redirect_uri", "http://localhost:3000/authorization-code/callback")
+	// q.Add("state", state)
+	// q.Add("nonce", nonce)
+
+	//redirectPath = svcFactory.Config.OktaSecrets.IssuerURL + "/v1/authorize?" + q.Encode()
+
+	//svcFactory.Logger.Bg().Fatal("HELLLO", zap.String("redir_url", redirectPath))
+	// svcFactory.Logger.For(req.Context()).Fatal("HELLLO", zap.String("redir_url", redirectPath))
+
+	http.Redirect(res, req, "https://google.com", http.StatusMovedPermanently)
+
 }

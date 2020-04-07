@@ -3,6 +3,7 @@ evebot
 .vscode/
 .cover
 .env
+build
 main
 eve-bot
 CHANGELOG.md

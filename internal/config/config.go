@@ -29,11 +29,16 @@ type api struct {
 	AllowedHeaders      []string
 }
 
+type oktaSecrets struct {
+	ClientID, ClientSecret, IssuerURL string
+}
+
 // Config is the main Bot Config
 type Config struct {
 	API          api
 	Logger       logger
 	SlackSecrets slackSecrets
+	OktaSecrets  oktaSecrets
 }
 
 func getenv(key, fallback string) string {
@@ -65,6 +70,9 @@ const (
 	envVarSlackVerificationToken = "EVEBOT_SLACK_VERIFICATION_TOKEN"
 	envVarSlackBotOAuth          = "EVEBOT_SLACK_BOT_OAUTH"
 	envVarSlackOAuth             = "EVEBOT_SLACK_OAUTH"
+	envVarOktaClientID           = "EVEBOT_OKTA_CLIENTID"
+	envVarOktaClientSecret       = "EVEBOT_OKTA_CLIENTSECRET"
+	envVarOktaIssuerURL          = "EVEBOT_OKTA_ISSUERURL"
 )
 
 // Read the config values (iether sane default or required, all EnvVars)
@@ -95,6 +103,11 @@ func Read() *Config {
 			VerificationToken: getenv(envVarSlackVerificationToken, ""),
 			BotOAuthToken:     getenv(envVarSlackBotOAuth, ""),
 			OAuthToken:        getenv(envVarSlackOAuth, ""),
+		},
+		OktaSecrets: oktaSecrets{
+			ClientID:     getenv(envVarOktaClientID, ""),
+			ClientSecret: getenv(envVarOktaClientSecret, ""),
+			IssuerURL:    getenv(envVarOktaIssuerURL, "https://dev-528196-admin.okta.com/oauth2/default"),
 		},
 	}
 }

@@ -16,45 +16,52 @@ import (
 	"go.uber.org/zap"
 )
 
+// Register the routes
 func (a *app) registerRoutes(svcFactory *servicefactory.Container) {
 	a.router.Handle("/", middleware.Handler{AppCtx: svcFactory, RouteHandler: pingHandler}).Methods("GET")
 	a.router.Handle("/slack-events", middleware.Handler{AppCtx: svcFactory, RouteHandler: slackEventHandler}).Methods("POST")
+	a.router.Handle("/authorization-code/callback", middleware.Handler{AppCtx: svcFactory, RouteHandler: authCodeCBHandler}).Methods("POST", "GET")
+	// a.router.Handle("/login", loginHandler).Methods("GET")
+	a.router.Handle("/logout", middleware.Handler{AppCtx: svcFactory, RouteHandler: logoutHandler}).Methods("GET")
+}
+
+var state = "ApplicationState"
+var nonce = "NonceNotSetYet"
+
+// Handler Functions
+
+// func loginHandler(w http.ResponseWriter, req *http.Request) {
+// 	nonce, _ = httphelper.GenerateNonce()
+// 	//var redirectPath string
+
+// 	q := req.URL.Query()
+// 	q.Add("client_id", svcFactory.Config.OktaSecrets.ClientID)
+// 	q.Add("response_type", "code")
+// 	q.Add("response_mode", "query")
+// 	q.Add("scope", "openid profile email")
+// 	q.Add("redirect_uri", "http://localhost:3000/authorization-code/callback")
+// 	q.Add("state", state)
+// 	q.Add("nonce", nonce)
+
+// 	//redirectPath = svcFactory.Config.OktaSecrets.IssuerURL + "/v1/authorize?" + q.Encode()
+
+// 	//svcFactory.Logger.Bg().Fatal("HELLLO", zap.String("redir_url", redirectPath))
+// 	// svcFactory.Logger.For(req.Context()).Fatal("HELLLO", zap.String("redir_url", redirectPath))
+
+// 	http.Redirect(res, req, "https://google.com", http.StatusMovedPermanently)
+// 	return httphelper.AppResponse(http.StatusOK, "login")
+// }
+
+func logoutHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
+	return httphelper.AppResponse(http.StatusOK, "logout")
+}
+
+func authCodeCBHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
+	return httphelper.AppResponse(http.StatusOK, "auth code")
 }
 
 func pingHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
 	return httphelper.AppResponse(http.StatusOK, "pong")
-}
-
-func verifyRequestSig(req *http.Request, signingSecret *string) ([]byte, error) {
-	cleanErr := func(oerr error, msg string, status int) error {
-		return &resterror.RestError{
-			Code:          http.StatusUnauthorized,
-			Message:       msg,
-			OriginalError: oerr,
-		}
-	}
-
-	verifier, err := slack.NewSecretsVerifier(req.Header, *signingSecret)
-	if err != nil {
-		return []byte{}, cleanErr(err, "failed new secret verifier", http.StatusUnauthorized)
-	}
-
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return []byte{}, cleanErr(err, "failed readAll req body", http.StatusBadRequest)
-	}
-
-	_, err = verifier.Write(body)
-	if err != nil {
-		return []byte{}, cleanErr(err, "failed verifier write", http.StatusUnauthorized)
-	}
-
-	err = verifier.Ensure()
-	if err != nil {
-		return []byte{}, cleanErr(err, "failed verifier ensure", http.StatusUnauthorized)
-	}
-
-	return body, nil
 }
 
 func slackEventHandler(svcFactory *servicefactory.Container, res http.ResponseWriter, req *http.Request) (int, interface{}, error) {
@@ -116,4 +123,37 @@ func slackEventHandler(svcFactory *servicefactory.Container, res http.ResponseWr
 
 	return httphelper.AppResponse(http.StatusGone, "unknown slack event")
 
+}
+
+// Private/Helper functions
+func verifyRequestSig(req *http.Request, signingSecret *string) ([]byte, error) {
+	cleanErr := func(oerr error, msg string, status int) error {
+		return &resterror.RestError{
+			Code:          http.StatusUnauthorized,
+			Message:       msg,
+			OriginalError: oerr,
+		}
+	}
+
+	verifier, err := slack.NewSecretsVerifier(req.Header, *signingSecret)
+	if err != nil {
+		return []byte{}, cleanErr(err, "failed new secret verifier", http.StatusUnauthorized)
+	}
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return []byte{}, cleanErr(err, "failed readAll req body", http.StatusBadRequest)
+	}
+
+	_, err = verifier.Write(body)
+	if err != nil {
+		return []byte{}, cleanErr(err, "failed verifier write", http.StatusUnauthorized)
+	}
+
+	err = verifier.Ensure()
+	if err != nil {
+		return []byte{}, cleanErr(err, "failed verifier ensure", http.StatusUnauthorized)
+	}
+
+	return body, nil
 }

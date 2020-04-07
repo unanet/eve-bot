@@ -1,8 +1,19 @@
 stages:
+  - test
   - build
   - publish
   - tag
-  - release
+  # - release
+
+test:
+  stage: test
+  script:
+    - make test
+  tags:
+    - linux
+  except:
+    - tags    
+
 
 build:
   stage: build
@@ -33,12 +44,12 @@ tag:
     - master
     - patch
 
-release:
-  stage: release
-  script:
-    - make release
-  tags:
-    - linux
-  only:
-    - tags
+# release:
+#   stage: release
+#   script:
+#     - make release
+#   tags:
+#     - linux
+#   only:
+#     - tags
   
