@@ -77,7 +77,7 @@ docker-exec = docker run --rm \
 	-w /src \
 	${DOCKER_BUILD_IMAGE}
 
-default: details build
+default: version test build
 
 .PHONY: build
 build:
@@ -90,6 +90,11 @@ build:
 .PHONY: test
 test:	
 	$(docker-exec) go test -v ./...
+
+.PHONY: version
+version:	
+	@echo "${VERSION}"
+
 
 .PHONY: tag
 tag:
