@@ -1,55 +1,21 @@
 stages:
-  - test
   - build
-  - publish
-  - tag
-  # - release
 
-test:
-  stage: test
-  script:
-    - make test
-  tags:
-    - linux
-  except:
-    - tags    
-
-
-build:
+Dist:
   stage: build
   script:
-    - make
+    - make dist
+  tags:
+    - linux
+  only:
+    - master
+
+Build:
+  stage: build
+  script:
+    - make build
   tags:
     - linux
   except:
-    - tags    
-
-publish:
-  stage: publish
-  script:
-    - make publish
-  tags:
-    - linux
-  only:
     - master
-    - patch
-
-tag:
-  stage: tag
-  script:
-    - make tag
-  tags:
-    - linux
-  only:
-    - master
-    - patch
-
-# release:
-#   stage: release
-#   script:
-#     - make release
-#   tags:
-#     - linux
-#   only:
-#     - tags
-  
+    - tags
