@@ -7,10 +7,9 @@ import (
 
 	"github.com/nlopes/slack/slackevents"
 	"github.com/slack-go/slack"
-	"gitlab.unanet.io/devops/eve-bot/internal/api/resterror"
+	"gitlab.unanet.io/devops/eve/pkg/eveerrs"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
-	"gitlab.unanet.io/devops/eve-bot/internal/evelogger"
-	"go.uber.org/zap"
 )
 
 // Provider provides access to the Slack Client
@@ -22,15 +21,13 @@ type Provider interface {
 type provider struct {
 	client *slack.Client
 	cfg    *config.Config
-	logger evelogger.Container
 }
 
 // NewProvider creates a new provider
-func NewProvider(cfg *config.Config, logger evelogger.Container) Provider {
+func NewProvider(cfg *config.Config) Provider {
 	return &provider{
 		client: slack.New(cfg.SlackSecrets.BotOAuthToken),
 		cfg:    cfg,
-		logger: logger,
 	}
 }
 
@@ -44,7 +41,7 @@ func (p *provider) Client() *slack.Client {
 func (p *provider) HandleEvent(req *http.Request) error {
 
 	restErr := func(oerr error, msg string, status int) error {
-		return &resterror.RestError{
+		return &eveerrs.RestError{
 			Code:          http.StatusUnauthorized,
 			Message:       msg,
 			OriginalError: oerr,
@@ -79,7 +76,7 @@ func (p *provider) HandleEvent(req *http.Request) error {
 		return restErr(err, "failed parse slack event", http.StatusNotAcceptable)
 	}
 
-	p.logger.For(req.Context()).Info("slack event", zap.String("event", slackAPIEvent.Type))
+	// p.logger.For(req.Context()).Info("slack event", zap.String("event", slackAPIEvent.Type))
 
 	if slackAPIEvent.Type == slackevents.URLVerification {
 		var r *slackevents.ChallengeResponse

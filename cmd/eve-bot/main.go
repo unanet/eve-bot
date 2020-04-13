@@ -5,6 +5,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"gitlab.unanet.io/devops/eve/pkg/mux"
+	"go.uber.org/zap"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/api"
 )
 
 // Public/Global Variables Passed in dynamically during Build time
@@ -33,28 +39,11 @@ var (
 )
 
 func main() {
-	// svcFactory := servicefactory.Initialize(
-	// 	version.New(
-	// 		Version,
-	// 		GitCommit,
-	// 		GitBranch,
-	// 		GitCommitAuthor,
-	// 		GitDescribe,
-	// 		BuildDate,
-	// 		VersionPrerelease,
-	// 		VersionMetaData,
-	// 		Builder,
-	// 		BuildHost,
-	// 		time.Now(),
-	// 	),
-	// )
-
-	// // Serve up the main server API
-	// if err := api.New(svcFactory).Serve(); err != nil {
-	// 	svcFactory.Logger.Bg().Fatal("api serve failed", zap.Error(err))
-	// }
-	http.HandleFunc("/login", loginHandler)
-	http.ListenAndServe(":3000", nil)
+	api, err := mux.NewApi(api.Controllers)
+	if err != nil {
+		log.Logger.Panic("Failed to Create Api App", zap.Error(err))
+	}
+	api.Start()
 }
 
 // GenerateNonce is is to generate random bytes for Okta
