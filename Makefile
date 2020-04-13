@@ -32,7 +32,7 @@ docker-exec = docker run --rm \
 	-e DOCKER_GID=${DOCKER_GID} \
 	-v ${CUR_DIR}:/src \
 	-v ${MODCACHE}:/go/pkg/mod \
-	-v ${HOME}/.ssh/unanet/id_rsa:/home/unanet/.ssh/id_rsa \
+	-v ${HOME}/.ssh/id_rsa:/home/unanet/.ssh/id_rsa \
 	-w /src \
 	${BUILD_IMAGE}
 
