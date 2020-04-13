@@ -45,7 +45,7 @@ build:
 	$(docker-exec) go test ./...
 	$(docker-exec) go build -o ./bin/eve-bot ./cmd/eve-bot/main.go
 
-dist:
+dist: build
 	docker pull unanet-docker.jfrog.io/alpine-base
 	docker build . -t ${IMAGE_NAME}:${PATCH_VERSION}
 	docker push ${IMAGE_NAME}:${PATCH_VERSION}
