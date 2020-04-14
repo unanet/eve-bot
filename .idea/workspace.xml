@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="" />
+    <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/eve-bot/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/eve-bot/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -37,7 +45,22 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="settings.editor.selected.configurable" value="configurable.group.language" />
+    <property name="settings.editor.selected.configurable" value="watcher.settings" />
+  </component>
+  <component name="RunManager">
+    <configuration name="eve-bot" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="eve-bot" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <envs>
+        <env name="EVE_SERVICE_NAME" value="eve-bot" />
+      </envs>
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/cmd/eve-bot/main.go" />
+      <package value="gitlab.unanet.io/devops/eve-bot" />
+      <directory value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="2" />
@@ -50,10 +73,22 @@
       <screen x="1680" y="-283" width="1920" height="1057" />
     </state>
     <state x="2439" y="182" key="#GOROOT/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586737417472" />
-    <state x="2149" y="-116" key="SettingsEditor" timestamp="1586737402905">
+    <state x="2104" y="-93" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586826610454">
       <screen x="1680" y="-283" width="1920" height="1057" />
     </state>
-    <state x="2149" y="-116" key="SettingsEditor/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586737402905" />
+    <state x="2104" y="-93" key="#com.intellij.execution.impl.EditConfigurationsDialog/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826610454" />
+    <state x="2305" y="30" key="EditFileWatcherDialog" timestamp="1586826597896">
+      <screen x="1680" y="-283" width="1920" height="1057" />
+    </state>
+    <state x="2305" y="30" key="EditFileWatcherDialog/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826597896" />
+    <state x="2505" y="-23" key="EnvironmentVariablesDialog" timestamp="1586826578082">
+      <screen x="1680" y="-283" width="1920" height="1057" />
+    </state>
+    <state x="2505" y="-23" key="EnvironmentVariablesDialog/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826578082" />
+    <state x="2149" y="-116" key="SettingsEditor" timestamp="1586826599070">
+      <screen x="1680" y="-283" width="1920" height="1057" />
+    </state>
+    <state x="2149" y="-116" key="SettingsEditor/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826599070" />
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1586746591000">
       <screen x="0" y="23" width="1680" height="1027" />
     </state>

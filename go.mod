@@ -7,6 +7,6 @@ require (
 	github.com/go-chi/render v1.0.1
 	github.com/nlopes/slack v0.6.0
 	github.com/slack-go/slack v0.6.3
-	gitlab.unanet.io/devops/eve v0.0.0-20200412235603-bc7eb56e8c83
+	gitlab.unanet.io/devops/eve v0.0.0-20200414010455-edc2a08dddc6
 	go.uber.org/zap v1.14.1
 )

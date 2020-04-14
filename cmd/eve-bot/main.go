@@ -13,33 +13,12 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/api"
 )
 
-// Public/Global Variables Passed in dynamically during Build time
-// used to add build metadata into the binary
-var (
-	// GitCommit is the Full Git Commit SHA
-	GitCommit string
-	// GitCommitAuthor is the author of the Git Commit
-	GitCommitAuthor string
-	// GitBranch is the Full Git Branch Name
-	GitBranch string
-	// BuildDate is the DateTimeStamp during build
-	BuildDate string
-	// GitDescribe is a way to intentionally describe the version
-	GitDescribe string
-	// Version is the Full Semantic Version
-	Version string
-	// VersionPrerelease is the pre-release name (dev,rc-1,alpha,beta,nightly,etc.)
-	VersionPrerelease string
-	// VersionMetaData is the optional metadata to attach to a version
-	VersionMetaData string
-	// Builder is the name of the user that builds the artifact (i.e whoami)
-	Builder string
-	// BuildHost is the name of the host that builds the artifact
-	BuildHost string
-)
-
 func main() {
-	api, err := mux.NewApi(api.Controllers)
+	api, err := mux.NewApi(api.Controllers, mux.Config{
+		Port:        8080,
+		MetricsPort: 3000,
+		ServiceName: "eve-bot",
+	})
 	if err != nil {
 		log.Logger.Panic("Failed to Create Api App", zap.Error(err))
 	}
