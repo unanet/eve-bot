@@ -5,12 +5,18 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/nlopes/slack/slackevents"
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slackevents"
 	"gitlab.unanet.io/devops/eve/pkg/eveerrs"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/config"
 )
+
+// Config needed for slack
+type Config struct {
+	SlackSigningSecret     string `split_words:"true" required:"true"`
+	SlackVerificationToken string `split_words:"true" required:"true"`
+	SlackBotOAuthToken     string `split_words:"true" required:"true"`
+	SlackOAuthToken        string `split_words:"true" required:"true"`
+}
 
 // Provider provides access to the Slack Client
 // basically a wrapper around slack
@@ -20,19 +26,15 @@ type Provider interface {
 
 type provider struct {
 	client *slack.Client
-	cfg    *config.Config
+	cfg    Config
 }
 
 // NewProvider creates a new provider
-func NewProvider(cfg *config.Config) Provider {
+func NewProvider(cfg Config) Provider {
 	return &provider{
-		client: slack.New(cfg.SlackSecrets.BotOAuthToken),
+		client: slack.New(cfg.SlackBotOAuthToken),
 		cfg:    cfg,
 	}
-}
-
-func (p *provider) Client() *slack.Client {
-	return p.client
 }
 
 // HandleEvent takes an http request and handles the Slack API Event
@@ -48,7 +50,7 @@ func (p *provider) HandleEvent(req *http.Request) error {
 		}
 	}
 
-	verifier, err := slack.NewSecretsVerifier(req.Header, p.cfg.SlackSecrets.SigningSecret)
+	verifier, err := slack.NewSecretsVerifier(req.Header, p.cfg.SlackSigningSecret)
 	if err != nil {
 		return restErr(err, "failed new secret verifier", http.StatusUnauthorized)
 	}
@@ -70,7 +72,7 @@ func (p *provider) HandleEvent(req *http.Request) error {
 
 	slackAPIEvent, err := slackevents.ParseEvent(
 		json.RawMessage(body),
-		slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackSecrets.VerificationToken}))
+		slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
 
 	if err != nil {
 		return restErr(err, "failed parse slack event", http.StatusNotAcceptable)
