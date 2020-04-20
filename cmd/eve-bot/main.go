@@ -9,8 +9,8 @@ import (
 
 func main() {
 	api, err := mux.NewApi(api.Controllers, mux.Config{
-		Port:        8080,
-		MetricsPort: 3000,
+		Port:        3000,
+		MetricsPort: 8080,
 		ServiceName: "eve-bot",
 	})
 	if err != nil {

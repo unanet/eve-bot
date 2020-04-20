@@ -50,8 +50,8 @@ These secrets are required for the application to run. The source of truth is Sl
 ```bash
 export EVEBOT_SLACK_SIGNING_SECRET=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_SIGNING_SECRET`
 export EVEBOT_SLACK_VERIFICATION_TOKEN=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_VERIFICATION_TOKEN`
-export EVEBOT_SLACK_BOT_OAUTH=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_BOT_OAUTH`
-export EVEBOT_SLACK_OAUTH=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_OAUTH`
+export EVEBOT_SLACKBOT_OAUTH_TOKEN=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_BOT_OAUTH`
+export EVEBOT_SLACK_OAUTH_TOKEN=`vault kv get --format=json kv/devops/evebot | jq .data.data.EVEBOT_SLACK_OAUTH`
 ```
 
 ### Slack Links
