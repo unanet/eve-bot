@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/kelseyhightower/envconfig"
-	iokta "gitlab.unanet.io/devops/eve-bot/internal/okta"
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"gitlab.unanet.io/devops/eve/pkg/mux"
@@ -21,8 +20,6 @@ type (
 	LogConfig = log.Config
 	// SlackConfig is the slack config (secret, tokens..)
 	SlackConfig = islack.Config
-	// OktaConfig is the slack config (secret, tokens..)
-	OktaConfig = iokta.Config
 	// MuxConfig is the multiplexer (router) config (ports, timeouts)
 	MuxConfig = mux.Config
 )
@@ -31,7 +28,6 @@ type (
 type Config struct {
 	LogConfig
 	SlackConfig
-	OktaConfig
 	MuxConfig
 }
 

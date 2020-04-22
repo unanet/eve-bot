@@ -2,8 +2,10 @@ package slack
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -18,14 +20,12 @@ type Config struct {
 	SlackVerificationToken string `split_words:"true" required:"true"`
 	SlackbotOauthToken     string `split_words:"true" required:"true"`
 	SlackOauthToken        string `split_words:"true" required:"true"`
+	// SlackSkipVerification is used for local dev
+	// We need to skip the URL verification when proxying calls with SSH tunnel
+	SlackSkipVerification bool `split_words:"true" required:"false"`
 }
 
 // Provider provides access to the Slack Client
-// basically a wrapper around slack
-// type Provider interface {
-// 	HandleEvent(req *http.Request) error
-// }
-
 type Provider struct {
 	Client *slack.Client
 	cfg    Config
@@ -39,73 +39,104 @@ func NewProvider(cfg Config) *Provider {
 	}
 }
 
+func botError(oerr error, msg string, status int) error {
+	log.Logger.Error("evebot error", zap.Error(oerr))
+	return &eveerrs.RestError{
+		Code:          status,
+		Message:       msg,
+		OriginalError: oerr,
+	}
+}
+
+// HandleEveCallback handles the callbacks from eve-api
+func (p *Provider) HandleEveCallback(req *http.Request) error {
+	return nil
+}
+
+// HandleInteraction handles the interactive callbacks (buttons, dropdowns, etc.)
+func (p *Provider) HandleInteraction(req *http.Request) error {
+	var payload slack.InteractionCallback
+	err := json.Unmarshal([]byte(req.FormValue("payload")), &payload)
+	if err != nil {
+		return botError(err, "failed to parse interactive slack message payload", http.StatusInternalServerError)
+	}
+
+	fmt.Printf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value)
+	return nil
+}
+
 // HandleEvent takes an http request and handles the Slack API Event
 // this is where we do our request signature validation
 // ..and switch the incoming api event types
 func (p *Provider) HandleEvent(req *http.Request) error {
-	log.Logger.Info("SlackClient HandleEvent")
+	verifier, err := slack.NewSecretsVerifier(req.Header, p.cfg.SlackSigningSecret)
+	if err != nil {
+		return botError(err, "failed new secret verifier", http.StatusUnauthorized)
+	}
 
-	restErr := func(oerr error, msg string, status int) error {
-		log.Logger.Error("SlackClient HandleEvent Error", zap.Error(oerr))
-		return &eveerrs.RestError{
-			Code:          http.StatusUnauthorized,
-			Message:       msg,
-			OriginalError: oerr,
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return botError(err, "failed readAll req body", http.StatusBadRequest)
+	}
+
+	_, err = verifier.Write(body)
+	if err != nil {
+		return botError(err, "failed verifier write", http.StatusUnauthorized)
+	}
+
+	// This is required to run the bot locally and proxy calls in with SSH tunnel
+	if p.cfg.SlackSkipVerification == false {
+		err = verifier.Ensure()
+		if err != nil {
+			return botError(err, "failed verifier ensure", http.StatusUnauthorized)
 		}
 	}
 
-	log.Logger.Info("SlackClient NewSecretsVerifier")
-	verifier, err := slack.NewSecretsVerifier(req.Header, p.cfg.SlackSigningSecret)
+	slackAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
 	if err != nil {
-		return restErr(err, "failed new secret verifier", http.StatusUnauthorized)
+		return botError(err, "failed parse slack event", http.StatusNotAcceptable)
 	}
 
-	log.Logger.Info("SlackClient ReadBody")
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return restErr(err, "failed readAll req body", http.StatusBadRequest)
-	}
-
-	log.Logger.Info("SlackClient verifier.Write(body)")
-	_, err = verifier.Write(body)
-	if err != nil {
-		return restErr(err, "failed verifier write", http.StatusUnauthorized)
-	}
-
-	log.Logger.Info("SlackClient verifier.Ensure")
-	err = verifier.Ensure()
-	if err != nil {
-		return restErr(err, "failed verifier ensure", http.StatusUnauthorized)
-	}
-
-	log.Logger.Info("SlackClient slackevents.ParseEvent")
-	slackAPIEvent, err := slackevents.ParseEvent(
-		json.RawMessage(body),
-		slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
-
-	if err != nil {
-		return restErr(err, "failed parse slack event", http.StatusNotAcceptable)
-	}
-
-	// p.logger.For(req.Context()).Info("slack event", zap.String("event", slackAPIEvent.Type))
-	log.Logger.Info("SlackClient slackAPIEvent.Type", zap.String("slack_event_type", slackAPIEvent.Type))
-	if slackAPIEvent.Type == slackevents.URLVerification {
-		log.Logger.Info("SlackClient slackAPIEvent.Type")
+	log.Logger.Debug("slack event", zap.String("slack_event_type", slackAPIEvent.Type))
+	switch slackAPIEvent.Type {
+	case slackevents.URLVerification:
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
 		if err != nil {
-			return restErr(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
+			return botError(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
 		}
-	}
-
-	if slackAPIEvent.Type == slackevents.CallbackEvent {
-		log.Logger.Info("SlackClient slackAPIEvent.Type")
+	case slackevents.CallbackEvent:
 		innerEvent := slackAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
-			p.Client.PostMessage(ev.Channel, slack.MsgOptionText("Yes, App Mention Event hello.", false))
+			msgFields := strings.Fields(ev.Text)
+			botIDField := msgFields[0]
+			commandFields := msgFields[1:]
+
+			if len(commandFields) <= 0 || commandFields[0] == "help" {
+				return p.ShowHelp(ev)
+			}
+
+			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Yes, <@%s>, this is %s! You want me to run: %s", ev.User, botIDField, commandFields), false))
 		}
+	default:
+		return fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
 	}
 
+	return nil
+}
+
+// ShowHelp shows the help message to the Slack User
+func (p *Provider) ShowHelp(ev *slackevents.AppMentionEvent) error {
+
+	helpAttachment := slack.Attachment{
+		Pretext:    "\ndeploy help\nmigrate help",
+		Fallback:   "help",
+		CallbackID: "help",
+		Color:      "#3AA3E3",
+	}
+	attachmentOpt := slack.MsgOptionAttachments(helpAttachment)
+	msgOpt := slack.MsgOptionText(fmt.Sprintf("Hey <@%s>! Need a little help? Try the following...", ev.User), false)
+	p.Client.PostMessage(ev.Channel, msgOpt, attachmentOpt)
 	return nil
 }
