@@ -49,7 +49,7 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 		})
 	}
 
-	// Just returning an empty repsponse here...
+	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 
 }
@@ -69,7 +69,7 @@ func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.
 		})
 	}
 
-	// Just returning an empty repsponse here...
+	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 }
 
@@ -88,6 +88,6 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 		})
 	}
 
-	// Just returning an empty repsponse here...
+	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 }

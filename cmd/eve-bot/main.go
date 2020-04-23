@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+
 	api, err := mux.NewApi(api.Controllers, mux.Config{
 		Port:        3000,
 		MetricsPort: 8080,

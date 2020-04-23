@@ -26,17 +26,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/internal/api/slack.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/commander/evebot_commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/controller/auth/auth.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/controller/base.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/base.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/controller/ping/ping.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/ping.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/controller/slack/slack.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/api/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/routes.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/okta/okta.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/eve-bot/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/eve-bot/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/slack.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/deploy_command.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/deploy_command.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/eve_commands.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/slack/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/slack/slack.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -143,5 +139,13 @@
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1680.1027@0.23.1680.1027" timestamp="1586746591000" />
+    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1587615505531">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587615505531" />
+    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1587605211086">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587605211086" />
   </component>
 </project>

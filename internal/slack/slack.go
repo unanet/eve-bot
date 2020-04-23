@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/commander"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"gitlab.unanet.io/devops/eve/pkg/eveerrs"
@@ -27,15 +29,17 @@ type Config struct {
 
 // Provider provides access to the Slack Client
 type Provider struct {
-	Client *slack.Client
-	cfg    Config
+	Client          *slack.Client
+	CommandResolver commander.Resolver
+	cfg             Config
 }
 
 // NewProvider creates a new provider
 func NewProvider(cfg Config) *Provider {
 	return &Provider{
-		Client: slack.New(cfg.SlackbotOauthToken),
-		cfg:    cfg,
+		Client:          slack.New(cfg.SlackbotOauthToken),
+		cfg:             cfg,
+		CommandResolver: commander.NewResolver(),
 	}
 }
 
@@ -97,7 +101,6 @@ func (p *Provider) HandleEvent(req *http.Request) error {
 		return botError(err, "failed parse slack event", http.StatusNotAcceptable)
 	}
 
-	log.Logger.Debug("slack event", zap.String("slack_event_type", slackAPIEvent.Type))
 	switch slackAPIEvent.Type {
 	case slackevents.URLVerification:
 		var r *slackevents.ChallengeResponse
@@ -110,14 +113,29 @@ func (p *Provider) HandleEvent(req *http.Request) error {
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
 			msgFields := strings.Fields(ev.Text)
-			botIDField := msgFields[0]
+			//botIDField := msgFields[0]
 			commandFields := msgFields[1:]
 
-			if len(commandFields) <= 0 || commandFields[0] == "help" {
+			if len(commandFields) <= 0 || (len(commandFields) == 1 && commandFields[0] == "help") {
 				return p.ShowHelp(ev)
 			}
 
-			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Yes, <@%s>, this is %s! You want me to run: %s", ev.User, botIDField, commandFields), false))
+			eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
+
+			if err != nil {
+				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry, <@%s>! I can't execute `%s`. Maybe try one of the following...", ev.User, commandFields[0]), false))
+				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(commander.CmdHelpMsgs, false))
+				return nil
+			}
+
+			if eveBotCmd.IsHelpRequest(commandFields) {
+				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, here is how `%s` works...", ev.User, eveBotCmd.Name()), false))
+				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.Examples().HelpMsg(), false))
+				return nil
+			}
+
+			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure, <@%s>! I'll `%s` that for you. Be right back!", ev.User, eveBotCmd.Name()), false))
+			return nil
 		}
 	default:
 		return fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
@@ -135,8 +153,9 @@ func (p *Provider) ShowHelp(ev *slackevents.AppMentionEvent) error {
 		CallbackID: "help",
 		Color:      "#3AA3E3",
 	}
+
 	attachmentOpt := slack.MsgOptionAttachments(helpAttachment)
-	msgOpt := slack.MsgOptionText(fmt.Sprintf("Hey <@%s>! Need a little help? Try the following...", ev.User), false)
+	msgOpt := slack.MsgOptionText(fmt.Sprintf("Hey <@%s>! Need a little help? Try one of the following commands...", ev.User), false)
 	p.Client.PostMessage(ev.Channel, msgOpt, attachmentOpt)
 	return nil
 }
