@@ -1,17 +1,12 @@
 package commander
 
-import (
-	"fmt"
-)
-
-// Add all the Evebot commands here
-// As we add more commands this will need to be updated
 func init() {
+	// Add all the Evebot commands here on init
 	evebotCommands = []EvebotCommand{
 		NewEvebotDeployCommand(),
 	}
 
-	// Set the Full Help Message Once
+	// Set the Full Help Message Once on init
 	CmdHelpMsgs = fullHelpMessage()
 }
 
@@ -40,31 +35,9 @@ type EvebotCommand interface {
 	Name() string
 	Examples() EvebotCommandExamples
 	IsHelpRequest(input []string) bool
-}
-
-// Resolver resolves the input commands and returns a valid EvebotCommand or an Error
-type Resolver interface {
-	Resolve(input []string) (EvebotCommand, error)
-}
-
-type EvebotResolver struct{}
-
-func NewResolver() Resolver {
-	return &EvebotResolver{}
-}
-
-func (ebr *EvebotResolver) Resolve(input []string) (EvebotCommand, error) {
-	if len(input) <= 1 {
-		return nil, fmt.Errorf("invalid evebot command")
-	}
-
-	for _, v := range evebotCommands {
-		if v.Name() == input[0] {
-			return v, nil
-		}
-	}
-
-	return nil, fmt.Errorf("invalid evebot command: %v", input[0])
+	IsValidCommand(input []string) bool
+	AdditionalArgs(input []string) (EvebotArgs, error)
+	ResolveAdditionalArg(argKV []string) EvebotArg
 }
 
 func fullHelpMessage() string {

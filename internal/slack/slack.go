@@ -69,31 +69,39 @@ func (p *Provider) HandleInteraction(req *http.Request) error {
 	return nil
 }
 
-// HandleEvent takes an http request and handles the Slack API Event
-// this is where we do our request signature validation
-// ..and switch the incoming api event types
-func (p *Provider) HandleEvent(req *http.Request) error {
+func (p *Provider) validateSlackRequest(req *http.Request) ([]byte, error) {
 	verifier, err := slack.NewSecretsVerifier(req.Header, p.cfg.SlackSigningSecret)
 	if err != nil {
-		return botError(err, "failed new secret verifier", http.StatusUnauthorized)
+		return []byte{}, botError(err, "failed new secret verifier", http.StatusUnauthorized)
 	}
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return botError(err, "failed readAll req body", http.StatusBadRequest)
+		return []byte{}, botError(err, "failed readAll req body", http.StatusBadRequest)
 	}
 
 	_, err = verifier.Write(body)
 	if err != nil {
-		return botError(err, "failed verifier write", http.StatusUnauthorized)
+		return []byte{}, botError(err, "failed verifier write", http.StatusUnauthorized)
 	}
 
 	// This is required to run the bot locally and proxy calls in with SSH tunnel
 	if p.cfg.SlackSkipVerification == false {
 		err = verifier.Ensure()
 		if err != nil {
-			return botError(err, "failed verifier ensure", http.StatusUnauthorized)
+			return []byte{}, botError(err, "failed verifier ensure", http.StatusUnauthorized)
 		}
+	}
+	return body, nil
+}
+
+// HandleEvent takes an http request and handles the Slack API Event
+// this is where we do our request signature validation
+// ..and switch the incoming api event types
+func (p *Provider) HandleEvent(req *http.Request) error {
+	body, err := p.validateSlackRequest(req)
+	if err != nil {
+		return err
 	}
 
 	slackAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
@@ -134,7 +142,18 @@ func (p *Provider) HandleEvent(req *http.Request) error {
 				return nil
 			}
 
-			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure, <@%s>! I'll `%s` that for you. Be right back!", ev.User, eveBotCmd.Name()), false))
+			additionalArgs, err := eveBotCmd.AdditionalArgs(commandFields)
+
+			if err != nil {
+				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, Whoops! Invalid additional argument: `%s`", ev.User, err.Error()), false))
+				return nil
+			}
+
+			for _, v := range additionalArgs {
+				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, here is arg key `%s`  and value `%v`", ev.User, v.Name(), v), false))
+			}
+
+			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure, <@%s>! I'll `%s` that for you. Be right back! %v length: %v %v %v", ev.User, eveBotCmd.Name(), commandFields, len(commandFields), commandFields[4], commandFields[5]), false))
 			return nil
 		}
 	default:
