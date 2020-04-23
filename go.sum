@@ -105,8 +105,6 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 gitlab.unanet.io/devops/eve v0.0.0-20200414010455-edc2a08dddc6 h1:VokFx/oPbQuqtXliVM+d4uJdodah3/5/SEld75H30js=
 gitlab.unanet.io/devops/eve v0.0.0-20200414010455-edc2a08dddc6/go.mod h1:tm20Ak26WXyb4MM+xngcShKvBsH9icdSvQGdTUMHf6k=
-gitlab.unanet.io/devops/eve v0.0.0-20200415215631-52f18474776e h1:sNmXFrlkHFio6NkldiIfX/uKan5sErsLSM50vIgB+lc=
-gitlab.unanet.io/devops/eve v0.0.0-20200417214332-e04a32b77ca1 h1:dkOSS7tRn0WsRhDMmMxIcQS8pqriWm9pzMu4n71T6B0=
 go.uber.org/atomic v1.6.0 h1:Ezj3JGmsOnG1MoRWQkPBsKLe9DwWD9QeXzTRzzldNVk=
 go.uber.org/atomic v1.6.0/go.mod h1:sABNBOSYdrvTF6hTgEIbc7YasKWGhgEQZyfxyTvoXHQ=
 go.uber.org/multierr v1.5.0 h1:KCa4XfM8CWFCpxXRGok+Q0SS/0XBhMDbHHGABQLvD2A=

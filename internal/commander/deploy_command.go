@@ -8,7 +8,6 @@ import (
 
 type EvebotDeployCommand struct {
 	name string
-	args EvebotArgs
 }
 
 func NewEvebotDeployCommand() *EvebotDeployCommand {
