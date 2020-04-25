@@ -86,3 +86,5 @@ fabric.properties
 bin
 
 eve-bot
+
+.env

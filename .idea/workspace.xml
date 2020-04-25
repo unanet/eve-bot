@@ -28,6 +28,8 @@
     <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/deploy_command.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/deploy_command.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/slack/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/slack/slack.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,20 +105,33 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
+    <state x="3346" y="32" key="#Dockerfile" timestamp="1587700036576">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state x="3346" y="32" key="#Dockerfile/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587700036576" />
     <state x="3280" y="389" key="#GOROOT" timestamp="1587593126340">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
     <state x="3280" y="389" key="#GOROOT/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587593126340" />
     <state x="2439" y="182" key="#GOROOT/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586737417472" />
+    <state x="3531" y="344" key="#Notifications" timestamp="1587700023545">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state x="3531" y="344" key="#Notifications/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587700023545" />
     <state x="2104" y="-93" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586826610454">
       <screen x="1680" y="-283" width="1920" height="1057" />
     </state>
     <state x="2104" y="-93" key="#com.intellij.execution.impl.EditConfigurationsDialog/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826610454" />
+    <state x="3399" y="283" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1587849310936">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state x="3399" y="283" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587849310936" />
     <state x="2305" y="30" key="EditFileWatcherDialog" timestamp="1586826597896">
       <screen x="1680" y="-283" width="1920" height="1057" />
     </state>
@@ -133,13 +148,13 @@
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1680.1027@0.23.1680.1027" timestamp="1586746591000" />
-    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1587655588129">
+    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1587846973899">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
-    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587655588129" />
-    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1587605211086">
+    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587846973899" />
+    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1587656981384">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
-    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587605211086" />
+    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587656981384" />
   </component>
 </project>

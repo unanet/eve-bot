@@ -14,36 +14,19 @@ run: `make`
 
 This application uses sane defaults for most of the config, but there are some required secrets that need to be set as `Environment Variables`. **All application config use EnvVars.**
 
-### Application Environment Variables
+## Environment Variables
 
 ```bash
-EVEBOT_API_SERVICENAME
-EVEBOT_API_PORT
-EVEBOT_API_METRICSPORT
-EVEBOT_API_ALLOWEDMETHODS
-EVEBOT_API_ALLOWEDORIGINS
-EVEBOT_API_ALLOWEDHEADERS
-EVEBOT_LOGGER_LEVEL
-EVEBOT_LOGGER_ENCODING
-EVEBOT_LOGGER_OUTPUTPATHS
-EVEBOT_LOGGER_ERROUTPUTPATHS
-EVEBOT_SLACK_SIGNING_SECRET
-EVEBOT_SLACK_VERIFICATION_TOKEN
-EVEBOT_SLACK_BOT_OAUTH
-EVEBOT_SLACK_OAUTH
+EVEBOT_SERVICE_NAME=eve-bot
+EVEBOT_LOG_LEVEL=debug
+EVEBOT_PORT=3000
+EVEBOT_METRICS_PORT=3001
+EVEBOT_SLACK_SIGNING_SECRET=""
+EVEBOT_SLACK_VERIFICATION_SECRET=""
+EVEBOT_SLACK_USER_OAUTH_ACCESS_TOKEN=""
+EVEBOT_SLACK_OAUTH_ACCESS_TOKEN=""
+EVEBOT_SLACK_SKIP_VERIFICATION=""
 ```
-
-All environment variables are represented as strings. The list/slice variables need to be set as a comma separated string:
-
-```bash
-export EVEBOT_API_ALLOWEDMETHODS="GET,HEAD,POST,PUT,OPTIONS,DELETE"
-export EVEBOT_API_ALLOWEDORIGINS="localhost,evebot.unanet.io,api.slack.com"
-export EVEBOT_API_ALLOWEDHEADERS="X-Requested-With,X-Request-ID,jaeger-debug-id,Content-Type,X-Slack-Signature,X-Slack-Request-Timestamp"
-export EVEBOT_LOGGER_OUTPUTPATHS="stdout,/tmp/evebot.logs"
-export EVEBOT_LOGGER_ERROUTPUTPATHS="stderr"
-```
-
-### Required Environment Variables
 
 These secrets are required for the application to run. The source of truth is Slack, but we store them in Vault for safe keeping.
 

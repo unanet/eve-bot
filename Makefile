@@ -57,6 +57,5 @@ dist: build
 		-X PUT \
 		https://unanet.jfrog.io/unanet/api/storage/docker-local/eve-bot/${PATCH_VERSION}\?properties=version=${VERSION}%7Cgitlab-build-properties.project-id=${CI_PROJECT_ID}%7Cgitlab-build-properties.git-sha=${CI_COMMIT_SHORT_SHA}%7Cgitlab-build-properties.git-branch=${CI_COMMIT_BRANCH}
 
-
 proxy-bot: 
 	ssh evebot -R 3000:localhost:3000 -Nf

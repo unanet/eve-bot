@@ -22,15 +22,24 @@ func (edc *EvebotDeployCommand) Name() string {
 
 func (edc *EvebotDeployCommand) Examples() EvebotCommandExamples {
 	return EvebotCommandExamples{
+		"`Deploy Summary:`",
+		"This command is used to deploy services to specific namespaces and environments",
+		"\n",
+		"`Usage:`",
 		"- deploy {{ namespace }} in {{ environment }}",
-		"- deploy {{ namespace }} in {{ environment }} services={{ artifact_name:artifact_version }}",
-		"- deploy {{ namespace }} in {{ environment }} services={{ artifact_name:artifact_version }} dryrun={{ true }}",
-		"- deploy {{ namespace }} in {{ environment }} services={{ artifact_name:artifact_version }} dryrun={{ true }} force={{ true }}",
+		"- deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version }}",
+		"- deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }}",
+		"- deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }} force={{ true }}",
+		"\n",
+		"`Optional Args:`",
+		"- services		Comma spearated list of services to deploy",
+		"- dryrun		Generates deployment plan only (doesn't actually deploy)",
+		"- force		Forces a deployment",
 		"\n",
 		"`Examples:`",
 		"- deploy current in qa",
 		"- deploy current in qa services=infocus-cloud-client:2020.1 dryrun=true",
-		"- deploy current in qa services=infocus-cloud-client:2020.1,infocus-proxy:2020.1 dryrun=true redeploy=true",
+		"- deploy current in qa services=infocus-cloud-client:2020.1,infocus-proxy:2020.1 dryrun=true force=true",
 	}
 }
 

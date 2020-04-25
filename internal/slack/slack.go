@@ -17,11 +17,16 @@ import (
 )
 
 // Config needed for slack
+//		EVEBOT_SLACK_SIGNING_SECRET
+//		EVEBOT_SLACK_VERIFICATION_TOKEN
+//		EVEBOT_SLACK_USER_OAUTH_ACCESS_TOKEN
+//		EVEBOT_SLACK_OAUTH_ACCESS_TOKEN
+//		EVEBOT_SLACK_SKIP_VERIFICATION
 type Config struct {
-	SlackSigningSecret     string `split_words:"true" required:"true"`
-	SlackVerificationToken string `split_words:"true" required:"true"`
-	SlackbotOauthToken     string `split_words:"true" required:"true"`
-	SlackOauthToken        string `split_words:"true" required:"true"`
+	SlackSigningSecret        string `split_words:"true" required:"true"`
+	SlackVerificationToken    string `split_words:"true" required:"true"`
+	SlackUserOauthAccessToken string `split_words:"true" required:"true"`
+	SlackOauthAccessToken     string `split_words:"true" required:"true"`
 	// SlackSkipVerification is used for local dev
 	// We need to skip the URL verification when proxying calls with SSH tunnel
 	SlackSkipVerification bool `split_words:"true" required:"false"`
@@ -37,7 +42,7 @@ type Provider struct {
 // NewProvider creates a new provider
 func NewProvider(cfg Config) *Provider {
 	return &Provider{
-		Client:          slack.New(cfg.SlackbotOauthToken),
+		Client:          slack.New(cfg.SlackUserOauthAccessToken),
 		cfg:             cfg,
 		CommandResolver: commander.NewResolver(),
 	}
@@ -95,6 +100,45 @@ func (p *Provider) validateSlackRequest(req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
+func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
+	msgFields := strings.Fields(ev.Text)
+	//botIDField := msgFields[0]
+	commandFields := msgFields[1:]
+
+	if len(commandFields) <= 0 || (len(commandFields) == 1 && commandFields[0] == "help") {
+		p.ShowHelp(ev)
+		return
+	}
+
+	eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
+
+	if err != nil {
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry, <@%s>! I can't execute `%s`. Maybe try one of the following...", ev.User, commandFields[0]), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(commander.CmdHelpMsgs, false))
+		return
+	}
+
+	if eveBotCmd.IsHelpRequest(commandFields) {
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>...", ev.User), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.Examples().HelpMsg(), false))
+		return
+	}
+
+	additionalArgs, err := eveBotCmd.AdditionalArgs(commandFields)
+
+	if err != nil {
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, Whoops! Invalid additional argument: `%s`", ev.User, err.Error()), false))
+		return
+	}
+
+	for _, v := range additionalArgs {
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, here is arg key `%s`  and value `%v`", ev.User, v.Name(), v), false))
+	}
+
+	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure, <@%s>! I'll `%s` that for you. Be right back! %v length: %v %v %v", ev.User, eveBotCmd.Name(), commandFields, len(commandFields), commandFields[4], commandFields[5]), false))
+	return
+}
+
 // HandleEvent takes an http request and handles the Slack API Event
 // this is where we do our request signature validation
 // ..and switch the incoming api event types
@@ -116,50 +160,17 @@ func (p *Provider) HandleEvent(req *http.Request) error {
 		if err != nil {
 			return botError(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
 		}
+
 	case slackevents.CallbackEvent:
 		innerEvent := slackAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
-			msgFields := strings.Fields(ev.Text)
-			//botIDField := msgFields[0]
-			commandFields := msgFields[1:]
-
-			if len(commandFields) <= 0 || (len(commandFields) == 1 && commandFields[0] == "help") {
-				return p.ShowHelp(ev)
-			}
-
-			eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
-
-			if err != nil {
-				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry, <@%s>! I can't execute `%s`. Maybe try one of the following...", ev.User, commandFields[0]), false))
-				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(commander.CmdHelpMsgs, false))
-				return nil
-			}
-
-			if eveBotCmd.IsHelpRequest(commandFields) {
-				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, here is how `%s` works...", ev.User, eveBotCmd.Name()), false))
-				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.Examples().HelpMsg(), false))
-				return nil
-			}
-
-			additionalArgs, err := eveBotCmd.AdditionalArgs(commandFields)
-
-			if err != nil {
-				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, Whoops! Invalid additional argument: `%s`", ev.User, err.Error()), false))
-				return nil
-			}
-
-			for _, v := range additionalArgs {
-				p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, here is arg key `%s`  and value `%v`", ev.User, v.Name(), v), false))
-			}
-
-			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure, <@%s>! I'll `%s` that for you. Be right back! %v length: %v %v %v", ev.User, eveBotCmd.Name(), commandFields, len(commandFields), commandFields[4], commandFields[5]), false))
+			p.processSlackMentionEvent(ev)
 			return nil
 		}
 	default:
 		return fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
 	}
-
 	return nil
 }
 
