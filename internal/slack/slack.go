@@ -11,7 +11,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
-	"gitlab.unanet.io/devops/eve/pkg/eveerrs"
+	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
 )
@@ -50,7 +50,7 @@ func NewProvider(cfg Config) *Provider {
 
 func botError(oerr error, msg string, status int) error {
 	log.Logger.Error("evebot error", zap.Error(oerr))
-	return &eveerrs.RestError{
+	return &errors.RestError{
 		Code:          status,
 		Message:       msg,
 		OriginalError: oerr,
@@ -142,36 +142,38 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 // HandleEvent takes an http request and handles the Slack API Event
 // this is where we do our request signature validation
 // ..and switch the incoming api event types
-func (p *Provider) HandleEvent(req *http.Request) error {
+func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
 	body, err := p.validateSlackRequest(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	slackAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
 	if err != nil {
-		return botError(err, "failed parse slack event", http.StatusNotAcceptable)
+		return nil, botError(err, "failed parse slack event", http.StatusNotAcceptable)
 	}
 
+	log.Logger.Debug("Slack Event Type", zap.String("slack_event", slackAPIEvent.Type))
 	switch slackAPIEvent.Type {
 	case slackevents.URLVerification:
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
 		if err != nil {
-			return botError(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
+			return nil, botError(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
 		}
-
+		log.Logger.Debug("Slack Challenge", zap.String("challenge", r.Challenge))
+		return r.Challenge, nil
 	case slackevents.CallbackEvent:
 		innerEvent := slackAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
 			p.processSlackMentionEvent(ev)
-			return nil
+			return "OK", nil
 		}
 	default:
-		return fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
+		return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
 	}
-	return nil
+	return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
 }
 
 // ShowHelp shows the help message to the Slack User

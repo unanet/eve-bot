@@ -17,8 +17,8 @@ This application uses sane defaults for most of the config, but there are some r
 ## Environment Variables
 
 ```bash
-EVEBOT_SERVICE_NAME=eve-bot
-EVEBOT_LOG_LEVEL=debug
+EVE_SERVICE_NAME=eve-bot
+EVE_LOG_LEVEL=debug
 EVEBOT_PORT=3000
 EVEBOT_METRICS_PORT=3001
 EVEBOT_SLACK_SIGNING_SECRET=""

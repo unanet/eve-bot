@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
-	"gitlab.unanet.io/devops/eve/pkg/eveerrs"
+	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
@@ -42,15 +42,17 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 		// if this hits, there is no way to notify the user in slack
 		log.Logger.Error("eve callback handler error", zap.Error(err))
 		botmetrics.StatBotErrCount.WithLabelValues("eve-callback").Inc()
-		render.Respond(w, r, &eveerrs.RestError{
+		render.Respond(w, r, &errors.RestError{
 			Code:          500,
 			Message:       "unknown eve callback error",
 			OriginalError: err,
 		})
+		return
 	}
 
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
+	return
 
 }
 
@@ -62,32 +64,36 @@ func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.
 		// if this hits, there is no way to notify the user in slack
 		log.Logger.Error("slack interaction handler error", zap.Error(err))
 		botmetrics.StatBotErrCount.WithLabelValues("slack-interactive").Inc()
-		render.Respond(w, r, &eveerrs.RestError{
+		render.Respond(w, r, &errors.RestError{
 			Code:          500,
 			Message:       "unknown slack interaction error",
 			OriginalError: err,
 		})
+		return
 	}
 
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
+	return
 }
 
 func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Request) {
-	err := c.slackProvider.HandleEvent(r)
+	payload, err := c.slackProvider.HandleEvent(r)
 
 	if err != nil {
 		// This is a Bad scenario and we should get paged
 		// if this hits, there is no way to notify the user in slack
 		log.Logger.Error("slack event handler error", zap.Error(err))
 		botmetrics.StatBotErrCount.WithLabelValues("slack-event").Inc()
-		render.Respond(w, r, &eveerrs.RestError{
+		render.Respond(w, r, &errors.RestError{
 			Code:          500,
 			Message:       "unknown slack event error",
 			OriginalError: err,
 		})
+		return
 	}
 
 	// Just returning an empty response here...
-	render.Respond(w, r, nil)
+	render.Respond(w, r, payload)
+	return
 }
