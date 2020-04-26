@@ -81,9 +81,7 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 	payload, err := c.slackProvider.HandleEvent(r)
 
 	if err != nil {
-		// This is a Bad scenario and we should get paged
-		// if this hits, there is no way to notify the user in slack
-		log.Logger.Error("slack event handler error", zap.Error(err))
+		log.Logger.Error("Slack Event Handler Error", zap.Error(err))
 		botmetrics.StatBotErrCount.WithLabelValues("slack-event").Inc()
 		render.Respond(w, r, &errors.RestError{
 			Code:          500,

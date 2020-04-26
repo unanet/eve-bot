@@ -49,7 +49,7 @@ func NewProvider(cfg Config) *Provider {
 }
 
 func botError(oerr error, msg string, status int) error {
-	log.Logger.Error("evebot error", zap.Error(oerr))
+	log.Logger.Error("EveBot Error", zap.Error(oerr))
 	return &errors.RestError{
 		Code:          status,
 		Message:       msg,
@@ -100,42 +100,56 @@ func (p *Provider) validateSlackRequest(req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
+func newBlockMsgOpt(text string) slack.MsgOption {
+	return slack.MsgOptionBlocks(
+		slack.NewSectionBlock(
+			slack.NewTextBlockObject(
+				slack.MarkdownType,
+				text,
+				false,
+				false),
+			nil,
+			nil),
+		slack.NewDividerBlock())
+}
+
 func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	msgFields := strings.Fields(ev.Text)
 	//botIDField := msgFields[0]
 	commandFields := msgFields[1:]
 
-	if len(commandFields) <= 0 || (len(commandFields) == 1 && commandFields[0] == "help") {
-		p.ShowHelp(ev)
-		return
-	}
-
 	eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
 
+	//p.Client.PostMessage(ev.Channel, newBlockMsgOpt(fmt.Sprintf("<@%s>...", ev.User)))
+	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>...", ev.User), false))
+
 	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry, <@%s>! I can't execute `%s`. Maybe try one of the following...", ev.User, commandFields[0]), false))
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(commander.CmdHelpMsgs, false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry! I can't execute `%s`. Try running `help`...", commandFields), false))
 		return
 	}
 
 	if eveBotCmd.IsHelpRequest(commandFields) {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>...", ev.User), false))
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.Examples().HelpMsg(), false))
+		//p.Client.PostMessage(ev.Channel, newBlockMsgOpt(eveBotCmd.Help().String()))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.Help().String(), false))
+		//p.Client.PostMessage(ev.Channel,
+		//	newBlockMsgOpt(eveBotCmd.Summary().String()),
+		//	newBlockMsgOpt(eveBotCmd.Help().String()),
+		//)
 		return
 	}
 
 	additionalArgs, err := eveBotCmd.AdditionalArgs(commandFields)
 
 	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, Whoops! Invalid additional argument: `%s`", ev.User, err.Error()), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Whoops! `%s`", err.Error()), false))
 		return
 	}
 
 	for _, v := range additionalArgs {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, here is arg key `%s`  and value `%v`", ev.User, v.Name(), v), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("here is arg key `%s` and value `%v`", v.Name(), v), false))
 	}
 
-	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure, <@%s>! I'll `%s` that for you. Be right back! %v length: %v %v %v", ev.User, eveBotCmd.Name(), commandFields, len(commandFields), commandFields[4], commandFields[5]), false))
+	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure! I'll `%s` that for you. Be right back!", eveBotCmd.Name()), false))
 	return
 }
 
@@ -145,6 +159,7 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
 	body, err := p.validateSlackRequest(req)
 	if err != nil {
+		log.Logger.Debug("Validate Slack Request Error", zap.Error(err))
 		return nil, err
 	}
 
@@ -174,20 +189,4 @@ func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
 		return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
 	}
 	return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
-}
-
-// ShowHelp shows the help message to the Slack User
-func (p *Provider) ShowHelp(ev *slackevents.AppMentionEvent) error {
-
-	helpAttachment := slack.Attachment{
-		Pretext:    "\ndeploy help\nmigrate help",
-		Fallback:   "help",
-		CallbackID: "help",
-		Color:      "#3AA3E3",
-	}
-
-	attachmentOpt := slack.MsgOptionAttachments(helpAttachment)
-	msgOpt := slack.MsgOptionText(fmt.Sprintf("Hey <@%s>! Need a little help? Try one of the following commands...", ev.User), false)
-	p.Client.PostMessage(ev.Channel, msgOpt, attachmentOpt)
-	return nil
 }

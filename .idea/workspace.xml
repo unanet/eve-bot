@@ -26,9 +26,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/slack.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/commander/deploy_command.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/deploy_command.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/evebot_args.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/evebot_args.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/evebot_commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/evebot_commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/evebot_resolver.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/evebot_resolver.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/slack/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/slack/slack.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -67,7 +70,7 @@
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/internal/api" />
-    <property name="settings.editor.selected.configurable" value="watcher.settings" />
+    <property name="settings.editor.selected.configurable" value="preferences.editor" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -140,21 +143,22 @@
       <screen x="1680" y="-283" width="1920" height="1057" />
     </state>
     <state x="2505" y="-23" key="EnvironmentVariablesDialog/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826578082" />
-    <state x="2149" y="-116" key="SettingsEditor" timestamp="1586826599070">
-      <screen x="1680" y="-283" width="1920" height="1057" />
+    <state x="2760" y="-10" key="SettingsEditor" timestamp="1587872420597">
+      <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
+    <state x="2760" y="-10" key="SettingsEditor/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587872420597" />
     <state x="2149" y="-116" key="SettingsEditor/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826599070" />
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1586746591000">
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1680.1027@0.23.1680.1027" timestamp="1586746591000" />
-    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1587846973899">
+    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1587879582400">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
-    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587846973899" />
-    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1587656981384">
+    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587879582400" />
+    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1587873614323">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
-    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587656981384" />
+    <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587873614323" />
   </component>
 </project>

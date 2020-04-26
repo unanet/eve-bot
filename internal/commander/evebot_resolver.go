@@ -14,8 +14,12 @@ func NewResolver() Resolver {
 }
 
 func (ebr *EvebotResolver) Resolve(input []string) (EvebotCommand, error) {
-	if len(input) <= 1 {
-		return nil, fmt.Errorf("invalid evebot command")
+
+	// This occurs when the user pings evebot without a command
+	// example: @evebot
+	// thinking about adding an EvebotRootCommand...
+	if len(input) <= 0 {
+		return NewEvebotHelpCommand(), nil
 	}
 
 	for _, v := range evebotCommands {
