@@ -16,7 +16,6 @@ import (
 
 // Controller for slack routes
 type SlackController struct {
-	Base
 	slackProvider *islack.Provider
 }
 

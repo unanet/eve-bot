@@ -24,7 +24,7 @@ func (ebr *EvebotResolver) Resolve(input []string) (EvebotCommand, error) {
 
 	for _, v := range evebotCommands {
 		if v.Name() == input[0] {
-			return v, nil
+			return v.Initialize(input), nil
 		}
 	}
 

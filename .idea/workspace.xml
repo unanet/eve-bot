@@ -26,12 +26,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/internal/commander/command.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/base.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/ping.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/ping.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/controllers.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/api/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/slack.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/commander/deploy_command.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/deploy_command.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/commander/evebot_args.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/evebot_args.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/commander/evebot_commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/evebot_commands.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/deploy_command.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/command_deploy.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/evebot_args.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/evebot_arg.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/evebot_commands.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/commander/evebot_resolver.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/evebot_resolver.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/commander/help_command.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/commander/command_help.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/slack/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/slack/slack.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -69,14 +74,15 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/internal/api" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/internal/commander" />
     <property name="settings.editor.selected.configurable" value="preferences.editor" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/internal/commander" />
       <recent name="$PROJECT_DIR$/internal/api" />
     </key>
-    <key name="CopyFile.RECENT_KEYS">
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/internal/api" />
     </key>
   </component>
@@ -152,10 +158,10 @@
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1680.1027@0.23.1680.1027" timestamp="1586746591000" />
-    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1587879582400">
+    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1587888048803">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
-    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587879582400" />
+    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587888048803" />
     <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1587873614323">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>

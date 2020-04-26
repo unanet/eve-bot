@@ -118,36 +118,29 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	//botIDField := msgFields[0]
 	commandFields := msgFields[1:]
 
-	eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
-
-	//p.Client.PostMessage(ev.Channel, newBlockMsgOpt(fmt.Sprintf("<@%s>...", ev.User)))
 	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>...", ev.User), false))
 
+	eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
 	if err != nil {
 		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry! I can't execute `%s`. Try running `help`...", commandFields), false))
 		return
 	}
 
-	if eveBotCmd.IsHelpRequest(commandFields) {
-		//p.Client.PostMessage(ev.Channel, newBlockMsgOpt(eveBotCmd.Help().String()))
+	if eveBotCmd.IsHelpRequest() {
 		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.Help().String(), false))
-		//p.Client.PostMessage(ev.Channel,
-		//	newBlockMsgOpt(eveBotCmd.Summary().String()),
-		//	newBlockMsgOpt(eveBotCmd.Help().String()),
-		//)
 		return
 	}
 
-	additionalArgs, err := eveBotCmd.AdditionalArgs(commandFields)
+	_, err = eveBotCmd.AdditionalArgs()
 
 	if err != nil {
 		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Whoops! `%s`", err.Error()), false))
 		return
 	}
 
-	for _, v := range additionalArgs {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("here is arg key `%s` and value `%v`", v.Name(), v), false))
-	}
+	//for _, v := range additionalArgs {
+	//	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("here is arg key `%s` and value `%v`", v.Name(), v), false))
+	//}
 
 	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure! I'll `%s` that for you. Be right back!", eveBotCmd.Name()), false))
 	return
@@ -163,7 +156,7 @@ func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
 		return nil, err
 	}
 
-	slackAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
+	slackAPIEvent, err := slackevents.ParseEvent(body, slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
 	if err != nil {
 		return nil, botError(err, "failed parse slack event", http.StatusNotAcceptable)
 	}
@@ -172,7 +165,7 @@ func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
 	switch slackAPIEvent.Type {
 	case slackevents.URLVerification:
 		var r *slackevents.ChallengeResponse
-		err := json.Unmarshal([]byte(body), &r)
+		err := json.Unmarshal(body, &r)
 		if err != nil {
 			return nil, botError(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
 		}

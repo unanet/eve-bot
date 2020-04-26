@@ -10,7 +10,6 @@ import (
 )
 
 type PingController struct {
-	Base
 }
 
 func NewPingController() *PingController {

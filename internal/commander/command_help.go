@@ -6,7 +6,7 @@ type EvebotHelpCommand struct {
 	usage        EvebotCommandUsage
 	optionalArgs EvebotCommandArgs
 	examples     EvebotCommandExamples
-	commandList  EvebotCommandList
+	input        []string
 }
 
 func NewEvebotHelpCommand() EvebotHelpCommand {
@@ -21,24 +21,14 @@ func NewEvebotHelpCommand() EvebotHelpCommand {
 	}
 }
 
-func (ehc EvebotHelpCommand) Examples() EvebotCommandExamples {
-	return ehc.examples
+func (ehc EvebotHelpCommand) Initialize(input []string) EvebotCommand {
+	ehc.input = input
+
+	return ehc
 }
 
 func (ehc EvebotHelpCommand) Name() string {
 	return ehc.name
-}
-
-func (ehc EvebotHelpCommand) OptionalArgs() EvebotCommandArgs {
-	return ehc.optionalArgs
-}
-
-func (ehc EvebotHelpCommand) Summary() EvebotCommandSummary {
-	return ehc.summary
-}
-
-func (ehc EvebotHelpCommand) Usage() EvebotCommandUsage {
-	return ehc.usage
 }
 
 func (ehc EvebotHelpCommand) Help() *EvebotCommandHelp {
@@ -63,24 +53,17 @@ func (ehc EvebotHelpCommand) Help() *EvebotCommandHelp {
 
 }
 
-func (ehc EvebotHelpCommand) IsHelpRequest(input []string) bool {
-	if len(input) == 0 || input[0] == "help" {
+func (ehc EvebotHelpCommand) IsHelpRequest() bool {
+	if len(ehc.input) == 0 || ehc.input[0] == "help" {
 		return true
 	}
 	return false
 }
 
-func (ehc EvebotHelpCommand) IsValidCommand(input []string) bool {
-	if len(input) <= 0 || input[0] != ehc.Name() || len(input) >= 3 {
-		return false
-	}
-	return true
-}
-
-func (ehc EvebotHelpCommand) AdditionalArgs(input []string) (EvebotCommandArgs, error) {
+func (ehc EvebotHelpCommand) AdditionalArgs() (EvebotCommandArgs, error) {
 	return nil, nil
 }
 
-func (ehc EvebotHelpCommand) ResolveAdditionalArg(argKV []string) EvebotArg {
+func (ehc EvebotHelpCommand) ResolveAdditionalArg(argKV []string) EvebotCommandArg {
 	return nil
 }
