@@ -36,7 +36,7 @@ func NewParsedArgServices(input []string) ArgServices {
 }
 
 func (ebas ArgServices) Description() string {
-	return "comma separated list of services with name:version and version is optional"
+	return "comma separated list of services with name:version syntax (version is optional)"
 }
 
 func NewServicesArg() ArgServices {

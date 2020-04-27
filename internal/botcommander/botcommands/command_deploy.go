@@ -27,7 +27,7 @@ func NewEvebotDeployCommand() EvebotDeployCommand {
 		examples: bothelp.HelpExamples{
 			"deploy current in qa",
 			"deploy current in qa services=infocus-cloud-client:2020.1 dryrun=true",
-			"deploy current in qa services=infocus-cloud-client:2020.1,infocus-proxy:2020.1 dryrun=true force=true",
+			"deploy current in qa services=infocus-cloud-client:2020.2.232,infocus-proxy:2020.2.199 dryrun=true force=true",
 			"deploy current in qa services=infocus-cloud-client,infocus-proxy",
 		},
 		asyncRequired: true,
