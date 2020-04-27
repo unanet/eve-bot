@@ -1,9 +1,9 @@
 package commander
 
 // Evebot Command Usage
-type EvebotCommandUsage []string
+type HelpUsage []string
 
-func (ebcu EvebotCommandUsage) String() string {
+func (ebcu HelpUsage) String() string {
 	var msg string
 	for _, s := range ebcu {
 		if len(msg) > 0 {

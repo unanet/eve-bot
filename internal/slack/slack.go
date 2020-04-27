@@ -6,11 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/commander"
+	"time"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
+	"gitlab.unanet.io/devops/eve-bot/internal/commander"
+	"gitlab.unanet.io/devops/eve-bot/internal/queue"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
@@ -49,7 +50,7 @@ func NewProvider(cfg Config) *Provider {
 }
 
 func botError(oerr error, msg string, status int) error {
-	log.Logger.Error("EveBot Error", zap.Error(oerr))
+	log.Logger.Debug("EveBot Error", zap.Error(oerr))
 	return &errors.RestError{
 		Code:          status,
 		Message:       msg,
@@ -90,13 +91,13 @@ func (p *Provider) validateSlackRequest(req *http.Request) ([]byte, error) {
 		return []byte{}, botError(err, "failed verifier write", http.StatusUnauthorized)
 	}
 
-	// This is required to run the bot locally and proxy calls in with SSH tunnel
-	if p.cfg.SlackSkipVerification == false {
-		err = verifier.Ensure()
-		if err != nil {
-			return []byte{}, botError(err, "failed verifier ensure", http.StatusUnauthorized)
-		}
+	err = verifier.Ensure()
+	if err != nil {
+		// Sending back a Teapot StatusCode here (418)
+		// These are requests from bad actors
+		return []byte{}, botError(err, "failed verifier ensure", http.StatusTeapot)
 	}
+
 	return body, nil
 }
 
@@ -143,6 +144,18 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	//}
 
 	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure! I'll `%s` that for you. Be right back!", eveBotCmd.Name()), false))
+
+	// If the command requires Async (deploy/migrate) we use the queue
+	//...and sending a callback to the API request
+	if eveBotCmd.AsyncRequired() {
+		queue.WorkQueue <- queue.WorkRequest{
+			Name:    ev.Channel,
+			User:    ev.User,
+			Channel: ev.Channel,
+			EveType: eveBotCmd.Name(),
+			Delay:   time.Second * 60, // Just for testing/simulation
+		}
+	}
 	return
 }
 

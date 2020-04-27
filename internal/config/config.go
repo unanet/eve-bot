@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/kelseyhightower/envconfig"
+	"gitlab.unanet.io/devops/eve-bot/internal/queue"
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"gitlab.unanet.io/devops/eve/pkg/mux"
@@ -22,6 +23,8 @@ type (
 	SlackConfig = islack.Config
 	// MuxConfig is the multiplexer (router) config (ports, timeouts)
 	MuxConfig = mux.Config
+	// QueueConfig is the config for queue for Async Eve-API Calls
+	QueueConfig = queue.Config
 )
 
 // Config is the top level application config
@@ -29,6 +32,7 @@ type Config struct {
 	LogConfig
 	SlackConfig
 	MuxConfig
+	QueueConfig
 }
 
 // Values returns the environmental config values (prefix: EVEBOT_)

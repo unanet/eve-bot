@@ -1,29 +1,34 @@
 package commander
 
 type EvebotHelpCommand struct {
-	name         string
-	summary      EvebotCommandSummary
-	usage        EvebotCommandUsage
-	optionalArgs EvebotCommandArgs
-	examples     EvebotCommandExamples
-	input        []string
+	input         []string
+	name          string
+	asyncRequired bool
+	summary       HelpSummary
+	usage         HelpUsage
+	optionalArgs  Args
+	examples      UserHelpExamples
 }
 
 func NewEvebotHelpCommand() EvebotHelpCommand {
 	return EvebotHelpCommand{
 		name:    "help",
 		summary: "Try running one of the commands below",
-		usage: EvebotCommandUsage{
+		usage: HelpUsage{
 			"{{ command }} help",
 		},
-		optionalArgs: EvebotCommandArgs{},
-		examples:     EvebotCommandExamples{},
+		optionalArgs:  Args{},
+		examples:      UserHelpExamples{},
+		asyncRequired: false,
 	}
+}
+
+func (ehc EvebotHelpCommand) AsyncRequired() bool {
+	return ehc.asyncRequired
 }
 
 func (ehc EvebotHelpCommand) Initialize(input []string) EvebotCommand {
 	ehc.input = input
-
 	return ehc
 }
 
@@ -31,7 +36,7 @@ func (ehc EvebotHelpCommand) Name() string {
 	return ehc.name
 }
 
-func (ehc EvebotHelpCommand) Help() *EvebotCommandHelp {
+func (ehc EvebotHelpCommand) Help() *Help {
 
 	var nonHelpCmds string
 	var nonHelpCmdExamples string
@@ -60,10 +65,10 @@ func (ehc EvebotHelpCommand) IsHelpRequest() bool {
 	return false
 }
 
-func (ehc EvebotHelpCommand) AdditionalArgs() (EvebotCommandArgs, error) {
+func (ehc EvebotHelpCommand) AdditionalArgs() (Args, error) {
 	return nil, nil
 }
 
-func (ehc EvebotHelpCommand) ResolveAdditionalArg(argKV []string) EvebotCommandArg {
+func (ehc EvebotHelpCommand) ResolveAdditionalArg(argKV []string) Arg {
 	return nil
 }

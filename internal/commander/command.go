@@ -4,8 +4,9 @@ package commander
 // each evebot command needs to implement this interface
 type EvebotCommand interface {
 	Name() string
-	Help() *EvebotCommandHelp
+	Help() *Help
 	Initialize(input []string) EvebotCommand
 	IsHelpRequest() bool
-	AdditionalArgs() (EvebotCommandArgs, error)
+	AdditionalArgs() (Args, error)
+	AsyncRequired() bool
 }

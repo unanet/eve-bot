@@ -1,15 +1,15 @@
 package commander
 
-type EvebotCommandArg interface {
+type Arg interface {
 	Name() string
 	Description() string
 }
 
-type EvebotCommandArgs []EvebotCommandArg
+type Args []Arg
 
-func (eba EvebotCommandArgs) String() string {
+func (a Args) String() string {
 	var msg string
-	for _, v := range eba {
+	for _, v := range a {
 		msg = msg + v.Name() + " - " + v.Description() + "\n"
 	}
 	return msg

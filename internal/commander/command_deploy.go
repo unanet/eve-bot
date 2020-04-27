@@ -7,31 +7,38 @@ import (
 )
 
 type EvebotDeployCommand struct {
-	name         string
-	input        []string
-	summary      EvebotCommandSummary
-	usage        EvebotCommandUsage
-	optionalArgs EvebotCommandArgs
-	examples     EvebotCommandExamples
+	input         []string
+	name          string
+	asyncRequired bool
+	summary       HelpSummary
+	usage         HelpUsage
+	optionalArgs  Args
+	examples      UserHelpExamples
 }
 
 func NewEvebotDeployCommand() EvebotDeployCommand {
 	return EvebotDeployCommand{
 		name:    "deploy",
 		summary: "Deploy command is used to deploy services to a specific namespace and environment",
-		usage: EvebotCommandUsage{
+		usage: HelpUsage{
 			"deploy {{ namespace }} in {{ environment }}",
 			"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version }}",
 			"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }}",
 			"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }} force={{ true }}",
 		},
-		optionalArgs: EvebotCommandArgs{NewDryrunArg(), NewForceArg(), NewServicesArg()},
-		examples: EvebotCommandExamples{
+		optionalArgs: Args{NewDryrunArg(), NewForceArg(), NewServicesArg()},
+		examples: UserHelpExamples{
 			"deploy current in qa",
 			"deploy current in qa services=infocus-cloud-client:2020.1 dryrun=true",
 			"deploy current in qa services=infocus-cloud-client:2020.1,infocus-proxy:2020.1 dryrun=true force=true",
+			"deploy current in qa services=infocus-cloud-client,infocus-proxy",
 		},
+		asyncRequired: true,
 	}
+}
+
+func (edc EvebotDeployCommand) AsyncRequired() bool {
+	return edc.asyncRequired
 }
 
 func (edc EvebotDeployCommand) Initialize(input []string) EvebotCommand {
@@ -43,7 +50,7 @@ func (edc EvebotDeployCommand) Name() string {
 	return edc.name
 }
 
-func (edc EvebotDeployCommand) Help() *EvebotCommandHelp {
+func (edc EvebotDeployCommand) Help() *Help {
 	return NewEvebotCommandHelp(
 		EvebotCommandHelpSummaryOpt(edc.summary.String()),
 		EvebotCommandHelpUsageOpt(edc.usage.String()),
@@ -59,12 +66,12 @@ func (edc EvebotDeployCommand) IsHelpRequest() bool {
 	return false
 }
 
-func (edc EvebotDeployCommand) AdditionalArgs() (EvebotCommandArgs, error) {
+func (edc EvebotDeployCommand) AdditionalArgs() (Args, error) {
 	if len(edc.input) <= 3 {
-		return EvebotCommandArgs{}, nil
+		return Args{}, nil
 	}
 
-	var additionalArgs EvebotCommandArgs
+	var additionalArgs Args
 
 	for _, s := range edc.input[3:] {
 		if strings.Contains(s, "=") {
@@ -72,7 +79,7 @@ func (edc EvebotDeployCommand) AdditionalArgs() (EvebotCommandArgs, error) {
 			if additionalArg := edc.resolveAdditionalArg(argKV); additionalArg != nil {
 				additionalArgs = append(additionalArgs, additionalArg)
 			} else {
-				return EvebotCommandArgs{}, fmt.Errorf("invalid additional arg: %v", argKV)
+				return Args{}, fmt.Errorf("invalid additional arg: %v", argKV)
 			}
 		}
 	}
@@ -80,21 +87,21 @@ func (edc EvebotDeployCommand) AdditionalArgs() (EvebotCommandArgs, error) {
 	return additionalArgs, nil
 }
 
-func (edc EvebotDeployCommand) resolveAdditionalArg(argKV []string) EvebotCommandArg {
+func (edc EvebotDeployCommand) resolveAdditionalArg(argKV []string) Arg {
 	switch strings.ToLower(argKV[0]) {
 	case "dryrun":
 		b, err := strconv.ParseBool(strings.ToLower(argKV[1]))
 		if err != nil {
 			return nil
 		} else {
-			return EvebotArgDryrun(b)
+			return ArgDryrun(b)
 		}
 	case "force":
 		b, err := strconv.ParseBool(strings.ToLower(argKV[1]))
 		if err != nil {
 			return nil
 		} else {
-			return EvebotArgForce(b)
+			return ArgForce(b)
 		}
 	case "services":
 		return NewParsedArgServices(strings.Split(argKV[1], ","))
