@@ -27,19 +27,19 @@ func ResolveArgumentKV(argKV []string) Arg {
 		if err != nil {
 			return nil
 		} else {
-			return ArgDryrun(b)
+			return Dryrun(b)
 		}
 	case "force":
 		b, err := strconv.ParseBool(strings.ToLower(argKV[1]))
 		if err != nil {
 			return nil
 		} else {
-			return ArgForce(b)
+			return Force(b)
 		}
 	case "services":
-		return NewParsedArgServices(strings.Split(argKV[1], ","))
+		return NewServicesArg(strings.Split(argKV[1], ","))
 	case "databases":
-		return NewParsedArgDatabases(strings.Split(argKV[1], ","))
+		return NewDatabasesArg(strings.Split(argKV[1], ","))
 	default:
 		return nil
 	}

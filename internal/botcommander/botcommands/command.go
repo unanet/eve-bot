@@ -11,6 +11,7 @@ type EvebotCommand interface {
 	Name() string
 	Help() *bothelp.Help
 	Initialize(input []string) EvebotCommand
+	IsValid() bool
 	IsHelpRequest() bool
 	AdditionalArgs() (botargs.Args, error)
 	AsyncRequired() bool
@@ -27,9 +28,9 @@ type baseCommand struct {
 	input          []string
 	name           string
 	asyncRequired  bool
-	summary        bothelp.HelpSummary
-	usage          bothelp.HelpUsage
+	summary        bothelp.Summary
+	usage          bothelp.Usage
 	optionalArgs   botargs.Args // these are used for the help command
 	additionalArgs botargs.Args // these are the actual supplied args from the user
-	examples       bothelp.HelpExamples
+	examples       bothelp.Examples
 }

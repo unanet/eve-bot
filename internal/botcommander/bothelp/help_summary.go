@@ -1,8 +1,8 @@
 package bothelp
 
 // Evebot Command Summary
-type HelpSummary string
+type Summary string
 
-func (ebcs HelpSummary) String() string {
+func (ebcs Summary) String() string {
 	return string(ebcs)
 }

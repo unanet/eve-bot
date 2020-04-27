@@ -23,9 +23,9 @@ func NewResolver() Resolver {
 func (ebr *EvebotResolver) Resolve(input []string) (botcommands.EvebotCommand, error) {
 	// This occurs when the user pings evebot without a command
 	// example: @evebot
-	// thinking about adding an EvebotRootCommand...
+	// thinking about adding an RootCmd...
 	if len(input) <= 0 {
-		return botcommands.NewEvebotRootCommand(), nil
+		return botcommands.NewRootCmd(), nil
 	}
 
 	// Match the command input with a command name

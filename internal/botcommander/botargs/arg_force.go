@@ -4,16 +4,16 @@ package botargs
 	ARGUMENT: Force
 */
 
-type ArgForce bool
+type Force bool
 
-func (ebaf ArgForce) Name() string {
+func (a Force) Name() string {
 	return "force"
 }
 
-func (ebaf ArgForce) Description() string {
+func (a Force) Description() string {
 	return "forces the command to execute"
 }
 
-func NewForceArg() ArgForce {
+func DefaultForceArg() Force {
 	return false
 }

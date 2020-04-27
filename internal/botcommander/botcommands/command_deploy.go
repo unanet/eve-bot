@@ -8,23 +8,23 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 )
 
-type EvebotDeployCommand struct {
+type DeployCmd struct {
 	baseCommand
 }
 
-func NewEvebotDeployCommand() EvebotDeployCommand {
-	return EvebotDeployCommand{baseCommand{
+func NewEvebotDeployCommand() DeployCmd {
+	return DeployCmd{baseCommand{
 		name:    "deploy",
-		summary: "Deploy command is used to deploy services to a specific namespace and environment",
-		usage: bothelp.HelpUsage{
+		summary: "The `deploy` command is used to deploy services to a specific *namespace* and *environment*",
+		usage: bothelp.Usage{
 			"deploy {{ namespace }} in {{ environment }}",
 			"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version }}",
 			"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }}",
 			"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }} force={{ true }}",
 		},
-		optionalArgs:   botargs.Args{botargs.NewDryrunArg(), botargs.NewForceArg(), botargs.NewServicesArg()},
+		optionalArgs:   botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultServicesArg()},
 		additionalArgs: botargs.Args{},
-		examples: bothelp.HelpExamples{
+		examples: bothelp.Examples{
 			"deploy current in qa",
 			"deploy current in qa services=infocus-cloud-client:2020.1 dryrun=true",
 			"deploy current in qa services=infocus-cloud-client:2020.2.232,infocus-proxy:2020.2.199 dryrun=true force=true",
@@ -34,33 +34,40 @@ func NewEvebotDeployCommand() EvebotDeployCommand {
 	}}
 }
 
-func (cmd EvebotDeployCommand) AsyncRequired() bool {
+func (cmd DeployCmd) IsValid() bool {
+	if cmd.input == nil || len(cmd.input) == 0 || len(cmd.input) <= 3 {
+		return false
+	}
+	return true
+}
+
+func (cmd DeployCmd) AsyncRequired() bool {
 	return cmd.asyncRequired
 }
 
-func (cmd EvebotDeployCommand) Initialize(input []string) EvebotCommand {
+func (cmd DeployCmd) Initialize(input []string) EvebotCommand {
 	cmd.input = input
 	return cmd
 }
 
-func (cmd EvebotDeployCommand) Name() string {
+func (cmd DeployCmd) Name() string {
 	return cmd.name
 }
 
-func (cmd EvebotDeployCommand) Help() *bothelp.Help {
-	return bothelp.NewEvebotCommandHelp(
-		bothelp.EvebotCommandHelpSummaryOpt(cmd.summary.String()),
-		bothelp.EvebotCommandHelpUsageOpt(cmd.usage.String()),
-		bothelp.EvebotCommandHelpArgsOpt(cmd.optionalArgs.String()),
-		bothelp.EvebotCommandHelpExamplesOpt(cmd.examples.String()),
+func (cmd DeployCmd) Help() *bothelp.Help {
+	return bothelp.New(
+		bothelp.HeaderOpt(cmd.summary.String()),
+		bothelp.UsageOpt(cmd.usage.String()),
+		bothelp.ArgsOpt(cmd.optionalArgs.String()),
+		bothelp.ExamplesOpt(cmd.examples.String()),
 	)
 }
 
-func (cmd EvebotDeployCommand) IsHelpRequest() bool {
+func (cmd DeployCmd) IsHelpRequest() bool {
 	return isHelpRequest(cmd.input, cmd.name)
 }
 
-func (cmd EvebotDeployCommand) AdditionalArgs() (botargs.Args, error) {
+func (cmd DeployCmd) AdditionalArgs() (botargs.Args, error) {
 	// if we've already calculated the args, use them
 	if len(cmd.additionalArgs) > 0 {
 		return cmd.additionalArgs, nil

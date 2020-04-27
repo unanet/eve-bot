@@ -8,23 +8,23 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 )
 
-type EvebotMigrateCommand struct {
+type MigrateCmd struct {
 	baseCommand
 }
 
-func NewEvebotMigrateCommand() EvebotDeployCommand {
-	return EvebotDeployCommand{baseCommand{
+func NewEvebotMigrateCommand() DeployCmd {
+	return DeployCmd{baseCommand{
 		name:    "migrate",
-		summary: "Migrate command is used to migrate databases by namespace and environment",
-		usage: bothelp.HelpUsage{
+		summary: "The `migrate` command is used to migrate databases by *namespace* and *environment*",
+		usage: bothelp.Usage{
 			"migrate {{ namespace }} in {{ environment }}",
 			"migrate {{ namespace }} in {{ environment }} databases={{ service_name:service_version }}",
 			"migrate {{ namespace }} in {{ environment }} databases={{ service_name:service_version,service_name:service_version }} dryrun={{ true }}",
 			"migrate {{ namespace }} in {{ environment }} databases={{ service_name:service_version,service_name:service_version }} dryrun={{ true }} force={{ true }}",
 		},
-		optionalArgs:   botargs.Args{botargs.NewDryrunArg(), botargs.NewForceArg(), botargs.NewDatabasesArg()},
+		optionalArgs:   botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultDatabasesArg()},
 		additionalArgs: botargs.Args{},
-		examples: bothelp.HelpExamples{
+		examples: bothelp.Examples{
 			"migrate current in qa",
 			"migrate current in qa databases=infocus dryrun=true",
 			"migrate current in qa databases=infocus dryrun=true force=true",
@@ -34,33 +34,40 @@ func NewEvebotMigrateCommand() EvebotDeployCommand {
 	}}
 }
 
-func (cmd EvebotMigrateCommand) AsyncRequired() bool {
+func (cmd MigrateCmd) AsyncRequired() bool {
 	return cmd.asyncRequired
 }
 
-func (cmd EvebotMigrateCommand) Initialize(input []string) EvebotCommand {
+func (cmd MigrateCmd) IsValid() bool {
+	if cmd.input == nil || len(cmd.input) == 0 || len(cmd.input) <= 3 {
+		return false
+	}
+	return true
+}
+
+func (cmd MigrateCmd) Initialize(input []string) EvebotCommand {
 	cmd.input = input
 	return cmd
 }
 
-func (cmd EvebotMigrateCommand) Name() string {
+func (cmd MigrateCmd) Name() string {
 	return cmd.name
 }
 
-func (cmd EvebotMigrateCommand) Help() *bothelp.Help {
-	return bothelp.NewEvebotCommandHelp(
-		bothelp.EvebotCommandHelpSummaryOpt(cmd.summary.String()),
-		bothelp.EvebotCommandHelpUsageOpt(cmd.usage.String()),
-		bothelp.EvebotCommandHelpArgsOpt(cmd.optionalArgs.String()),
-		bothelp.EvebotCommandHelpExamplesOpt(cmd.examples.String()),
+func (cmd MigrateCmd) Help() *bothelp.Help {
+	return bothelp.New(
+		bothelp.HeaderOpt(cmd.summary.String()),
+		bothelp.UsageOpt(cmd.usage.String()),
+		bothelp.ArgsOpt(cmd.optionalArgs.String()),
+		bothelp.ExamplesOpt(cmd.examples.String()),
 	)
 }
 
-func (cmd EvebotMigrateCommand) IsHelpRequest() bool {
+func (cmd MigrateCmd) IsHelpRequest() bool {
 	return isHelpRequest(cmd.input, cmd.name)
 }
 
-func (cmd EvebotMigrateCommand) AdditionalArgs() (botargs.Args, error) {
+func (cmd MigrateCmd) AdditionalArgs() (botargs.Args, error) {
 	// if we've already calculated the args, use them
 	if len(cmd.additionalArgs) > 0 {
 		return cmd.additionalArgs, nil

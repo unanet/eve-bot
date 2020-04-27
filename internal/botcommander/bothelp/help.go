@@ -10,71 +10,71 @@ type Help struct {
 }
 
 // Evebot Command Help
-func (ebch Help) String() string {
+func (h Help) String() string {
 	var msg string
-	if len(ebch.Header) > 0 {
-		msg = msg + "\n" + ebch.Header + "\n\n"
+	if len(h.Header) > 0 {
+		msg = msg + "\n" + h.Header + "\n\n"
 	}
-	if len(ebch.Summary) > 0 {
-		msg = msg + "*Summary:* " + ebch.Summary + "...\n\n"
+	if len(h.Summary) > 0 {
+		msg = msg + "*Summary:* " + h.Summary + "...\n\n"
 	}
-	if len(ebch.Commands) > 0 {
-		msg = msg + "*Commands:*\n" + "```" + ebch.Commands + "```" + "\n\n"
+	if len(h.Commands) > 0 {
+		msg = msg + "*Commands:*\n" + "```" + h.Commands + "```" + "\n\n"
 	}
-	if len(ebch.Usage) > 0 {
-		msg = msg + "*Usage:*\n" + "```" + ebch.Usage + "```" + "\n\n"
+	if len(h.Usage) > 0 {
+		msg = msg + "*Usage:*\n" + "```" + h.Usage + "```" + "\n\n"
 	}
-	if len(ebch.Args) > 0 {
-		msg = msg + "*Optional Args:*\n" + "```" + ebch.Args + "```" + "\n\n"
+	if len(h.Args) > 0 {
+		msg = msg + "*Optional Args:*\n" + "```" + h.Args + "```" + "\n\n"
 	}
-	if len(ebch.Examples) > 0 {
-		msg = msg + "*Examples:*\n" + "```" + ebch.Examples + "```" + "\n\n"
+	if len(h.Examples) > 0 {
+		msg = msg + "*Examples:*\n" + "```" + h.Examples + "```" + "\n\n"
 	}
 	return msg
 }
 
-type HelpOption func(ech *Help)
+type HelpOption func(*Help)
 
-func EvebotCommandHelpHeaderOpt(header string) HelpOption {
-	return func(ech *Help) {
-		ech.Header = header
-	}
-}
-
-func NewEvebotCommandHelp(opts ...HelpOption) *Help {
-	e := &Help{}
+func New(opts ...HelpOption) *Help {
+	h := &Help{}
 	for _, opt := range opts {
-		opt(e)
+		opt(h)
 	}
-	return e
+	return h
 }
 
-func EvebotCommandHelpSummaryOpt(summary string) HelpOption {
-	return func(ech *Help) {
-		ech.Summary = summary
-	}
-}
-
-func EvebotCommandHelpUsageOpt(usage string) HelpOption {
-	return func(ech *Help) {
-		ech.Usage = usage
+func HeaderOpt(header string) HelpOption {
+	return func(h *Help) {
+		h.Header = header
 	}
 }
 
-func EvebotCommandHelpArgsOpt(args string) HelpOption {
-	return func(ech *Help) {
-		ech.Args = args
+func SummaryOpt(summary string) HelpOption {
+	return func(h *Help) {
+		h.Summary = summary
 	}
 }
 
-func EvebotCommandHelpExamplesOpt(examples string) HelpOption {
-	return func(ech *Help) {
-		ech.Examples = examples
+func UsageOpt(usage string) HelpOption {
+	return func(h *Help) {
+		h.Usage = usage
 	}
 }
 
-func EvebotCommandHelpCommandsOpt(commands string) HelpOption {
-	return func(ech *Help) {
-		ech.Commands = commands
+func ArgsOpt(args string) HelpOption {
+	return func(h *Help) {
+		h.Args = args
+	}
+}
+
+func ExamplesOpt(examples string) HelpOption {
+	return func(h *Help) {
+		h.Examples = examples
+	}
+}
+
+func CommandsOpt(commands string) HelpOption {
+	return func(h *Help) {
+		h.Commands = commands
 	}
 }

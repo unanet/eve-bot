@@ -22,15 +22,11 @@ import (
 //		EVEBOT_SLACK_VERIFICATION_TOKEN
 //		EVEBOT_SLACK_USER_OAUTH_ACCESS_TOKEN
 //		EVEBOT_SLACK_OAUTH_ACCESS_TOKEN
-//		EVEBOT_SLACK_SKIP_VERIFICATION
 type Config struct {
 	SlackSigningSecret        string `split_words:"true" required:"true"`
 	SlackVerificationToken    string `split_words:"true" required:"true"`
 	SlackUserOauthAccessToken string `split_words:"true" required:"true"`
 	SlackOauthAccessToken     string `split_words:"true" required:"true"`
-	// SlackSkipVerification is used for local dev
-	// We need to skip the URL verification when proxying calls with SSH tunnel
-	SlackSkipVerification bool `split_words:"true" required:"false"`
 }
 
 // Provider provides access to the Slack Client
@@ -121,7 +117,7 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 
 	eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
 	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry <@%s>! I can't execute `%s` command.\n\nTry running `help` for more info...", ev.User, commandFields), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry <@%s>, no can do!\n\nI don't know how execute the `%s` command.\n\nTry running: ```@evebot help```", ev.User, commandFields), false))
 		return
 	}
 
@@ -133,7 +129,7 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	_, err = eveBotCmd.AdditionalArgs()
 
 	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, we failed to process your request!\n\n`%s`", ev.User, err.Error()), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Whoops <@%s>! You have some invalid optional args:\n\n*error*: ```%s```", ev.User, err.Error()), false))
 		return
 	}
 
@@ -141,7 +137,12 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	//	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("here is arg key `%s` and value `%v`", v.Name(), v), false))
 	//}
 
-	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure <@%s>! I'll `%s` that for you. Be right back!", ev.User, eveBotCmd.Name()), false))
+	if eveBotCmd.IsValid() == false {
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`", ev.User, commandFields), false))
+		return
+	}
+
+	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure <@%s>, I'll `%s` that right away for you - brb!", ev.User, eveBotCmd.Name()), false))
 
 	// If the command requires Async (deploy/migrate) we use the queue
 	//...and sending a callback to the API request

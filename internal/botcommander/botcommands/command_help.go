@@ -5,40 +5,47 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 )
 
-type EvebotHelpCommand struct {
+type HelpCmd struct {
 	baseCommand
 }
 
-func NewEvebotHelpCommand() EvebotHelpCommand {
-	return EvebotHelpCommand{baseCommand{
+func NewEvebotHelpCommand() HelpCmd {
+	return HelpCmd{baseCommand{
 		name:    "help",
 		summary: "Try running one of the commands below",
-		usage: bothelp.HelpUsage{
+		usage: bothelp.Usage{
 			"{{ command }} help",
 		},
 		optionalArgs:  botargs.Args{},
-		examples:      bothelp.HelpExamples{},
+		examples:      bothelp.Examples{},
 		asyncRequired: false,
 	}}
 }
 
-func (cmd EvebotHelpCommand) AsyncRequired() bool {
+func (cmd HelpCmd) AsyncRequired() bool {
 	return cmd.asyncRequired
 }
 
-func (cmd EvebotHelpCommand) Initialize(input []string) EvebotCommand {
+func (cmd HelpCmd) IsValid() bool {
+	if cmd.input == nil || len(cmd.input) == 0 {
+		return false
+	}
+	return true
+}
+
+func (cmd HelpCmd) Initialize(input []string) EvebotCommand {
 	cmd.input = input
 	return cmd
 }
 
-func (cmd EvebotHelpCommand) Name() string {
+func (cmd HelpCmd) Name() string {
 	return cmd.name
 }
 
-func (cmd EvebotHelpCommand) Help() *bothelp.Help {
+func (cmd HelpCmd) Help() *bothelp.Help {
 
 	var nonHelpCmds string
-	var nonHelpCmdExamples = bothelp.HelpExamples{}
+	var nonHelpCmdExamples = bothelp.Examples{}
 
 	for _, v := range EvebotCommands {
 		if v.Name() != cmd.name {
@@ -47,24 +54,24 @@ func (cmd EvebotHelpCommand) Help() *bothelp.Help {
 		}
 	}
 
-	return bothelp.NewEvebotCommandHelp(
-		bothelp.EvebotCommandHelpSummaryOpt(cmd.summary.String()),
-		bothelp.EvebotCommandHelpCommandsOpt(nonHelpCmds),
-		bothelp.EvebotCommandHelpUsageOpt(cmd.usage.String()),
-		bothelp.EvebotCommandHelpArgsOpt(cmd.optionalArgs.String()),
-		bothelp.EvebotCommandHelpExamplesOpt(nonHelpCmdExamples.String()),
+	return bothelp.New(
+		bothelp.HeaderOpt(cmd.summary.String()),
+		bothelp.CommandsOpt(nonHelpCmds),
+		bothelp.UsageOpt(cmd.usage.String()),
+		bothelp.ArgsOpt(cmd.optionalArgs.String()),
+		bothelp.ExamplesOpt(nonHelpCmdExamples.String()),
 	)
 
 }
 
-func (cmd EvebotHelpCommand) IsHelpRequest() bool {
+func (cmd HelpCmd) IsHelpRequest() bool {
 	return isHelpRequest(cmd.input, cmd.name)
 }
 
-func (cmd EvebotHelpCommand) AdditionalArgs() (botargs.Args, error) {
+func (cmd HelpCmd) AdditionalArgs() (botargs.Args, error) {
 	return nil, nil
 }
 
-func (cmd EvebotHelpCommand) ResolveAdditionalArg(argKV []string) botargs.Arg {
+func (cmd HelpCmd) ResolveAdditionalArg(argKV []string) botargs.Arg {
 	return nil
 }

@@ -4,22 +4,22 @@ package botargs
 	ARGUMENT: Databases
 */
 
-type ArgDatabases []string
+type Databases []string
 
-func (ebad ArgDatabases) Name() string {
+func (a Databases) Name() string {
 	return "databases"
 }
 
-func (ebad ArgDatabases) Description() string {
+func (a Databases) Description() string {
 	return "comma separated list of databases"
 }
 
-func NewDatabasesArg() ArgDatabases {
-	return ArgDatabases{}
+func DefaultDatabasesArg() Databases {
+	return Databases{}
 }
 
-func NewParsedArgDatabases(input []string) ArgDatabases {
-	var dbs = ArgDatabases{}
+func NewDatabasesArg(input []string) Databases {
+	var dbs = Databases{}
 
 	for _, v := range input {
 		dbs = append(dbs, v)

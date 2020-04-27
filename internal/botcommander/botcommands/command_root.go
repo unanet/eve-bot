@@ -5,45 +5,52 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 )
 
-type EvebotRootCommand struct {
+type RootCmd struct {
 	baseCommand
 }
 
-func NewEvebotRootCommand() EvebotRootCommand {
-	return EvebotRootCommand{baseCommand{
+func NewRootCmd() RootCmd {
+	return RootCmd{baseCommand{
 		name:           "",
-		summary:        "Welcome to Eve-Bot! To get started, run:\n```@evebot help```",
-		usage:          bothelp.HelpUsage{},
+		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
+		usage:          bothelp.Usage{},
 		optionalArgs:   botargs.Args{},
 		additionalArgs: botargs.Args{},
-		examples:       bothelp.HelpExamples{},
+		examples:       bothelp.Examples{},
 		asyncRequired:  false,
 	}}
 }
 
-func (cmd EvebotRootCommand) AsyncRequired() bool {
+func (cmd RootCmd) IsValid() bool {
+	if cmd.input == nil {
+		return false
+	}
+	return true
+}
+
+func (cmd RootCmd) AsyncRequired() bool {
 	return cmd.asyncRequired
 }
 
-func (cmd EvebotRootCommand) Initialize(input []string) EvebotCommand {
+func (cmd RootCmd) Initialize(input []string) EvebotCommand {
 	cmd.input = input
 	return cmd
 }
 
-func (cmd EvebotRootCommand) Name() string {
+func (cmd RootCmd) Name() string {
 	return cmd.name
 }
 
-func (cmd EvebotRootCommand) Help() *bothelp.Help {
-	return bothelp.NewEvebotCommandHelp(
-		bothelp.EvebotCommandHelpHeaderOpt(cmd.summary.String()),
+func (cmd RootCmd) Help() *bothelp.Help {
+	return bothelp.New(
+		bothelp.HeaderOpt(cmd.summary.String()),
 	)
 }
 
-func (cmd EvebotRootCommand) IsHelpRequest() bool {
+func (cmd RootCmd) IsHelpRequest() bool {
 	return true
 }
 
-func (cmd EvebotRootCommand) AdditionalArgs() (botargs.Args, error) {
+func (cmd RootCmd) AdditionalArgs() (botargs.Args, error) {
 	return botargs.Args{}, nil
 }

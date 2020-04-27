@@ -1,9 +1,9 @@
 package bothelp
 
 // Evebot Command Examples
-type HelpExamples []string
+type Examples []string
 
-func (ebce HelpExamples) String() string {
+func (ebce Examples) String() string {
 	var msg string
 	for _, s := range ebce {
 		if len(msg) > 0 {

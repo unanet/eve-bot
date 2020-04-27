@@ -4,16 +4,16 @@ package botargs
 	ARGUMENT: Dryrun
 */
 
-type ArgDryrun bool
+type Dryrun bool
 
-func (ebad ArgDryrun) Name() string {
+func (a Dryrun) Name() string {
 	return "dryrun"
 }
 
-func (ebad ArgDryrun) Description() string {
+func (a Dryrun) Description() string {
 	return "generates a plan but doesn't actually change any state"
 }
 
-func NewDryrunArg() ArgDryrun {
+func DefaultDryrunArg() Dryrun {
 	return false
 }
