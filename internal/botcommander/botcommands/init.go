@@ -1,13 +1,14 @@
-package commander
+package botcommands
 
 func init() {
 	// Add all the Evebot commands here on init
-	evebotCommands = []EvebotCommand{
+	EvebotCommands = []EvebotCommand{
 		NewEvebotHelpCommand(),
 		NewEvebotDeployCommand(),
+		NewEvebotMigrateCommand(),
 	}
 }
 
 var (
-	evebotCommands []EvebotCommand
+	EvebotCommands []EvebotCommand
 )

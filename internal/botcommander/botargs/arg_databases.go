@@ -1,4 +1,4 @@
-package commander
+package botargs
 
 /*
 	ARGUMENT: Databases
@@ -16,4 +16,14 @@ func (ebad ArgDatabases) Description() string {
 
 func NewDatabasesArg() ArgDatabases {
 	return ArgDatabases{}
+}
+
+func NewParsedArgDatabases(input []string) ArgDatabases {
+	var dbs = ArgDatabases{}
+
+	for _, v := range input {
+		dbs = append(dbs, v)
+	}
+
+	return dbs
 }

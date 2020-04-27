@@ -1,4 +1,4 @@
-package commander
+package botargs
 
 /*
 	ARGUMENT: Force

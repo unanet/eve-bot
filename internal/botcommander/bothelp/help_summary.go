@@ -1,4 +1,4 @@
-package commander
+package bothelp
 
 // Evebot Command Summary
 type HelpSummary string

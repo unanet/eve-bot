@@ -10,7 +10,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
-	"gitlab.unanet.io/devops/eve-bot/internal/commander"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander"
 	"gitlab.unanet.io/devops/eve-bot/internal/queue"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -36,7 +36,7 @@ type Config struct {
 // Provider provides access to the Slack Client
 type Provider struct {
 	Client          *slack.Client
-	CommandResolver commander.Resolver
+	CommandResolver botcommander.Resolver
 	cfg             Config
 }
 
@@ -45,7 +45,7 @@ func NewProvider(cfg Config) *Provider {
 	return &Provider{
 		Client:          slack.New(cfg.SlackUserOauthAccessToken),
 		cfg:             cfg,
-		CommandResolver: commander.NewResolver(),
+		CommandResolver: botcommander.NewResolver(),
 	}
 }
 
@@ -119,23 +119,21 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	//botIDField := msgFields[0]
 	commandFields := msgFields[1:]
 
-	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>...", ev.User), false))
-
 	eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
 	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry! I can't execute `%s`. Try running `help`...", commandFields), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry <@%s>! I can't execute `%s` command.\n\nTry running `help` for more info...", ev.User, commandFields), false))
 		return
 	}
 
 	if eveBotCmd.IsHelpRequest() {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.Help().String(), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>...\n\n%s", ev.User, eveBotCmd.Help().String()), false))
 		return
 	}
 
 	_, err = eveBotCmd.AdditionalArgs()
 
 	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Whoops! `%s`", err.Error()), false))
+		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>, we failed to process your request!\n\n`%s`", ev.User, err.Error()), false))
 		return
 	}
 
@@ -143,7 +141,7 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	//	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("here is arg key `%s` and value `%v`", v.Name(), v), false))
 	//}
 
-	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure! I'll `%s` that for you. Be right back!", eveBotCmd.Name()), false))
+	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure <@%s>! I'll `%s` that for you. Be right back!", ev.User, eveBotCmd.Name()), false))
 
 	// If the command requires Async (deploy/migrate) we use the queue
 	//...and sending a callback to the API request
