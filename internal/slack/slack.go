@@ -117,7 +117,7 @@ func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
 	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.AckMsg(ev.User), false))
 
 	// If the command requires Async (deploy/migrate) we use the queue
-	//...and sending a callback to the API request
+	//...and send a callback to the API request
 	if eveBotCmd.MakeAsyncReq() {
 		queue.WorkQueue <- queue.WorkRequest{
 			Name:    ev.Channel,
