@@ -1,14 +1,14 @@
 package botcommander
 
 import (
-	"fmt"
+	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 )
 
 // Resolver resolves the input commands and returns a valid EvebotCommand or an Error
 type Resolver interface {
-	Resolve(input []string) (botcommands.EvebotCommand, error)
+	Resolve(input string) botcommands.EvebotCommand
 }
 
 // EvebotResolver implements the Resolver interface
@@ -20,21 +20,27 @@ func NewResolver() Resolver {
 }
 
 // Resolve resolves the input command and returns a valid EvebotCommand or an error
-func (ebr *EvebotResolver) Resolve(input []string) (botcommands.EvebotCommand, error) {
-	// This occurs when the user pings evebot without a command
-	// example: @evebot
-	// thinking about adding an RootCmd...
-	if len(input) <= 0 {
-		return botcommands.NewRootCmd(), nil
+func (ebr *EvebotResolver) Resolve(input string) botcommands.EvebotCommand {
+	// parse the input string
+	msgFields := strings.Fields(input)
+	// equivalent to just `@evebot`
+	if len(msgFields) == 1 {
+		// botIDField := msgFields[0]
+		return botcommands.NewRootCmd()
 	}
 
-	// Match the command input with a command name
-	for _, v := range botcommands.EvebotCommands {
-		if v.Name() == input[0] {
-			return v.Initialize(input), nil
-		}
+	cmdFields := msgFields[1:]
+	cmdName := cmdFields[0]
+
+	switch strings.ToLower(cmdName) {
+	case "deploy":
+		return botcommands.NewDeployCommand(cmdFields)
+	case "help":
+		return botcommands.NewHelpCommand(cmdFields)
+	case "migrate":
+		return botcommands.NewMigrateCommand(cmdFields)
+	default:
+		return botcommands.NewInvalidCommand(cmdFields)
 	}
 
-	// Didn't find a match for the command
-	return nil, fmt.Errorf("invalid evebot command: %v", input[0])
 }

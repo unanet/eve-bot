@@ -1,28 +1,29 @@
 package botcommands
 
 import (
+	"fmt"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
-func NewHelpCommand(cmdFields []string) HelpCmd {
-	cmd := DefaultHelpCommand()
+func NewInvalidCommand(cmdFields []string) InvalidCmd {
+	cmd := DefaultInvalidCommand()
 	cmd.input = cmdFields
+	cmd.summary = bothelp.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmdFields))
 	return cmd
 }
 
-type HelpCmd struct {
+type InvalidCmd struct {
 	baseCommand
 }
 
-func DefaultHelpCommand() HelpCmd {
-	return HelpCmd{baseCommand{
-		name:    "help",
-		summary: "Try running one of the commands below",
-		usage: bothelp.Usage{
-			"{{ command }} help",
-		},
+func DefaultInvalidCommand() InvalidCmd {
+	return InvalidCmd{baseCommand{
+		name:           "",
+		summary:        "Not sure what to do...",
+		usage:          bothelp.Usage{},
 		examples:       bothelp.Examples{},
 		async:          false,
 		optionalArgs:   botargs.Args{},
@@ -32,35 +33,33 @@ func DefaultHelpCommand() HelpCmd {
 	}}
 }
 
-func (cmd HelpCmd) AckMsg(userID string) string {
-	return baseAckMsg(cmd, userID, cmd.input)
-}
-
-func (cmd HelpCmd) MakeAsyncReq() bool {
-	return false
-}
-
-func (cmd HelpCmd) ErrMsg() string {
+func (cmd InvalidCmd) ErrMsg() string {
 	return baseErrMsg(cmd.errs)
 }
 
-func (cmd HelpCmd) IsValid() bool {
-	if len(cmd.errs) > 0 {
-		return false
-	}
-	return baseIsValid(cmd.input)
+func (cmd InvalidCmd) AckMsg(userID string) string {
+	return baseAckMsg(cmd, userID, cmd.input)
 }
 
-func (cmd HelpCmd) Name() string {
+func (cmd InvalidCmd) MakeAsyncReq() bool {
+	return false
+}
+
+func (cmd InvalidCmd) IsValid() bool {
+	return false
+}
+
+func (cmd InvalidCmd) Name() string {
 	return cmd.name
 }
 
-func (cmd HelpCmd) Help() *bothelp.Help {
+func (cmd InvalidCmd) Help() *bothelp.Help {
+
 	var nonHelpCmds string
 	var nonHelpCmdExamples = bothelp.Examples{}
 
 	for _, v := range EvebotCommands {
-		if v.Name() != cmd.name {
+		if v.Name() != "help" {
 			nonHelpCmds = nonHelpCmds + "\n" + v.Name()
 			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Name()+" help")
 		}
@@ -69,12 +68,11 @@ func (cmd HelpCmd) Help() *bothelp.Help {
 	return bothelp.New(
 		bothelp.HeaderOpt(cmd.summary.String()),
 		bothelp.CommandsOpt(nonHelpCmds),
-		bothelp.UsageOpt(cmd.usage.String()),
-		bothelp.ArgsOpt(cmd.optionalArgs.String()),
 		bothelp.ExamplesOpt(nonHelpCmdExamples.String()),
 	)
+
 }
 
-func (cmd HelpCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
+func (cmd InvalidCmd) IsHelpRequest() bool {
+	return true
 }

@@ -3,6 +3,7 @@ package botcommands
 import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
 type RootCmd struct {
@@ -14,22 +15,29 @@ func NewRootCmd() RootCmd {
 		name:           "",
 		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
 		usage:          bothelp.Usage{},
-		optionalArgs:   botargs.Args{},
-		additionalArgs: botargs.Args{},
 		examples:       bothelp.Examples{},
-		asyncRequired:  false,
+		async:          false,
+		optionalArgs:   botargs.Args{},
+		suppliedArgs:   botargs.Args{},
+		requiredParams: botparams.Params{},
+		suppliedParams: botparams.Params{},
 	}}
 }
 
+func (cmd RootCmd) ErrMsg() string {
+	return baseErrMsg(cmd.errs)
+}
+
+func (cmd RootCmd) AckMsg(userID string) string {
+	return baseAckMsg(cmd, userID, cmd.input)
+}
+
 func (cmd RootCmd) IsValid() bool {
-	if cmd.input == nil {
-		return false
-	}
 	return true
 }
 
-func (cmd RootCmd) AsyncRequired() bool {
-	return cmd.asyncRequired
+func (cmd RootCmd) MakeAsyncReq() bool {
+	return false
 }
 
 func (cmd RootCmd) Initialize(input []string) EvebotCommand {
@@ -49,8 +57,4 @@ func (cmd RootCmd) Help() *bothelp.Help {
 
 func (cmd RootCmd) IsHelpRequest() bool {
 	return true
-}
-
-func (cmd RootCmd) AdditionalArgs() (botargs.Args, error) {
-	return botargs.Args{}, nil
 }

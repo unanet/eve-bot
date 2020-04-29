@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -111,42 +110,15 @@ func newBlockMsgOpt(text string) slack.MsgOption {
 }
 
 func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
-	msgFields := strings.Fields(ev.Text)
-	//botIDField := msgFields[0]
-	commandFields := msgFields[1:]
+	// Resolve the input and return a Command object
+	eveBotCmd := p.CommandResolver.Resolve(ev.Text)
 
-	eveBotCmd, err := p.CommandResolver.Resolve(commandFields)
-	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sorry <@%s>, no can do!\n\nI don't know how execute the `%s` command.\n\nTry running: ```@evebot help```", ev.User, commandFields), false))
-		return
-	}
-
-	if eveBotCmd.IsHelpRequest() {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("<@%s>...\n\n%s", ev.User, eveBotCmd.Help().String()), false))
-		return
-	}
-
-	_, err = eveBotCmd.AdditionalArgs()
-
-	if err != nil {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Whoops <@%s>! You have some invalid optional args:\n\n*error*: ```%s```", ev.User, err.Error()), false))
-		return
-	}
-
-	//for _, v := range additionalArgs {
-	//	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("here is arg key `%s` and value `%v`", v.Name(), v), false))
-	//}
-
-	if eveBotCmd.IsValid() == false {
-		p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`", ev.User, commandFields), false))
-		return
-	}
-
-	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(fmt.Sprintf("Sure <@%s>, I'll `%s` that right away for you - brb!", ev.User, eveBotCmd.Name()), false))
+	// Send the immediate Acknowledgement Message back to the chat user
+	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.AckMsg(ev.User), false))
 
 	// If the command requires Async (deploy/migrate) we use the queue
 	//...and sending a callback to the API request
-	if eveBotCmd.AsyncRequired() {
+	if eveBotCmd.MakeAsyncReq() {
 		queue.WorkQueue <- queue.WorkRequest{
 			Name:    ev.Channel,
 			User:    ev.User,
