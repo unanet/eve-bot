@@ -1,4 +1,4 @@
-package queue
+package botqueue
 
 import (
 	"os"
@@ -20,10 +20,9 @@ type Config struct {
 
 // WorkRequest is an single unit of work that needs to be processed by a worker
 type WorkRequest struct {
-	Name                                 string
 	Channel                              string
 	User                                 string
-	EveType                              string
+	CommandName                          string
 	ReceivedTS, InProcessTS, CompletedTS time.Time
 	Delay                                time.Duration
 }
@@ -61,11 +60,11 @@ func (w *Worker) tallyWIPMetrics(workItem *WorkRequest) {
 	workerID := strconv.Itoa(w.ID)
 	queueWaitTimeMS := float64(time.Since(workItem.ReceivedTS).Nanoseconds()) / 1000000.0
 	log.Logger.Debug("work request in process", zap.String("worker_id", workerID), zap.Float64("queue_time_ms", queueWaitTimeMS))
-	botmetrics.StatBotWorkerQueueSaturationGauge.WithLabelValues(workItem.EveType).Dec()
-	botmetrics.StatBotWorkReqInProcessCount.WithLabelValues(workItem.EveType, workerID).Inc()
-	botmetrics.StatBotWorkerQueueDurationGauge.WithLabelValues(workItem.EveType, workerID).Set(queueWaitTimeMS)
-	botmetrics.StatBotWorkerQueueDurationHistogram.WithLabelValues(workItem.EveType, workerID).Observe(queueWaitTimeMS)
-	botmetrics.StatBotWorkerWIPSaturationGauge.WithLabelValues(workItem.EveType, workerID).Inc()
+	botmetrics.StatBotWorkerQueueSaturationGauge.WithLabelValues(workItem.CommandName).Dec()
+	botmetrics.StatBotWorkReqInProcessCount.WithLabelValues(workItem.CommandName, workerID).Inc()
+	botmetrics.StatBotWorkerQueueDurationGauge.WithLabelValues(workItem.CommandName, workerID).Set(queueWaitTimeMS)
+	botmetrics.StatBotWorkerQueueDurationHistogram.WithLabelValues(workItem.CommandName, workerID).Observe(queueWaitTimeMS)
+	botmetrics.StatBotWorkerWIPSaturationGauge.WithLabelValues(workItem.CommandName, workerID).Inc()
 }
 
 func (w *Worker) tallyCompletedMetrics(workItem *WorkRequest) {
@@ -73,10 +72,10 @@ func (w *Worker) tallyCompletedMetrics(workItem *WorkRequest) {
 	workerID := strconv.Itoa(w.ID)
 	inProcessWorkTimeMS := float64(time.Since(workItem.InProcessTS).Nanoseconds()) / 1000000.0
 	log.Logger.Debug("work request complete", zap.String("worker_id", workerID), zap.Float64("wip_time_ms", inProcessWorkTimeMS))
-	botmetrics.StatBotWorkerWIPSaturationGauge.WithLabelValues(workItem.EveType, workerID).Dec()
-	botmetrics.StatBotWorkReqCompletedCount.WithLabelValues(workItem.EveType, workerID).Inc()
-	botmetrics.StatBotWorkerInProcessDurationGauge.WithLabelValues(workItem.EveType, workerID).Set(inProcessWorkTimeMS)
-	botmetrics.StatBotWorkerInProcessDurationHistogram.WithLabelValues(workItem.EveType, workerID).Observe(inProcessWorkTimeMS)
+	botmetrics.StatBotWorkerWIPSaturationGauge.WithLabelValues(workItem.CommandName, workerID).Dec()
+	botmetrics.StatBotWorkReqCompletedCount.WithLabelValues(workItem.CommandName, workerID).Inc()
+	botmetrics.StatBotWorkerInProcessDurationGauge.WithLabelValues(workItem.CommandName, workerID).Set(inProcessWorkTimeMS)
+	botmetrics.StatBotWorkerInProcessDurationHistogram.WithLabelValues(workItem.CommandName, workerID).Observe(inProcessWorkTimeMS)
 }
 
 // This function "starts" the worker by starting a goroutine, that is
@@ -151,8 +150,8 @@ func StartDispatcher(nworkers int) {
 			case work := <-WorkQueue:
 				work.ReceivedTS = time.Now()
 				log.Logger.Debug("work request received")
-				botmetrics.StatBotWorkReqReceivedCount.WithLabelValues(work.EveType).Inc()
-				botmetrics.StatBotWorkerQueueSaturationGauge.WithLabelValues(work.EveType).Inc()
+				botmetrics.StatBotWorkReqReceivedCount.WithLabelValues(work.CommandName).Inc()
+				botmetrics.StatBotWorkerQueueSaturationGauge.WithLabelValues(work.CommandName).Inc()
 				go func() {
 					worker := <-WorkerQueue
 					worker <- work

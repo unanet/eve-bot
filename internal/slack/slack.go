@@ -10,7 +10,6 @@ import (
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander"
-	"gitlab.unanet.io/devops/eve-bot/internal/queue"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
@@ -28,6 +27,13 @@ type Config struct {
 	SlackOauthAccessToken     string `split_words:"true" required:"true"`
 }
 
+// These map groups to channel
+// eve-api will send me "some" kind of group/identifier (probably the queue name or group)
+// we then map a group to a slack channel for notification
+var groupChannelMap = map[string]string{
+	"infocus": "G0123P9K9ST",
+}
+
 // Provider provides access to the Slack Client
 type Provider struct {
 	Client          *slack.Client
@@ -36,11 +42,11 @@ type Provider struct {
 }
 
 // NewProvider creates a new provider
-func NewProvider(cfg Config) *Provider {
+func NewProvider(cfg Config, commander botcommander.Resolver) *Provider {
 	return &Provider{
 		Client:          slack.New(cfg.SlackUserOauthAccessToken),
 		cfg:             cfg,
-		CommandResolver: botcommander.NewResolver(),
+		CommandResolver: commander,
 	}
 }
 
@@ -59,7 +65,7 @@ func (p *Provider) HandleEveCallback(req *http.Request) error {
 }
 
 // HandleInteraction handles the interactive callbacks (buttons, dropdowns, etc.)
-func (p *Provider) HandleInteraction(req *http.Request) error {
+func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	var payload slack.InteractionCallback
 	err := json.Unmarshal([]byte(req.FormValue("payload")), &payload)
 	if err != nil {
@@ -109,43 +115,53 @@ func newBlockMsgOpt(text string) slack.MsgOption {
 		slack.NewDividerBlock())
 }
 
-func (p *Provider) processSlackMentionEvent(ev *slackevents.AppMentionEvent) {
-	// Resolve the input and return a Command object
-	eveBotCmd := p.CommandResolver.Resolve(ev.Text)
+func (p *Provider) HandleEveEvent(req *http.Request) error {
+	ee := EveEvent{}
 
-	// Send the immediate Acknowledgement Message back to the chat user
-	p.Client.PostMessage(ev.Channel, slack.MsgOptionText(eveBotCmd.AckMsg(ev.User), false))
-
-	// If the command requires Async (deploy/migrate) we use the queue
-	//...and send a callback to the API request
-	if eveBotCmd.MakeAsyncReq() {
-		queue.WorkQueue <- queue.WorkRequest{
-			Name:    ev.Channel,
-			User:    ev.User,
-			Channel: ev.Channel,
-			EveType: eveBotCmd.Name(),
-			Delay:   time.Second * 60, // Just for testing/simulation
+	err := json.NewDecoder(req.Body).Decode(&ee)
+	if err != nil {
+		return &errors.RestError{
+			Code:          400,
+			Message:       "invalid request body",
+			OriginalError: err,
 		}
 	}
-	return
+
+	ee.CreatedAt = time.Now().UTC()
+	slackChannel := groupChannelMap[ee.Group]
+
+	if len(slackChannel) == 0 {
+		return &errors.RestError{
+			Code:    406,
+			Message: "invalid group name",
+		}
+	}
+
+	p.Client.PostMessage(slackChannel, slack.MsgOptionText(ee.Message, false))
+	return nil
 }
 
 // HandleEvent takes an http request and handles the Slack API Event
 // this is where we do our request signature validation
 // ..and switch the incoming api event types
-func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
+func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 	body, err := p.validateSlackRequest(req)
 	if err != nil {
 		log.Logger.Debug("Validate Slack Request Error", zap.Error(err))
 		return nil, err
 	}
 
-	slackAPIEvent, err := slackevents.ParseEvent(body, slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: p.cfg.SlackVerificationToken}))
+	slackAPIEvent, err := slackevents.ParseEvent(body,
+		slackevents.OptionVerifyToken(
+			&slackevents.TokenComparator{
+				VerificationToken: p.cfg.SlackVerificationToken,
+			},
+		),
+	)
 	if err != nil {
 		return nil, botError(err, "failed parse slack event", http.StatusNotAcceptable)
 	}
 
-	log.Logger.Debug("Slack Event Type", zap.String("slack_event", slackAPIEvent.Type))
 	switch slackAPIEvent.Type {
 	case slackevents.URLVerification:
 		var r *slackevents.ChallengeResponse
@@ -153,13 +169,18 @@ func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
 		if err != nil {
 			return nil, botError(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
 		}
-		log.Logger.Debug("Slack Challenge", zap.String("challenge", r.Challenge))
 		return r.Challenge, nil
 	case slackevents.CallbackEvent:
 		innerEvent := slackAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
-			p.processSlackMentionEvent(ev)
+			// Resolve the input and return a Command object
+			cmd := p.CommandResolver.Resolve(ev.Text)
+			// Send the immediate Acknowledgement Message back to the chat user
+			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
+			// cmd.WorkRequest handles sync vs async
+			// Make the work Request to API here:
+			//p.Client.PostMessage(ev.Channel, slack.MsgOptionText(cmd.WorkRequest(ev.Channel, ev.User), false))
 			return "OK", nil
 		}
 	default:
@@ -167,3 +188,11 @@ func (p *Provider) HandleEvent(req *http.Request) (interface{}, error) {
 	}
 	return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
 }
+
+//	queue.WorkQueue <- queue.WorkRequest{
+//		Name:    ev.Channel,
+//		User:    ev.User,
+//		Channel: ev.Channel,
+//		EveType: cmd.Name(),
+//		Delay:   time.Second * 60, // Just for testing/simulation
+//	}

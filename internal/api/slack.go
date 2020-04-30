@@ -27,16 +27,26 @@ func (c SlackController) Setup(r chi.Router) {
 	r.Post("/slack-events", c.slackEventHandler)
 	r.Post("/slack-interactive", c.slackInteractiveHandler)
 	r.Post("/eve-callback", c.eveCallbackHandler)
+	r.Post("/eve-event", c.eveEventHandler)
 }
 
-func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	err := c.slackProvider.HandleEveCallback(r)
-
-	if err != nil {
+// This is where eve-api calls us
+func (c SlackController) eveEventHandler(w http.ResponseWriter, r *http.Request) {
+	if err := c.slackProvider.HandleEveEvent(r); err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
+	// Just returning an empty response here...
+	render.Respond(w, r, nil)
+	return
 
+}
+
+func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	if err := c.slackProvider.HandleEveCallback(r); err != nil {
+		render.Respond(w, r, errors.Wrap(err))
+		return
+	}
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return
@@ -44,13 +54,10 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.Request) {
-	err := c.slackProvider.HandleInteraction(r)
-
-	if err != nil {
+	if err := c.slackProvider.HandleSlackInteraction(r); err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
-
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return
@@ -58,7 +65,7 @@ func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.
 
 func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Request) {
 	// Payload here is only used for initial URL route verification
-	payload, err := c.slackProvider.HandleEvent(r)
+	payload, err := c.slackProvider.HandleSlackEvent(r)
 
 	if err != nil {
 		render.Respond(w, r, errors.Wrap(err))
