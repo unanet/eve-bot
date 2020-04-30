@@ -8,8 +8,8 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
-func NewInvalidCommand(cmdFields []string) InvalidCmd {
-	cmd := DefaultInvalidCommand()
+func NewInvalidCommand(cmdFields []string) EvebotCommand {
+	cmd := defaultInvalidCommand()
 	cmd.input = cmdFields
 	cmd.summary = bothelp.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmdFields))
 	return cmd
@@ -19,7 +19,7 @@ type InvalidCmd struct {
 	baseCommand
 }
 
-func DefaultInvalidCommand() InvalidCmd {
+func defaultInvalidCommand() InvalidCmd {
 	return InvalidCmd{baseCommand{
 		name:           "",
 		summary:        "Not sure what to do...",
@@ -58,7 +58,7 @@ func (cmd InvalidCmd) Help() *bothelp.Help {
 	var nonHelpCmds string
 	var nonHelpCmdExamples = bothelp.Examples{}
 
-	for _, v := range EvebotCommands {
+	for _, v := range nonHelpCmd() {
 		if v.Name() != "help" {
 			nonHelpCmds = nonHelpCmds + "\n" + v.Name()
 			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Name()+" help")

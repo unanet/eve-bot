@@ -10,7 +10,7 @@ type RootCmd struct {
 	baseCommand
 }
 
-func NewRootCmd() RootCmd {
+func NewRootCmd() EvebotCommand {
 	return RootCmd{baseCommand{
 		name:           "",
 		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",

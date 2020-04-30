@@ -30,17 +30,19 @@ func (ebr *EvebotResolver) Resolve(input string) botcommands.EvebotCommand {
 	}
 
 	cmdFields := msgFields[1:]
-	cmdName := cmdFields[0]
 
-	switch strings.ToLower(cmdName) {
-	case "deploy":
-		return botcommands.NewDeployCommand(cmdFields)
-	case "help":
-		return botcommands.NewHelpCommand(cmdFields)
-	case "migrate":
-		return botcommands.NewMigrateCommand(cmdFields)
-	default:
-		return botcommands.NewInvalidCommand(cmdFields)
+	// Don't have a clever way to register the commands into this map
+	// so make sure after you create new command, you add the New func
+	// to the map so that is get's picked up here! Boom!
+	newCmdFunc := botcommands.CommandInitializerMap[cmdFields[0]]
+
+	// I know this is magic! And fucking beautiful if you ask me! :)
+	// Just make sure your New Command func follows the standard signature
+	// =======> func NewCmd(input []string) EvebotCommand { }
+	if newCmdFunc != nil {
+		return newCmdFunc.(func([]string) botcommands.EvebotCommand)(cmdFields)
 	}
+
+	return botcommands.NewInvalidCommand(cmdFields)
 
 }

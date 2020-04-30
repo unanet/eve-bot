@@ -1,14 +1,21 @@
 package botcommands
 
-func init() {
-	// Add all the Evebot commands here on init
-	EvebotCommands = []EvebotCommand{
-		DefaultHelpCommand(),
-		DefaultDeployCommand(),
-		DefaultMigrateCommand(),
-	}
-}
-
 var (
-	EvebotCommands []EvebotCommand
+	CommandInitializerMap = map[string]interface{}{
+		"help":    NewHelpCommand,
+		"deploy":  NewDeployCommand,
+		"migrate": NewMigrateCommand,
+	}
 )
+
+func nonHelpCmd() []EvebotCommand {
+	var cmds []EvebotCommand
+
+	for k, v := range CommandInitializerMap {
+		if k != "help" {
+			cmds = append(cmds, v.(func([]string) EvebotCommand)([]string{}))
+		}
+	}
+	return cmds
+
+}

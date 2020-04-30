@@ -6,8 +6,8 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
-func NewHelpCommand(cmdFields []string) HelpCmd {
-	cmd := DefaultHelpCommand()
+func NewHelpCommand(cmdFields []string) EvebotCommand {
+	cmd := defaultHelpCommand()
 	cmd.input = cmdFields
 	return cmd
 }
@@ -16,7 +16,7 @@ type HelpCmd struct {
 	baseCommand
 }
 
-func DefaultHelpCommand() HelpCmd {
+func defaultHelpCommand() HelpCmd {
 	return HelpCmd{baseCommand{
 		name:    "help",
 		summary: "Try running one of the commands below",
@@ -59,7 +59,7 @@ func (cmd HelpCmd) Help() *bothelp.Help {
 	var nonHelpCmds string
 	var nonHelpCmdExamples = bothelp.Examples{}
 
-	for _, v := range EvebotCommands {
+	for _, v := range nonHelpCmd() {
 		if v.Name() != cmd.name {
 			nonHelpCmds = nonHelpCmds + "\n" + v.Name()
 			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Name()+" help")

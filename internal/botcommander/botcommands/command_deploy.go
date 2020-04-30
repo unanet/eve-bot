@@ -9,8 +9,8 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
-func NewDeployCommand(cmdFields []string) DeployCmd {
-	cmd := DefaultDeployCommand()
+func NewDeployCommand(cmdFields []string) EvebotCommand {
+	cmd := defaultDeployCommand()
 	cmd.input = cmdFields
 	cmd.resolveParams()
 	cmd.resolveArgs()
@@ -21,7 +21,7 @@ type DeployCmd struct {
 	baseCommand
 }
 
-func DefaultDeployCommand() DeployCmd {
+func defaultDeployCommand() DeployCmd {
 	return DeployCmd{baseCommand{
 		name:    "deploy",
 		summary: "The `deploy` command is used to deploy services to a specific *namespace* and *environment*",

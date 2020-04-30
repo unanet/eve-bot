@@ -9,8 +9,8 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
-func NewMigrateCommand(cmdFields []string) MigrateCmd {
-	cmd := DefaultMigrateCommand()
+func NewMigrateCommand(cmdFields []string) EvebotCommand {
+	cmd := defaultMigrateCommand()
 	cmd.input = cmdFields
 	cmd.resolveParams()
 	cmd.resolveArgs()
@@ -22,7 +22,7 @@ type MigrateCmd struct {
 }
 
 // @evebot migrate current in qa
-func DefaultMigrateCommand() MigrateCmd {
+func defaultMigrateCommand() MigrateCmd {
 	return MigrateCmd{baseCommand{
 		name:    "migrate",
 		summary: "The `migrate` command is used to migrate databases by *namespace* and *environment*",
