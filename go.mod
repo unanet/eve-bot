@@ -3,6 +3,7 @@ module gitlab.unanet.io/devops/eve-bot
 go 1.14
 
 require (
+	github.com/dghubble/sling v1.3.0
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/golang/protobuf v1.4.0 // indirect

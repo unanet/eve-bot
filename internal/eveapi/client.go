@@ -89,5 +89,5 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions) (*DeployR
 }
 
 func (c *client) Migrate() (*MigrateResponse, error) {
-
+	return nil, nil
 }
