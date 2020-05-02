@@ -1,10 +1,20 @@
 stages:
   - build
+  - deploy
 
 Dist:
   stage: build
   script:
     - make dist
+  tags:
+    - linux
+  only:
+    - master
+
+Deploy:
+  stage: deploy
+  script:
+    - make deploy
   tags:
     - linux
   only:

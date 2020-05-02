@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// adding a comment to test deploys
 func main() {
 
 	botqueue.StartDispatcher(config.Values().QueueWorkers)
