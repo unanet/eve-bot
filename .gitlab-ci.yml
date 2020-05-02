@@ -1,15 +1,25 @@
 stages:
-  - build
+  - test
+  - dist
   - deploy
 
 Dist:
-  stage: build
+  stage: dist
   script:
     - make dist
   tags:
     - linux
   only:
     - master
+
+Test:
+  stage: test
+  script:
+    - make test
+  tags:
+    - linux
+  except:
+    - tags
 
 Deploy:
   stage: deploy
@@ -19,13 +29,3 @@ Deploy:
     - linux
   only:
     - master
-
-Build:
-  stage: build
-  script:
-    - make build
-  tags:
-    - linux
-  except:
-    - master
-    - tags
