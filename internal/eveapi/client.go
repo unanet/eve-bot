@@ -2,7 +2,7 @@ package eveapi
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -77,7 +77,7 @@ func (c *client) CallBackURL() string {
 
 func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser string, slackChannel string) (*DeploymentPlanOptions, error) {
 	var success DeploymentPlanOptions
-	var failure string
+	var failure eveerror.RestError
 
 	params := &EveParams{State: CallbackState{User: slackUser, Channel: slackChannel}}
 	dp.User = slackUser
@@ -93,19 +93,19 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 		return nil, err
 	}
 
-	eveError := &eveerror.RestError{}
-	merr := json.Unmarshal([]byte(failure), eveError)
-	if merr != nil {
-		log.Logger.Error("error marshalling eve-api error", zap.Error(merr))
-		return nil, merr
-	}
+	//eveError := &eveerror.RestError{}
+	//merr := json.Unmarshal([]byte(failure), eveError)
+	//if merr != nil {
+	//	log.Logger.Error("error marshalling eve-api error", zap.Error(merr))
+	//	return nil, merr
+	//}
 
 	switch resp.StatusCode {
 	case http.StatusOK:
 		return &success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api deploy", zap.String("error_msg", failure))
-		return nil, eveError
+		log.Logger.Debug("an error occurred while trying to call eve-api deploy", zap.String("error_msg", failure.Message))
+		return nil, fmt.Errorf(failure.Message)
 	}
 
 }
