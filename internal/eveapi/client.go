@@ -76,6 +76,7 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 	var failure string
 
 	params := &EveParams{State: CallbackState{User: slackUser, Channel: slackChannel}}
+	dp.User = slackUser
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).QueryStruct(params).Request()
 	if err != nil {

@@ -1,8 +1,9 @@
 FROM unanet-docker.jfrog.io/alpine-base
 
+ENV EVE_SERVICE_NAME eve-bot
 ENV EVEBOT_PORT 3000
 ENV EVEBOT_METRICS_PORT 3001
-ENV EVEBOT_SERVICE_NAME eve-bot
+
 
 ADD ./bin/eve-bot /app/eve-bot
 WORKDIR /app

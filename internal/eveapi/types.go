@@ -28,6 +28,7 @@ type DeploymentPlanOptions struct {
 	Namespaces  []string            `json:"namespaces,omitempty"`
 	Messages    []string            `json:"messages,omitempty"`
 	Type        string              `json:"type"`
+	User        string              `json:"user"`
 }
 
 type ArtifactDefinition struct {
