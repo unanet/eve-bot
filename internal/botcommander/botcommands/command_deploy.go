@@ -53,10 +53,10 @@ func defaultDeployCommand() DeployCmd {
 //Namespaces  []string            `json:"namespaces,omitempty"`
 //Messages    []string            `json:"messages,omitempty"`
 //Type        string              `json:"type"`
-func (cmd DeployCmd) EveReqObj() interface{} {
+func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
 
 	opts := eveapi.DeploymentPlanOptions{
-		CallbackURL: "config.Values().CallbackURL",
+		CallbackURL: cbURL,
 		Type:        "application",
 	}
 
@@ -129,8 +129,8 @@ func (cmd *DeployCmd) resolveParams() {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return
 	}
-	cmd.apiOptions["namespace"] = cmd.input[1]
-	cmd.apiOptions["environment"] = cmd.input[3]
+	cmd.apiOptions[botparams.NamespaceName] = cmd.input[1]
+	cmd.apiOptions[botparams.EnvironmentName] = cmd.input[3]
 
 	return
 }

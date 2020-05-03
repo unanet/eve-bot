@@ -3,6 +3,8 @@ package config
 import (
 	"sync"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+
 	"github.com/kelseyhightower/envconfig"
 	"gitlab.unanet.io/devops/eve-bot/internal/queue"
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
@@ -25,16 +27,17 @@ type (
 	MuxConfig = mux.Config
 	// QueueConfig is the config for queue for Async Eve-API Calls
 	QueueConfig = queue.Config
+	// EveAPIConfig is the config for the Eve API
+	EveAPIConfig = eveapi.Config
 )
 
 // Config is the top level application config
-// EVEBOT_CALLBACK_URL
 type Config struct {
 	LogConfig
 	SlackConfig
 	MuxConfig
 	QueueConfig
-	CallbackURL string `split_words:"true" default:"localhost:3000/eve-callback"`
+	EveAPIConfig
 }
 
 // Values returns the environmental config values (prefix: EVEBOT_)

@@ -20,16 +20,20 @@ const (
 
 // EVEBOT_EVEAPI_BASE_URL
 // EVEBOT_EVEAPI_TIMEOUT
+// EVEBOT_EVEAPI_CALLBACK_URL
 type Config struct {
-	EveapiBaseUrl string        `split_words:"true" required:"true"`
-	EveapiTimeout time.Duration `split_words:"true" default:"20s"`
+	EveapiBaseUrl     string        `split_words:"true" required:"true"`
+	EveapiTimeout     time.Duration `split_words:"true" default:"20s"`
+	EveapiCallbackUrl string        `split_words:"true" default:"localhost:3000/eve-callback"`
 }
 
 type Client interface {
-	Deploy(ctx context.Context, req DeploymentPlanOptions) (*DeployResponse, error)
+	Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser string, slackChannel string) (*DeploymentPlanOptions, error)
+	CallBackURL() string
 }
 
 type client struct {
+	cfg   *Config
 	sling *sling.Sling
 }
 
@@ -53,6 +57,7 @@ func NewClient(cfg Config) Client {
 	}
 
 	return &client{
+		cfg: &cfg,
 		sling: sling.New().
 			Base(cfg.EveapiBaseUrl).
 			Client(httpClient).
@@ -62,11 +67,15 @@ func NewClient(cfg Config) Client {
 
 }
 
-func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions) (*DeployResponse, error) {
-	var success DeployResponse
+func (c *client) CallBackURL() string {
+	return c.cfg.EveapiCallbackUrl
+}
+
+func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser string, slackChannel string) (*DeploymentPlanOptions, error) {
+	var success DeploymentPlanOptions
 	var failure string
 
-	params := &EveParams{State: CallbackState{User: "something", Channel: "something else"}}
+	params := &EveParams{State: CallbackState{User: slackUser, Channel: slackChannel}}
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).QueryStruct(params).Request()
 	if err != nil {

@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander"
@@ -30,15 +32,22 @@ type Config struct {
 type Provider struct {
 	Client          *slack.Client
 	CommandResolver botcommander.Resolver
+	EveAPIClient    eveapi.Client
 	cfg             Config
 }
 
+var (
+	callBackURL string
+)
+
 // NewProvider creates a new provider
-func NewProvider(cfg Config, commander botcommander.Resolver) *Provider {
+func NewProvider(sClient *slack.Client, commander botcommander.Resolver, eveAPIClient eveapi.Client, cfg Config) *Provider {
+	callBackURL = eveAPIClient.CallBackURL()
 	return &Provider{
-		Client:          slack.New(cfg.SlackUserOauthAccessToken),
-		cfg:             cfg,
+		Client:          sClient,
 		CommandResolver: commander,
+		EveAPIClient:    eveAPIClient,
+		cfg:             cfg,
 	}
 }
 
@@ -148,6 +157,23 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 
 			// Call API in separate Go Routine
 			go func() {
+				apiReqObj := cmd.EveReqObj(callBackURL)
+
+				switch apiReqObj.(type) {
+				case eveapi.DeploymentPlanOptions:
+					_, err := p.EveAPIClient.Deploy(req.Context(), apiReqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
+					if err != nil {
+						log.Logger.Debug("eve-api error", zap.Error(err))
+						p.Client.PostMessageContext(
+							req.Context(),
+							ev.Channel,
+							slack.MsgOptionText(
+								fmt.Sprintf("Whoops <@%s>! I detected some *errors:*\n\n ```%v```", ev.User, err.Error()), false))
+						return
+					}
+				default:
+					log.Logger.Error("invalid eve api command request object")
+				}
 
 			}()
 
