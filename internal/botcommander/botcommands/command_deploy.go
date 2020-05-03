@@ -7,6 +7,7 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
 func NewDeployCommand(cmdFields []string) EvebotCommand {
@@ -39,10 +40,47 @@ func defaultDeployCommand() DeployCmd {
 		},
 		async:          true,
 		optionalArgs:   botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultServicesArg()},
-		suppliedArgs:   botargs.Args{},
 		requiredParams: botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
-		suppliedParams: botparams.Params{},
+		apiOptions:     make(map[string]interface{}),
 	}}
+}
+
+//Artifacts   ArtifactDefinitions `json:"artifacts"`
+//ForceDeploy bool                `json:"force_deploy"`
+//DryRun      bool                `json:"dry_run"`
+//CallbackURL string              `json:"callback_url"`
+//Environment string              `json:"environment"`
+//Namespaces  []string            `json:"namespaces,omitempty"`
+//Messages    []string            `json:"messages,omitempty"`
+//Type        string              `json:"type"`
+func (cmd DeployCmd) EveReqObj() interface{} {
+
+	opts := eveapi.DeploymentPlanOptions{
+		CallbackURL: "config.Values().CallbackURL",
+		Type:        "application",
+	}
+
+	if val, ok := cmd.apiOptions[botargs.ServicesName]; ok {
+		opts.Artifacts = val.(eveapi.ArtifactDefinitions)
+	}
+
+	if val, ok := cmd.apiOptions[botargs.ForceDeployName]; ok {
+		opts.ForceDeploy = val.(bool)
+	}
+
+	if val, ok := cmd.apiOptions[botargs.DryrunName]; ok {
+		opts.DryRun = val.(bool)
+	}
+
+	if val, ok := cmd.apiOptions[botparams.EnvironmentName]; ok {
+		opts.Environment = val.(string)
+	}
+
+	if val, ok := cmd.apiOptions[botparams.NamespaceName]; ok {
+		opts.Namespaces = []string{val.(string)}
+	}
+
+	return opts
 }
 
 func (cmd DeployCmd) AckMsg(userID string) string {
@@ -87,17 +125,12 @@ func (cmd DeployCmd) IsHelpRequest() bool {
 // resolveParams attempts to resolve the input params
 // be sure and use a pointer receiver here since we are modifying the receiver object
 func (cmd *DeployCmd) resolveParams() {
-	if len(cmd.suppliedParams) > 0 {
-		return
-	}
 	if len(cmd.input) < 4 {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return
 	}
-	cmd.suppliedParams = botparams.Params{
-		botparams.NewNamespaceParam(cmd.input[1]),
-		botparams.NewEnvironmentParam(cmd.input[3]),
-	}
+	cmd.apiOptions["namespace"] = cmd.input[1]
+	cmd.apiOptions["environment"] = cmd.input[3]
 
 	return
 }
@@ -105,11 +138,6 @@ func (cmd *DeployCmd) resolveParams() {
 // resolveArgs attempts to resolve the input argument
 // be sure and use a pointer receiver here since we are modifying the receiver object
 func (cmd *DeployCmd) resolveArgs() {
-	// if we've already calculated the args, use them
-	if len(cmd.suppliedArgs) > 0 {
-		return
-	}
-
 	// haven't calculated the args and no need since they weren't supplied
 	if len(cmd.input) < 4 {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
@@ -120,7 +148,7 @@ func (cmd *DeployCmd) resolveArgs() {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
 			if suppliedArg := botargs.ResolveArgumentKV(argKV); suppliedArg != nil {
-				cmd.suppliedArgs = append(cmd.suppliedArgs, suppliedArg)
+				cmd.apiOptions[suppliedArg.Name()] = suppliedArg.Value()
 			} else {
 				cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", argKV))
 			}

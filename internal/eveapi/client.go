@@ -27,7 +27,6 @@ type Config struct {
 
 type Client interface {
 	Deploy(ctx context.Context, req DeploymentPlanOptions) (*DeployResponse, error)
-	Migrate() (*MigrateResponse, error)
 }
 
 type client struct {
@@ -86,8 +85,4 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions) (*DeployR
 		return nil, fmt.Errorf("an error occurred while trying to call eve-api deploy: %s", failure)
 	}
 
-}
-
-func (c *client) Migrate() (*MigrateResponse, error) {
-	return nil, nil
 }

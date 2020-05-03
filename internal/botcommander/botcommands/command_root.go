@@ -18,10 +18,12 @@ func NewRootCmd() EvebotCommand {
 		examples:       bothelp.Examples{},
 		async:          false,
 		optionalArgs:   botargs.Args{},
-		suppliedArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
-		suppliedParams: botparams.Params{},
 	}}
+}
+
+func (cmd RootCmd) EveReqObj() interface{} {
+	return nil
 }
 
 func (cmd RootCmd) ErrMsg() string {

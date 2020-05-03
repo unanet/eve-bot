@@ -8,6 +8,7 @@ import (
 type Arg interface {
 	Name() string
 	Description() string
+	Value() interface{}
 }
 
 type Args []Arg

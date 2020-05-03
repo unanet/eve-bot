@@ -18,6 +18,7 @@ type EvebotCommand interface {
 	MakeAsyncReq() bool
 	AckMsg(userID string) string
 	ErrMsg() string
+	EveReqObj() interface{}
 }
 
 //
@@ -69,16 +70,21 @@ func baseErrMsg(errs []error) string {
 }
 
 type baseCommand struct {
-	input          []string
-	name           string
-	async          bool
-	valid          bool
-	errs           []error
-	summary        bothelp.Summary
-	usage          bothelp.Usage
-	optionalArgs   botargs.Args // these are used for the help command
-	suppliedArgs   botargs.Args // these are the actual supplied args from the user
-	examples       bothelp.Examples
-	requiredParams botparams.Params // these are used so we know what the user should supply
-	suppliedParams botparams.Params // these are used so we know what the user actually supplied
+	input    []string
+	name     string
+	async    bool
+	valid    bool
+	errs     []error
+	summary  bothelp.Summary
+	usage    bothelp.Usage
+	examples bothelp.Examples
+
+	// these are used for the help command
+	optionalArgs botargs.Args
+
+	// these are used so we know what the user should supply
+	requiredParams botparams.Params
+
+	// when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
+	apiOptions map[string]interface{}
 }

@@ -1,5 +1,9 @@
 package botparams
 
+const (
+	NamespaceName = "namespace"
+)
+
 type Namespace struct {
 	baseParam
 }
@@ -12,9 +16,13 @@ func (e Namespace) Description() string {
 	return e.description
 }
 
+func (e Namespace) Value() string {
+	return e.value
+}
+
 func DefaultNamespace() Namespace {
 	return Namespace{baseParam{
-		name:        "namespace",
+		name:        NamespaceName,
 		description: "the namespace where the resource lives (i.e. k8s namespaces)",
 	}}
 }

@@ -1,5 +1,9 @@
 package botparams
 
+const (
+	EnvironmentName = "environment"
+)
+
 type Environment struct {
 	baseParam
 }
@@ -12,9 +16,13 @@ func (e Environment) Description() string {
 	return e.description
 }
 
+func (e Environment) Value() string {
+	return e.value
+}
+
 func DefaultEnvironment() Environment {
 	return Environment{baseParam{
-		name:        "environment",
+		name:        EnvironmentName,
 		description: "the environment where the resource lives (i.e. dev,int,qa,stage,perf,prod)",
 	}}
 }

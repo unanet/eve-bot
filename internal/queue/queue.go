@@ -1,4 +1,4 @@
-package botqueue
+package queue
 
 import (
 	"os"

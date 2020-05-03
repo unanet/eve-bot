@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -25,13 +24,6 @@ type Config struct {
 	SlackVerificationToken    string `split_words:"true" required:"true"`
 	SlackUserOauthAccessToken string `split_words:"true" required:"true"`
 	SlackOauthAccessToken     string `split_words:"true" required:"true"`
-}
-
-// These map groups to channel
-// eve-api will send me "some" kind of group/identifier (probably the queue name or group)
-// we then map a group to a slack channel for notification
-var groupChannelMap = map[string]string{
-	"infocus": "G0123P9K9ST",
 }
 
 // Provider provides access to the Slack Client
@@ -115,32 +107,6 @@ func newBlockMsgOpt(text string) slack.MsgOption {
 		slack.NewDividerBlock())
 }
 
-func (p *Provider) HandleEveEvent(req *http.Request) error {
-	ee := EveEvent{}
-
-	err := json.NewDecoder(req.Body).Decode(&ee)
-	if err != nil {
-		return &errors.RestError{
-			Code:          400,
-			Message:       "invalid request body",
-			OriginalError: err,
-		}
-	}
-
-	ee.CreatedAt = time.Now().UTC()
-	slackChannel := groupChannelMap[ee.Group]
-
-	if len(slackChannel) == 0 {
-		return &errors.RestError{
-			Code:    406,
-			Message: "invalid group name",
-		}
-	}
-
-	p.Client.PostMessage(slackChannel, slack.MsgOptionText(ee.Message, false))
-	return nil
-}
-
 // HandleEvent takes an http request and handles the Slack API Event
 // this is where we do our request signature validation
 // ..and switch the incoming api event types
@@ -158,6 +124,7 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 			},
 		),
 	)
+
 	if err != nil {
 		return nil, botError(err, "failed parse slack event", http.StatusNotAcceptable)
 	}
@@ -177,7 +144,13 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 			// Resolve the input and return a Command object
 			cmd := p.CommandResolver.Resolve(ev.Text)
 			// Send the immediate Acknowledgement Message back to the chat user
-			p.Client.PostMessage(ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
+			p.Client.PostMessageContext(req.Context(), ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
+
+			// Call API in separate Go Routine
+			go func() {
+
+			}()
+
 			// cmd.WorkRequest handles sync vs async
 			// Make the work Request to API here:
 			//p.Client.PostMessage(ev.Channel, slack.MsgOptionText(cmd.WorkRequest(ev.Channel, ev.User), false))

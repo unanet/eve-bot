@@ -12,6 +12,10 @@ func NewHelpCommand(cmdFields []string) EvebotCommand {
 	return cmd
 }
 
+func (cmd HelpCmd) EveReqObj() interface{} {
+	return nil
+}
+
 type HelpCmd struct {
 	baseCommand
 }
@@ -26,9 +30,7 @@ func defaultHelpCommand() HelpCmd {
 		examples:       bothelp.Examples{},
 		async:          false,
 		optionalArgs:   botargs.Args{},
-		suppliedArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
-		suppliedParams: botparams.Params{},
 	}}
 }
 

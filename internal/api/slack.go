@@ -27,19 +27,6 @@ func (c SlackController) Setup(r chi.Router) {
 	r.Post("/slack-events", c.slackEventHandler)
 	r.Post("/slack-interactive", c.slackInteractiveHandler)
 	r.Post("/eve-callback", c.eveCallbackHandler)
-	r.Post("/eve-event", c.eveEventHandler)
-}
-
-// This is where eve-api calls us
-func (c SlackController) eveEventHandler(w http.ResponseWriter, r *http.Request) {
-	if err := c.slackProvider.HandleEveEvent(r); err != nil {
-		render.Respond(w, r, errors.Wrap(err))
-		return
-	}
-	// Just returning an empty response here...
-	render.Respond(w, r, nil)
-	return
-
 }
 
 func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {

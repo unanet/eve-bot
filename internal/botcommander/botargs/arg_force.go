@@ -4,10 +4,18 @@ package botargs
 	ARGUMENT: Force
 */
 
+const (
+	ForceDeployName = "force"
+)
+
 type Force bool
 
 func (a Force) Name() string {
-	return "force"
+	return ForceDeployName
+}
+
+func (a Force) Value() interface{} {
+	return bool(a)
 }
 
 func (a Force) Description() string {

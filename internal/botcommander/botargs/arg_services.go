@@ -1,10 +1,18 @@
 package botargs
 
-import "strings"
+import (
+	"strings"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+)
 
 /*
 	ARGUMENT: Services
 */
+
+const (
+	ServicesName = "services"
+)
 
 type Service struct {
 	Name, Version string
@@ -13,11 +21,24 @@ type Service struct {
 type Services []Service
 
 func (ebas Services) Name() string {
-	return "services"
+	return ServicesName
 }
 
 func (ebas Services) Description() string {
 	return "comma separated list of services with name:version syntax (version is optional)"
+}
+
+func (ebas Services) Value() interface{} {
+	var artifactDefs []eveapi.ArtifactDefinition
+
+	for _, v := range ebas {
+		artifactDefs = append(artifactDefs, eveapi.ArtifactDefinition{
+			Name:             v.Name,
+			RequestedVersion: v.Version,
+		})
+	}
+
+	return artifactDefs
 }
 
 func DefaultServicesArg() Services {

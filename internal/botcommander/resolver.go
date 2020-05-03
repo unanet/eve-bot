@@ -3,6 +3,9 @@ package botcommander
 import (
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 )
 
@@ -31,18 +34,19 @@ func (ebr *EvebotResolver) Resolve(input string) botcommands.EvebotCommand {
 
 	cmdFields := msgFields[1:]
 
-	// Don't have a clever way to register the commands into this map
-	// so make sure after you create new command, you add the New func
-	// to the map so that is get's picked up here! Boom!
-	newCmdFunc := botcommands.CommandInitializerMap[cmdFields[0]]
+	// make sure after you create new command, you add the New func
+	// to the map so that is get's picked up here!
+	newCmdFuncInterface := botcommands.CommandInitializerMap[cmdFields[0]]
 
-	// I know this is magic! And fucking beautiful if you ask me! :)
-	// Just make sure your New Command func follows the standard signature
+	// Just make sure your New Command func follows the standard New Command signature
 	// =======> func NewCmd(input []string) EvebotCommand { }
-	if newCmdFunc != nil {
-		return newCmdFunc.(func([]string) botcommands.EvebotCommand)(cmdFields)
+	if newCmdFuncInterface != nil {
+		if newCmdFuncVal, ok := newCmdFuncInterface.(func([]string) botcommands.EvebotCommand); ok {
+			return newCmdFuncVal(cmdFields)
+		}
+		// this is bad - we will want to be alerted on this error
+		log.Logger.Error("invalid new command initializer func", zap.String("input", cmdFields[0]))
 	}
 
 	return botcommands.NewInvalidCommand(cmdFields)
-
 }

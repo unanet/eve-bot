@@ -1,13 +1,23 @@
 package botargs
 
+import "strings"
+
 /*
 	ARGUMENT: Databases
 */
 
+const (
+	DatabasesName = "databases"
+)
+
 type Databases []string
 
 func (a Databases) Name() string {
-	return "databases"
+	return DatabasesName
+}
+
+func (a Databases) Value() interface{} {
+	return strings.Join(a, ",")
 }
 
 func (a Databases) Description() string {

@@ -4,10 +4,18 @@ package botargs
 	ARGUMENT: Dryrun
 */
 
+const (
+	DryrunName = "dryrun"
+)
+
 type Dryrun bool
 
 func (a Dryrun) Name() string {
-	return "dryrun"
+	return DryrunName
+}
+
+func (a Dryrun) Value() interface{} {
+	return bool(a)
 }
 
 func (a Dryrun) Description() string {

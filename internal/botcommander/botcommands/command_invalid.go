@@ -27,10 +27,12 @@ func defaultInvalidCommand() InvalidCmd {
 		examples:       bothelp.Examples{},
 		async:          false,
 		optionalArgs:   botargs.Args{},
-		suppliedArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
-		suppliedParams: botparams.Params{},
 	}}
+}
+
+func (cmd InvalidCmd) EveReqObj() interface{} {
+	return nil
 }
 
 func (cmd InvalidCmd) ErrMsg() string {

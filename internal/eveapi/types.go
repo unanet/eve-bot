@@ -31,9 +31,11 @@ type DeploymentPlanOptions struct {
 }
 
 type ArtifactDefinition struct {
+	ID               int    `json:"id"`
 	Name             string `json:"name"`
 	RequestedVersion string `json:"requested_version,omitempty"`
 	AvailableVersion string `json:"available_version"`
 	ArtifactoryFeed  string `json:"artifactory_feed"`
 	ArtifactoryPath  string `json:"artifactory_path"`
+	Matched          bool   `json:"-"`
 }

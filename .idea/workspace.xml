@@ -28,6 +28,32 @@
     <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.kube/ingress.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.kube/ingress.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.kube/manifest.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.kube/manifest.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/eve-bot/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/eve-bot/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/api/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/api/slack.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botargs/arg.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botargs/arg.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botargs/arg_databases.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botargs/arg_databases.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botargs/arg_dryrun.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botargs/arg_dryrun.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botargs/arg_force.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botargs/arg_force.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botargs/arg_services.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botargs/arg_services.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botcommands/command.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botcommands/command.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botcommands/command_deploy.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botcommands/command_deploy.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botcommands/command_help.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botcommands/command_help.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botcommands/command_invalid.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botcommands/command_invalid.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botcommands/command_migrate.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botcommands/command_migrate.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botcommands/command_root.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botcommands/command_root.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botparams/param.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botparams/param.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botparams/param_environment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botparams/param_environment.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botparams/param_namespace.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/botparams/param_namespace.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/botqueue/botqueue.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/botcommander/resolver.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/botcommander/resolver.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/eveapi/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/eveapi/client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/eveapi/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/eveapi/types.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/slack/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/slack/slack.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/slack/types.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +108,7 @@
       <recent name="$PROJECT_DIR$/internal/api" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Go Test.TestEvebotResolver_Resolve in gitlab.unanet.io/devops/eve-bot/internal/botcommander">
     <configuration name="eve-bot" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="eve-bot" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -96,6 +122,22 @@
       <directory value="$PROJECT_DIR$/" />
       <method v="2" />
     </configuration>
+    <configuration name="TestEvebotResolver_Resolve in gitlab.unanet.io/devops/eve-bot/internal/botcommander" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="eve-bot" />
+      <working_directory value="$PROJECT_DIR$/internal/botcommander" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="gitlab.unanet.io/devops/eve-bot/internal/botcommander" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <pattern value="^TestEvebotResolver_Resolve$" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Test.TestEvebotResolver_Resolve in gitlab.unanet.io/devops/eve-bot/internal/botcommander" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="2" />
@@ -130,6 +172,10 @@
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
     <state x="3531" y="344" key="#Notifications/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587700023545" />
+    <state x="3346" y="100" key="#TestEvebotResolver_Resolve_in_gitlab.unanet.io/devops/eve-bot/internal/botcommander" timestamp="1588533853384">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state x="3346" y="100" key="#TestEvebotResolver_Resolve_in_gitlab.unanet.io/devops/eve-bot/internal/botcommander/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588533853384" />
     <state x="2104" y="-93" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586826610454">
       <screen x="1680" y="-283" width="1920" height="1057" />
     </state>
@@ -150,6 +196,22 @@
       <screen x="1680" y="-283" width="1920" height="1057" />
     </state>
     <state x="2505" y="-23" key="EnvironmentVariablesDialog/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586826578082" />
+    <state width="1678" height="409" key="GridCell.Tab.0.bottom" timestamp="1588536790837">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state width="1678" height="409" key="GridCell.Tab.0.bottom/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588536790837" />
+    <state width="1678" height="409" key="GridCell.Tab.0.center" timestamp="1588536790837">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state width="1678" height="409" key="GridCell.Tab.0.center/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588536790837" />
+    <state width="1678" height="409" key="GridCell.Tab.0.left" timestamp="1588536790836">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state width="1678" height="409" key="GridCell.Tab.0.left/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588536790836" />
+    <state width="1678" height="409" key="GridCell.Tab.0.right" timestamp="1588536790837">
+      <screen x="1920" y="-234" width="3440" height="1417" />
+    </state>
+    <state width="1678" height="409" key="GridCell.Tab.0.right/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588536790837" />
     <state x="2760" y="-10" key="SettingsEditor" timestamp="1587872420597">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
@@ -159,10 +221,10 @@
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1680.1027@0.23.1680.1027" timestamp="1586746591000" />
-    <state x="3346" y="110" width="588" height="729" key="find.popup" timestamp="1588464170702">
+    <state x="3345" y="110" width="588" height="729" key="find.popup" timestamp="1588530282229">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
-    <state x="3346" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588464170702" />
+    <state x="3345" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588530282229" />
     <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1588036185635">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>

@@ -40,34 +40,24 @@ func defaultMigrateCommand() MigrateCmd {
 		},
 		async:          true,
 		optionalArgs:   botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultDatabasesArg()},
-		suppliedArgs:   botargs.Args{},
 		requiredParams: botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
-		suppliedParams: botparams.Params{},
 	}}
 }
 
 func (cmd *MigrateCmd) resolveParams() {
-	if len(cmd.suppliedParams) > 0 {
-		return
-	}
+
 	if len(cmd.input) < 4 {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return
 	}
-	cmd.suppliedParams = append(
-		cmd.suppliedParams,
-		botparams.NewNamespaceParam(cmd.input[1]),
-		botparams.NewEnvironmentParam(cmd.input[3]),
-	)
+
+	cmd.apiOptions[botparams.NamespaceName] = cmd.input[1]
+	cmd.apiOptions[botparams.EnvironmentName] = cmd.input[3]
+
 	return
 }
 
 func (cmd *MigrateCmd) resolveArgs() {
-	// if we've already calculated the args, use them
-	if len(cmd.suppliedArgs) > 0 {
-		return
-	}
-
 	// haven't calculated the args and no need since they weren't supplied
 	if len(cmd.input) < 4 {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command args: %v", cmd.input))
@@ -78,7 +68,7 @@ func (cmd *MigrateCmd) resolveArgs() {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
 			if suppliedArg := botargs.ResolveArgumentKV(argKV); suppliedArg != nil {
-				cmd.suppliedArgs = append(cmd.suppliedArgs, suppliedArg)
+				cmd.apiOptions[suppliedArg.Name()] = suppliedArg.Value()
 			} else {
 				cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", cmd.input))
 			}
@@ -86,6 +76,10 @@ func (cmd *MigrateCmd) resolveArgs() {
 	}
 
 	return
+}
+
+func (cmd MigrateCmd) EveReqObj() interface{} {
+	return nil
 }
 
 func (cmd MigrateCmd) ErrMsg() string {
