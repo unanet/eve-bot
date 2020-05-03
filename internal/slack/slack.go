@@ -165,6 +165,7 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 					resp, err := p.EveAPIClient.Deploy(context.TODO(), apiReqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
 					if err != nil {
 						log.Logger.Debug("eve-api error", zap.Error(err))
+
 						p.Client.PostMessageContext(
 							context.TODO(),
 							ev.Channel,

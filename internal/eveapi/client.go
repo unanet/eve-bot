@@ -2,12 +2,16 @@ package eveapi
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
 
-	"gitlab.unanet.io/devops/eve/pkg/json"
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
+	eveerror "gitlab.unanet.io/devops/eve/pkg/errors"
+	evejson "gitlab.unanet.io/devops/eve/pkg/json"
 
 	"github.com/dghubble/sling"
 
@@ -62,7 +66,7 @@ func NewClient(cfg Config) Client {
 			Base(cfg.EveapiBaseUrl).
 			Client(httpClient).
 			Add("User-Agent", userAgent).
-			ResponseDecoder(json.NewJsonDecoder()),
+			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 
 }
@@ -85,14 +89,23 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
+		log.Logger.Error("error calling eve-api", zap.Error(err))
 		return nil, err
+	}
+
+	eveError := &eveerror.RestError{}
+	merr := json.Unmarshal([]byte(failure), eveError)
+	if merr != nil {
+		log.Logger.Error("error marshalling eve-api error", zap.Error(merr))
+		return nil, merr
 	}
 
 	switch resp.StatusCode {
 	case http.StatusOK:
 		return &success, nil
 	default:
-		return nil, fmt.Errorf("an error occurred while trying to call eve-api deploy: %s", failure)
+		log.Logger.Debug("an error occurred while trying to call eve-api deploy", zap.String("error_msg", failure))
+		return nil, eveError
 	}
 
 }
