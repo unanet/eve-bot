@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -154,7 +155,6 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 			cmd := p.CommandResolver.Resolve(ev.Text)
 			// Send the immediate Acknowledgement Message back to the chat user
 			p.Client.PostMessageContext(req.Context(), ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
-			incomingContext := req.Context()
 
 			// Call API in separate Go Routine
 			go func() {
@@ -162,16 +162,17 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 
 				switch apiReqObj.(type) {
 				case eveapi.DeploymentPlanOptions:
-					_, err := p.EveAPIClient.Deploy(incomingContext, apiReqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
+					resp, err := p.EveAPIClient.Deploy(context.TODO(), apiReqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
 					if err != nil {
 						log.Logger.Debug("eve-api error", zap.Error(err))
 						p.Client.PostMessageContext(
-							incomingContext,
+							context.TODO(),
 							ev.Channel,
 							slack.MsgOptionText(
 								fmt.Sprintf("Whoops <@%s>! I detected some *errors:*\n\n ```%v```", ev.User, err.Error()), false))
 						return
 					}
+					log.Logger.Debug("eve-api response", zap.Any("response", resp))
 				default:
 					log.Logger.Error("invalid eve api command request object")
 				}
