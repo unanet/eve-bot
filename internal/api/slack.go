@@ -1,13 +1,21 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
+	"net/http/httputil"
+
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+
+	"go.uber.org/zap"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
+	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 // Controller for slack routes
@@ -30,7 +38,32 @@ func (c SlackController) Setup(r chi.Router) {
 }
 
 func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	if err := c.slackProvider.HandleEveCallback(r); err != nil {
+	// ********************************************************************************************
+	// ****************** Debugging ***************************************************************
+	requestDump, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		render.Respond(w, r, errors.Wrap(err))
+		return
+	}
+	log.Logger.Debug("dump request body", zap.String("body", string(requestDump)))
+	// ********************************************************************************************
+	// ****************** Debugging ***************************************************************
+
+	// Extract the URL Params
+	channel := r.URL.Query().Get("channel")
+	user := r.URL.Query().Get("user")
+
+	// Get the Body
+	payload := eve.NSDeploymentPlan{}
+
+	err = json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		_ = c.slackProvider.ErrorNotification(r.Context(), user, channel, err)
+		render.Respond(w, r, errors.Wrap(err))
+		return
+	}
+
+	if err := c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload}); err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}

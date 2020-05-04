@@ -4,96 +4,28 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
-
-	"gitlab.unanet.io/devops/eve/pkg/eve"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander"
-	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
 )
 
-// Config needed for slack
-//		EVEBOT_SLACK_SIGNING_SECRET
-//		EVEBOT_SLACK_VERIFICATION_TOKEN
-//		EVEBOT_SLACK_USER_OAUTH_ACCESS_TOKEN
-//		EVEBOT_SLACK_OAUTH_ACCESS_TOKEN
-type Config struct {
-	SlackSigningSecret        string `split_words:"true" required:"true"`
-	SlackVerificationToken    string `split_words:"true" required:"true"`
-	SlackUserOauthAccessToken string `split_words:"true" required:"true"`
-	SlackOauthAccessToken     string `split_words:"true" required:"true"`
-}
-
-// Provider provides access to the Slack Client
-type Provider struct {
-	Client          *slack.Client
-	CommandResolver botcommander.Resolver
-	EveAPIClient    eveapi.Client
-	cfg             Config
-}
-
-var (
-	callBackURL string
-)
-
-// NewProvider creates a new provider
-func NewProvider(sClient *slack.Client, commander botcommander.Resolver, eveAPIClient eveapi.Client, cfg Config) *Provider {
-	callBackURL = eveAPIClient.CallBackURL()
-	return &Provider{
-		Client:          sClient,
-		CommandResolver: commander,
-		EveAPIClient:    eveAPIClient,
-		cfg:             cfg,
-	}
-}
-
-func botError(oerr error, msg string, status int) error {
-	log.Logger.Debug("EveBot Error", zap.Error(oerr))
-	return &errors.RestError{
-		Code:          status,
-		Message:       msg,
-		OriginalError: oerr,
-	}
+func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, err error) error {
+	slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%v```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", user, err.Error())
+	_, _, _ = p.Client.PostMessageContext(
+		ctx,
+		channel,
+		slack.MsgOptionText(slackErrMsg, false))
+	return nil
 }
 
 // HandleEveCallback handles the callbacks from eve-api
-func (p *Provider) HandleEveCallback(req *http.Request) error {
-
-	channel := req.URL.Query().Get("channel")
-	user := req.URL.Query().Get("user")
-
-	// Save a copy of this request for debugging.
-	requestDump, err := httputil.DumpRequest(req, true)
-	if err != nil {
-		log.Logger.Error("dump request error", zap.Error(err))
-		return err
-	}
-	log.Logger.Debug("dump request body", zap.String("body", string(requestDump)))
-
-	payload := eve.NSDeploymentPlan{}
-
-	err = json.NewDecoder(req.Body).Decode(&payload)
-	if err != nil {
-		log.Logger.Error("eve-callback failed json decode", zap.Error(err))
-		slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%v```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", user, err.Error())
-		p.Client.PostMessageContext(req.Context(), channel, slack.MsgOptionText(slackErrMsg, false))
-		return err
-	}
-
-	p.Client.PostMessageContext(req.Context(), channel, slack.MsgOptionText("made it", false))
-
-	log.Logger.Debug("user params", zap.Any("val", user))
-	log.Logger.Debug("channel params", zap.Any("val", channel))
-	log.Logger.Debug("body params", zap.Any("val", payload))
-
+func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) error {
+	_, _, _ = p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.SlackMsg(), false))
 	return nil
 }
 
@@ -107,32 +39,6 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 
 	fmt.Printf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value)
 	return nil
-}
-
-func (p *Provider) validateSlackRequest(req *http.Request) ([]byte, error) {
-	verifier, err := slack.NewSecretsVerifier(req.Header, p.cfg.SlackSigningSecret)
-	if err != nil {
-		return []byte{}, botError(err, "failed new secret verifier", http.StatusUnauthorized)
-	}
-
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return []byte{}, botError(err, "failed readAll req body", http.StatusBadRequest)
-	}
-
-	_, err = verifier.Write(body)
-	if err != nil {
-		return []byte{}, botError(err, "failed verifier write", http.StatusUnauthorized)
-	}
-
-	err = verifier.Ensure()
-	if err != nil {
-		// Sending back a Teapot StatusCode here (418)
-		// These are requests from bad actors
-		return []byte{}, botError(err, "failed verifier ensure", http.StatusTeapot)
-	}
-
-	return body, nil
 }
 
 func newBlockMsgOpt(text string) slack.MsgOption {
@@ -152,7 +58,7 @@ func newBlockMsgOpt(text string) slack.MsgOption {
 // this is where we do our request signature validation
 // ..and switch the incoming api event types
 func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
-	body, err := p.validateSlackRequest(req)
+	body, err := validateSlackRequest(req)
 	if err != nil {
 		log.Logger.Debug("Validate Slack Request Error", zap.Error(err))
 		return nil, err
@@ -211,9 +117,8 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 
 			}()
 
-			// cmd.WorkRequest handles sync vs async
-			// Make the work Request to API here:
-			//p.Client.PostMessage(ev.Channel, slack.MsgOptionText(cmd.WorkRequest(ev.Channel, ev.User), false))
+			// Immediately respond to the Slack HTTP Request.
+			// This doesn't actually do anything except free up the incoming request
 			return "OK", nil
 		}
 	default:
