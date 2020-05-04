@@ -89,16 +89,20 @@ func apiMessages(msgs []string) string {
 	return infoHeader + infoMsgs + "```\n"
 }
 
+func environmentNamespaceMsg(env, ns string) string {
+	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s```\n\n", ns, env)
+}
+
 func (cbs *CallbackState) SlackMsgHeader() string {
 	switch cbs.Payload.Status {
 	case eve.DeploymentPlanStatusComplete:
-		return fmt.Sprintf("<@%s>, your deployment is complete...\n\nNamespace: *%s*		Environment: *%s*\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
+		return fmt.Sprintf("<@%s>, your deployment is complete...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	case eve.DeploymentPlanStatusErrors:
-		return fmt.Sprintf("<@%s>, we encountered some errors during the deployment...\n\nNamespace: *%s*		Environment: *%s*\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
+		return fmt.Sprintf("<@%s>, we encountered some errors during the deployment...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	case eve.DeploymentPlanStatusDryrun:
-		return fmt.Sprintf("<@%s>, here's your *dryrun* results ...\n\nNamespace: *%s*		Environment: *%s*\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
+		return fmt.Sprintf("<@%s>, here's your *dryrun* results ...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	case eve.DeploymentPlanStatusPending:
-		return fmt.Sprintf("<@%s>, your deployment is pending. Here's the plan...\n\nNamespace: *%s*		Environment: *%s*\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
+		return fmt.Sprintf("<@%s>, your deployment is pending. Here's the plan...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	default:
 		return ""
 	}
