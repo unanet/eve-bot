@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 
@@ -66,6 +67,14 @@ func botError(oerr error, msg string, status int) error {
 // HandleEveCallback handles the callbacks from eve-api
 func (p *Provider) HandleEveCallback(req *http.Request) error {
 
+	// Save a copy of this request for debugging.
+	requestDump, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		log.Logger.Error("dump request error", zap.Error(err))
+		return err
+	}
+	log.Logger.Debug("dump request body", zap.String("body", string(requestDump)))
+
 	cbState := &eveapi.CallbackState{
 		Channel: req.URL.Query().Get("channel"),
 		User:    req.URL.Query().Get("user"),
@@ -73,9 +82,11 @@ func (p *Provider) HandleEveCallback(req *http.Request) error {
 
 	payload := eve.NSDeploymentPlan{}
 
-	err := json.NewDecoder(req.Body).Decode(&payload)
+	err = json.NewDecoder(req.Body).Decode(&payload)
 	if err != nil {
 		log.Logger.Error("eve-callback failed json decode", zap.Error(err))
+		slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened \n*errors:*\n\n ```%v```\n\nI've dispatched a semi-competent hoard of engineers to battle the issue...", cbState.User, err.Error())
+		p.Client.PostMessageContext(req.Context(), cbState.Channel, slack.MsgOptionText(slackErrMsg, false))
 		return err
 	}
 
