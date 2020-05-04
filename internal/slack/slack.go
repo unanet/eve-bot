@@ -25,17 +25,7 @@ func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, 
 
 // HandleEveCallback handles the callbacks from eve-api
 func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) error {
-
-	msgTxtOpt := slack.MsgOptionText(cbState.SlackMsgHeader()+cbState.SlackMsgResults(), false)
-
-	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, msgTxtOpt)
-	if err != nil {
-		log.Logger.Error("slack message error", zap.Error(err))
-		return p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
-	}
-
-	resultOpt := newBlockMsgOpt(cbState.SlackMsgHeader() + cbState.SlackMsgResults())
-	_, _, err = p.Client.PostMessageContext(ctx, cbState.Channel, resultOpt)
+	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.SlackMsgHeader()+cbState.SlackMsgResults(), false))
 	if err != nil {
 		log.Logger.Error("slack message error", zap.Error(err))
 		return p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
