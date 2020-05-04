@@ -28,7 +28,7 @@ const (
 type Config struct {
 	EveapiBaseUrl     string        `split_words:"true" required:"true"`
 	EveapiTimeout     time.Duration `split_words:"true" default:"20s"`
-	EveapiCallbackUrl string        `split_words:"true" default:"localhost:3000/eve-callback"`
+	EveapiCallbackUrl string        `split_words:"true" required:"true"`
 }
 
 type Client interface {
@@ -92,13 +92,6 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 		log.Logger.Error("error calling eve-api", zap.Error(err))
 		return nil, err
 	}
-
-	//eveError := &eveerror.RestError{}
-	//merr := json.Unmarshal([]byte(failure), eveError)
-	//if merr != nil {
-	//	log.Logger.Error("error marshalling eve-api error", zap.Error(merr))
-	//	return nil, merr
-	//}
 
 	switch resp.StatusCode {
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted:
