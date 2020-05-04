@@ -66,6 +66,7 @@ func botError(oerr error, msg string, status int) error {
 
 // HandleEveCallback handles the callbacks from eve-api
 func (p *Provider) HandleEveCallback(req *http.Request) error {
+	var cbState eveapi.CallbackState
 
 	// Save a copy of this request for debugging.
 	requestDump, err := httputil.DumpRequest(req, true)
@@ -75,10 +76,8 @@ func (p *Provider) HandleEveCallback(req *http.Request) error {
 	}
 	log.Logger.Debug("dump request body", zap.String("body", string(requestDump)))
 
-	cbState := &eveapi.CallbackState{
-		Channel: req.URL.Query().Get("Channel"),
-		User:    req.URL.Query().Get("User"),
-	}
+	cbState.Channel = req.URL.Query().Get("Channel")
+	cbState.User = req.URL.Query().Get("User")
 
 	payload := eve.NSDeploymentPlan{}
 
