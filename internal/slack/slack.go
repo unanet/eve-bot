@@ -25,7 +25,12 @@ func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, 
 
 // HandleEveCallback handles the callbacks from eve-api
 func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) error {
-	_, _, _ = p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.SlackMsg(), false))
+
+	headerOpt := slack.MsgOptionText(cbState.SlackMsgHeader(), false)
+
+	resultOpt := newBlockMsgOpt(cbState.SlackMsgResults())
+
+	_, _, _ = p.Client.PostMessageContext(ctx, cbState.Channel, headerOpt, resultOpt)
 	return nil
 }
 
@@ -47,7 +52,7 @@ func newBlockMsgOpt(text string) slack.MsgOption {
 			slack.NewTextBlockObject(
 				slack.MarkdownType,
 				text,
-				false,
+				true,
 				false),
 			nil,
 			nil),

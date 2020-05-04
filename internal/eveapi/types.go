@@ -33,27 +33,27 @@ func artifactResultMsg(services eve.DeployServices) string {
 	failedResultsHeader := "*Failed:*\n"
 	failedResults := ""
 	noopResultsMsg := ""
-	noopResultsHeader := "*No Change:*\n"
+	//noopResultsHeader := "*No Change:*\n"
 	noopResults := ""
 	for _, svc := range services {
 		switch svc.Result {
 		case eve.DeployArtifactResultFailed:
 			if len(failedResults) == 0 {
-				failedResults = fmt.Sprintf("`%s`	(Requested:%s	Available:%s)\n", svc.ArtifactName, svc.RequestedVersion, svc.AvailableVersion)
+				failedResults = fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
 			} else {
-				failedResults = failedResults + fmt.Sprintf("`%s`	(Requested:%s	Available:%s)\n", svc.ArtifactName, svc.RequestedVersion, svc.AvailableVersion)
+				failedResults = failedResults + fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
 			}
 		case eve.DeployArtifactResultSucceeded:
 			if len(successfulResults) == 0 {
-				successfulResults = fmt.Sprintf("%s	(Requested:%s	Deployed:%s)\n", svc.ArtifactName, svc.RequestedVersion, svc.DeployedVersion)
+				successfulResults = fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.DeployedVersion)
 			} else {
-				successfulResults = successfulResults + fmt.Sprintf("%s	(Requested:%s	Deployed:%s)\n", svc.ArtifactName, svc.RequestedVersion, svc.DeployedVersion)
+				successfulResults = successfulResults + fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.DeployedVersion)
 			}
 		case eve.DeployArtifactResultNoop:
 			if len(noopResults) == 0 {
-				noopResults = fmt.Sprintf("%s	(Requested:%s	Available:%s)\n", svc.ArtifactName, svc.RequestedVersion, svc.AvailableVersion)
+				noopResults = fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
 			} else {
-				noopResults = noopResults + fmt.Sprintf("%s	(Requested:%s	Available:%s)\n", svc.ArtifactName, svc.RequestedVersion, svc.AvailableVersion)
+				noopResults = noopResults + fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 	}
 
 	if len(noopResults) > 0 {
-		noopResultsMsg = noopResultsHeader + noopResults + "\n"
+		noopResultsMsg = noopResults + "\n"
 	}
 
 	return successfulResultsMsg + failedResultsMsg + noopResultsMsg
@@ -89,23 +89,23 @@ func apiMessages(msgs []string) string {
 	return infoHeader + infoMsgs + "```\n"
 }
 
-func (cbs *CallbackState) SlackMsg() string {
+func (cbs *CallbackState) SlackMsgHeader() string {
 	switch cbs.Payload.Status {
 	case eve.DeploymentPlanStatusComplete:
-		headerMsg := fmt.Sprintf("<@%s>, *%s* deployment in *%s* is complete! Here are your results...\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
-		return headerMsg + artifactResultMsg(cbs.Payload.Services) + "\n" + apiMessages(cbs.Payload.Messages)
+		return fmt.Sprintf("<@%s>, *%s* deployment in *%s* is complete! Here are your results...\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
 	case eve.DeploymentPlanStatusErrors:
-		headerMsg := fmt.Sprintf("<@%s>, we've encountered some errors while deploying *%s* in *%s*! Here are your results...\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
-		return headerMsg + artifactResultMsg(cbs.Payload.Services) + "\n" + apiMessages(cbs.Payload.Messages)
+		return fmt.Sprintf("<@%s>, we've encountered some errors while deploying *%s* in *%s*! Here are your results...\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
 	case eve.DeploymentPlanStatusDryrun:
-		headerMsg := fmt.Sprintf("<@%s>, here's the *%s* `dryrun` results for *%s*....\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
-		return headerMsg + artifactResultMsg(cbs.Payload.Services) + "\n" + apiMessages(cbs.Payload.Messages)
+		return fmt.Sprintf("<@%s>, here's the *%s* `dryrun` results for *%s*...\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
 	case eve.DeploymentPlanStatusPending:
-		headerMsg := fmt.Sprintf("<@%s>, your *%s* deployment in *%s* is pending! Here's the plan...\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
-		return headerMsg + artifactResultMsg(cbs.Payload.Services) + "\n" + apiMessages(cbs.Payload.Messages)
+		return fmt.Sprintf("<@%s>, your *%s* deployment in *%s* is pending! Here's the plan...\n\n", cbs.User, cbs.Payload.Namespace.Alias, cbs.Payload.EnvironmentName)
 	default:
 		return ""
 	}
+}
+
+func (cbs *CallbackState) SlackMsgResults() string {
+	return artifactResultMsg(cbs.Payload.Services) + "\n\n" + apiMessages(cbs.Payload.Messages)
 }
 
 type ArtifactDefinitions []*ArtifactDefinition
