@@ -30,7 +30,9 @@ func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.C
 
 	resultOpt := newBlockMsgOpt(cbState.SlackMsgResults())
 
-	_, _, _ = p.Client.PostMessageContext(ctx, cbState.Channel, headerOpt, resultOpt)
+	p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText("Made it here", false))
+
+	p.Client.PostMessageContext(ctx, cbState.Channel, headerOpt, resultOpt)
 	return nil
 }
 
@@ -96,7 +98,7 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 			// Resolve the input and return a Command object
 			cmd := p.CommandResolver.Resolve(ev.Text)
 			// Send the immediate Acknowledgement Message back to the chat user
-			p.Client.PostMessageContext(req.Context(), ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
+			_, _, _ = p.Client.PostMessageContext(req.Context(), ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
 
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine
@@ -109,7 +111,7 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 						if err != nil {
 							log.Logger.Debug("eve-api error", zap.Error(err))
 
-							p.Client.PostMessageContext(
+							_, _, _ = p.Client.PostMessageContext(
 								context.TODO(),
 								ev.Channel,
 								slack.MsgOptionText(
