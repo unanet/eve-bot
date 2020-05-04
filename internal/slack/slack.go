@@ -84,7 +84,7 @@ func (p *Provider) HandleEveCallback(req *http.Request) error {
 	err = json.NewDecoder(req.Body).Decode(&payload)
 	if err != nil {
 		log.Logger.Error("eve-callback failed json decode", zap.Error(err))
-		slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened \n*errors:*\n\n ```%v```\n\nI've dispatched a semi-competent hoard of engineers to battle the issue...", cbState.User, err.Error())
+		slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%v```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", cbState.User, err.Error())
 		p.Client.PostMessageContext(req.Context(), cbState.Channel, slack.MsgOptionText(slackErrMsg, false))
 		return err
 	}

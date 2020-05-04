@@ -1,8 +1,8 @@
 package eveapi
 
 type CallbackState struct {
-	User    string `json:"user"`
-	Channel string `json:"channel"`
+	User    string `url:"user"`
+	Channel string `url:"channel"`
 }
 
 type EveParams struct {
