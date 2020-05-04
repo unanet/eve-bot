@@ -76,8 +76,8 @@ func (p *Provider) HandleEveCallback(req *http.Request) error {
 	log.Logger.Debug("dump request body", zap.String("body", string(requestDump)))
 
 	cbState := &eveapi.CallbackState{
-		Channel: req.URL.Query().Get("channel"),
-		User:    req.URL.Query().Get("user"),
+		Channel: req.URL.Query().Get("Channel"),
+		User:    req.URL.Query().Get("User"),
 	}
 
 	payload := eve.NSDeploymentPlan{}
