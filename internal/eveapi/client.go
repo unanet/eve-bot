@@ -41,15 +41,6 @@ type client struct {
 	sling *sling.Sling
 }
 
-type CallbackState struct {
-	User    string
-	Channel string
-}
-
-type EveParams struct {
-	State CallbackState `url:"state,omitempty"`
-}
-
 func NewClient(cfg Config) Client {
 	var httpClient = &http.Client{
 		Timeout:   cfg.EveapiTimeout,
@@ -79,7 +70,10 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 	var success DeploymentPlanOptions
 	var failure eveerror.RestError
 
-	params := &EveParams{State: CallbackState{User: slackUser, Channel: slackChannel}}
+	//params := &EveParams{State: CallbackState{User: slackUser, Channel: slackChannel}}
+
+	params := &CallbackState{User: slackUser, Channel: slackChannel}
+
 	dp.User = slackUser
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).QueryStruct(params).Request()

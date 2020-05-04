@@ -11,17 +11,9 @@ import (
 
 // adding a comment to test deploys
 func main() {
-
-	//queue.StartDispatcher(config.Values().QueueWorkers)
-
 	app, err := mux.NewApi(api.Controllers, config.Values().MuxConfig)
 	if err != nil {
 		log.Logger.Panic("Failed to Create Api App", zap.Error(err))
 	}
-	//app.Start(func() {
-	//
-	//})
-
 	app.Start()
-
 }

@@ -1,15 +1,12 @@
 package eveapi
 
-type DeployRequest struct {
+type CallbackState struct {
+	User    string `json:"user"`
+	Channel string `json:"channel"`
 }
 
-type DeployResponse struct {
-}
-
-type MigrateRequest struct {
-}
-
-type MigrateResponse struct {
+type EveParams struct {
+	State CallbackState `url:"state"`
 }
 
 type APIError struct {

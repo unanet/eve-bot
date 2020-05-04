@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
 	"github.com/slack-go/slack"
@@ -63,6 +65,25 @@ func botError(oerr error, msg string, status int) error {
 
 // HandleEveCallback handles the callbacks from eve-api
 func (p *Provider) HandleEveCallback(req *http.Request) error {
+
+	cbState := &eveapi.CallbackState{
+		Channel: req.URL.Query().Get("channel"),
+		User:    req.URL.Query().Get("user"),
+	}
+
+	payload := eve.NSDeploymentPlan{}
+
+	err := json.NewDecoder(req.Body).Decode(&payload)
+	if err != nil {
+		log.Logger.Error("eve-callback failed json decode", zap.Error(err))
+		return err
+	}
+
+	p.Client.PostMessageContext(req.Context(), cbState.Channel, slack.MsgOptionText("made it", false))
+
+	log.Logger.Debug("state params", zap.Any("val", cbState))
+	log.Logger.Debug("body params", zap.Any("val", payload))
+
 	return nil
 }
 
