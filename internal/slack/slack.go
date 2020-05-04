@@ -93,29 +93,31 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 			// Send the immediate Acknowledgement Message back to the chat user
 			p.Client.PostMessageContext(req.Context(), ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
 
-			// Call API in separate Go Routine
-			go func() {
-				apiReqObj := cmd.EveReqObj(callBackURL)
+			if cmd.MakeAsyncReq() {
+				// Call API in separate Go Routine
+				go func() {
+					apiReqObj := cmd.EveReqObj(callBackURL)
 
-				switch apiReqObj.(type) {
-				case eveapi.DeploymentPlanOptions:
-					resp, err := p.EveAPIClient.Deploy(context.TODO(), apiReqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
-					if err != nil {
-						log.Logger.Debug("eve-api error", zap.Error(err))
+					switch apiReqObj.(type) {
+					case eveapi.DeploymentPlanOptions:
+						resp, err := p.EveAPIClient.Deploy(context.TODO(), apiReqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
+						if err != nil {
+							log.Logger.Debug("eve-api error", zap.Error(err))
 
-						p.Client.PostMessageContext(
-							context.TODO(),
-							ev.Channel,
-							slack.MsgOptionText(
-								fmt.Sprintf("Whoops <@%s>! I detected some *errors:*\n\n ```%v```", ev.User, err.Error()), false))
-						return
+							p.Client.PostMessageContext(
+								context.TODO(),
+								ev.Channel,
+								slack.MsgOptionText(
+									fmt.Sprintf("Whoops <@%s>! I detected some *errors:*\n\n ```%v```", ev.User, err.Error()), false))
+							return
+						}
+						log.Logger.Debug("eve-api response", zap.Any("response", resp))
+					default:
+						log.Logger.Error("invalid eve api command request object")
 					}
-					log.Logger.Debug("eve-api response", zap.Any("response", resp))
-				default:
-					log.Logger.Error("invalid eve api command request object")
-				}
 
-			}()
+				}()
+			}
 
 			// Immediately respond to the Slack HTTP Request.
 			// This doesn't actually do anything except free up the incoming request
