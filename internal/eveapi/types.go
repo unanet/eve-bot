@@ -33,27 +33,27 @@ func artifactResultMsg(services eve.DeployServices) string {
 	failedResultsHeader := "*Failed:*\n"
 	failedResults := ""
 	noopResultsMsg := ""
-	//noopResultsHeader := "*No Change:*\n"
+	noopResultsHeader := "*Noop:*\n"
 	noopResults := ""
 	for _, svc := range services {
 		switch svc.Result {
 		case eve.DeployArtifactResultFailed:
 			if len(failedResults) == 0 {
-				failedResults = fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
+				failedResults = fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
 			} else {
-				failedResults = failedResults + fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
+				failedResults = failedResults + fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
 			}
 		case eve.DeployArtifactResultSucceeded:
 			if len(successfulResults) == 0 {
-				successfulResults = fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.DeployedVersion)
+				successfulResults = fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.DeployedVersion)
 			} else {
-				successfulResults = successfulResults + fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.DeployedVersion)
+				successfulResults = successfulResults + fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.DeployedVersion)
 			}
 		case eve.DeployArtifactResultNoop:
 			if len(noopResults) == 0 {
-				noopResults = fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
+				noopResults = fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
 			} else {
-				noopResults = noopResults + fmt.Sprintf("`%s:%s`\n", svc.ArtifactName, svc.AvailableVersion)
+				noopResults = noopResults + fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 	}
 
 	if len(noopResults) > 0 {
-		noopResultsMsg = noopResults + "\n"
+		noopResultsMsg = noopResultsHeader + noopResults + "\n"
 	}
 
 	return successfulResultsMsg + failedResultsMsg + noopResultsMsg
