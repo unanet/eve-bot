@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -72,11 +73,16 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 
 	//params := &EveParams{State: CallbackState{User: slackUser, Channel: slackChannel}}
 
-	params := &CallbackState{User: slackUser, Channel: slackChannel}
+	cbUrlVals := url.Values{}
+	cbUrlVals.Set("user", slackUser)
+	cbUrlVals.Add("channel", slackChannel)
 
+	cbURL := dp.CallbackURL + "?" + cbUrlVals.Encode()
+
+	dp.CallbackURL = cbURL
 	dp.User = slackUser
 
-	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).QueryStruct(params).Request()
+	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).Request()
 	if err != nil {
 		return nil, err
 	}
