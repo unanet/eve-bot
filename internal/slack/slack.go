@@ -28,19 +28,15 @@ func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.C
 
 	headerOpt := slack.MsgOptionText(cbState.SlackMsgHeader(), false)
 
-	resultOpt := newBlockMsgOpt(cbState.SlackMsgResults())
+	resultOpt := slack.MsgOptionText(cbState.SlackMsgResults(), false)
 
-	p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText("Made it here", false))
+	//resultOpt := newBlockMsgOpt(cbState.SlackMsgResults())
 
-	slackChan, ts, err := p.Client.PostMessageContext(ctx, cbState.Channel, headerOpt, resultOpt)
+	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, headerOpt, resultOpt)
 	if err != nil {
-		log.Logger.Error("slack ts", zap.Error(err))
-		p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(err.Error(), false))
-		return nil
+		log.Logger.Error("slack message error", zap.Error(err))
+		return p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
 	}
-
-	log.Logger.Debug("slack channel", zap.String("channel", slackChan))
-	log.Logger.Debug("slack ts", zap.String("timestamp", ts))
 
 	return nil
 }
