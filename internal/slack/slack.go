@@ -66,9 +66,9 @@ func botError(oerr error, msg string, status int) error {
 
 // HandleEveCallback handles the callbacks from eve-api
 func (p *Provider) HandleEveCallback(req *http.Request) error {
-	var cbState eveapi.CallbackState
-	cbState.Channel = req.URL.Query().Get("channel")
-	cbState.User = req.URL.Query().Get("user")
+
+	channel := req.URL.Query().Get("channel")
+	user := req.URL.Query().Get("user")
 
 	// Save a copy of this request for debugging.
 	requestDump, err := httputil.DumpRequest(req, true)
@@ -83,14 +83,15 @@ func (p *Provider) HandleEveCallback(req *http.Request) error {
 	err = json.NewDecoder(req.Body).Decode(&payload)
 	if err != nil {
 		log.Logger.Error("eve-callback failed json decode", zap.Error(err))
-		slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%v```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", cbState.User, err.Error())
-		p.Client.PostMessageContext(req.Context(), cbState.Channel, slack.MsgOptionText(slackErrMsg, false))
+		slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%v```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", user, err.Error())
+		p.Client.PostMessageContext(req.Context(), channel, slack.MsgOptionText(slackErrMsg, false))
 		return err
 	}
 
-	p.Client.PostMessageContext(req.Context(), cbState.Channel, slack.MsgOptionText("made it", false))
+	p.Client.PostMessageContext(req.Context(), channel, slack.MsgOptionText("made it", false))
 
-	log.Logger.Debug("state params", zap.Any("val", cbState))
+	log.Logger.Debug("user params", zap.Any("val", user))
+	log.Logger.Debug("channel params", zap.Any("val", channel))
 	log.Logger.Debug("body params", zap.Any("val", payload))
 
 	return nil
