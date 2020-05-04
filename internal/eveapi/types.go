@@ -33,7 +33,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 	failedResultsHeader := "*Failed:*\n"
 	failedResults := ""
 	noopResultsMsg := ""
-	noopResultsHeader := "*Noop:*\n"
+	//noopResultsHeader := "*Noop:*\n"
 	noopResults := ""
 	for _, svc := range services {
 		switch svc.Result {
@@ -67,7 +67,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 	}
 
 	if len(noopResults) > 0 {
-		noopResultsMsg = noopResultsHeader + noopResults + "\n"
+		noopResultsMsg = noopResults + "\n"
 	}
 
 	return successfulResultsMsg + failedResultsMsg + noopResultsMsg

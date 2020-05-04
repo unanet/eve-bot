@@ -26,7 +26,7 @@ func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, 
 // HandleEveCallback handles the callbacks from eve-api
 func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) error {
 
-	msg := fmt.Sprintf("%s\n*Results*\n```%s```", cbState.SlackMsgHeader(), cbState.SlackMsgResults())
+	msg := fmt.Sprintf("%s\n%s", cbState.SlackMsgHeader(), cbState.SlackMsgResults())
 
 	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(msg, false))
 	if err != nil {
