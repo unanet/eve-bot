@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
@@ -103,10 +104,10 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine
-				go func(reqObj interface{}) {
+				go func(reqObj interface{}, slackUser, slackChannel string) {
 					switch reqObj.(type) {
 					case eveapi.DeploymentPlanOptions:
-						_, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
+						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel)
 						if err != nil {
 							log.Logger.Debug("eve-api error", zap.Error(err))
 
@@ -117,10 +118,25 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 									fmt.Sprintf("Whoops <@%s>! I detected some *errors:*\n\n ```%v```", ev.User, err.Error()), false))
 							return
 						}
+
+						if resp == nil {
+							log.Logger.Error("eve-api nil response")
+							_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf("invalid api response"))
+							return
+						}
+
+						if len(resp.Messages) > 0 {
+							log.Logger.Debug("eve-api messages", zap.Strings("messages", resp.Messages))
+							_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf(strings.Join(resp.Messages, ",")))
+							return
+						}
+
 					default:
 						log.Logger.Error("invalid eve api command request object")
+						_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf("invalid request object"))
+						return
 					}
-				}(cmd.EveReqObj(callBackURL))
+				}(cmd.EveReqObj(callBackURL), ev.User, ev.Channel)
 			}
 			// Immediately respond to the Slack HTTP Request.
 			// This doesn't actually do anything except free up the incoming request
