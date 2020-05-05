@@ -39,35 +39,35 @@ func artifactResultMsg(services eve.DeployServices) string {
 		switch svc.Result {
 		case eve.DeployArtifactResultFailed:
 			if len(failedResults) == 0 {
-				failedResults = fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
+				failedResults = fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 			} else {
-				failedResults = failedResults + fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
+				failedResults = failedResults + fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 			}
 		case eve.DeployArtifactResultSucceeded:
 			if len(successfulResults) == 0 {
-				successfulResults = fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.DeployedVersion)
+				successfulResults = fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
 			} else {
-				successfulResults = successfulResults + fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.DeployedVersion)
+				successfulResults = successfulResults + fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
 			}
 		case eve.DeployArtifactResultNoop:
 			if len(noopResults) == 0 {
-				noopResults = fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
+				noopResults = fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 			} else {
-				noopResults = noopResults + fmt.Sprintf("%s:%s\n", svc.ArtifactName, svc.AvailableVersion)
+				noopResults = noopResults + fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 			}
 		}
 	}
 
 	if len(successfulResults) > 0 {
-		successfulResultsMsg = successfulResultsHeader + successfulResults + "\n"
+		successfulResultsMsg = successfulResultsHeader + successfulResults
 	}
 
 	if len(failedResults) > 0 {
-		failedResultsMsg = failedResultsHeader + failedResults + "\n"
+		failedResultsMsg = failedResultsHeader + failedResults
 	}
 
 	if len(noopResults) > 0 {
-		noopResultsMsg = noopResults + "\n"
+		noopResultsMsg = noopResults
 	}
 
 	return successfulResultsMsg + failedResultsMsg + noopResultsMsg
@@ -96,13 +96,13 @@ func environmentNamespaceMsg(env, ns string) string {
 func (cbs *CallbackState) SlackMsgHeader() string {
 	switch cbs.Payload.Status {
 	case eve.DeploymentPlanStatusComplete:
-		return fmt.Sprintf("<@%s>, your deployment is complete...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		return fmt.Sprintf("\n<@%s>, your deployment is complete...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	case eve.DeploymentPlanStatusErrors:
-		return fmt.Sprintf("<@%s>, we encountered some errors during the deployment...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		return fmt.Sprintf("\n<@%s>, we encountered some errors during the deployment...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	case eve.DeploymentPlanStatusDryrun:
-		return fmt.Sprintf("<@%s>, here's your *dryrun* results ...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		return fmt.Sprintf("\n<@%s>, here's your *dryrun* results ...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	case eve.DeploymentPlanStatusPending:
-		return fmt.Sprintf("<@%s>, your deployment is pending. Here's the plan...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		return fmt.Sprintf("\n<@%s>, your deployment is pending. Here's the plan...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 	default:
 		return ""
 	}
@@ -114,11 +114,11 @@ func (cbs *CallbackState) SlackMsgResults() string {
 	apiMsgs := apiMessages(cbs.Payload.Messages)
 
 	if len(artifactMsg) > 0 {
-		artifactMsg = "```\n" + artifactMsg + "```\n"
+		artifactMsg = "```" + artifactMsg + "```"
 	}
 
 	if len(apiMsgs) > 0 {
-		apiMsgs = "```\n" + apiMsgs + "```\n"
+		apiMsgs = "```" + apiMsgs + "```"
 	}
 
 	return artifactMsg + apiMsgs
