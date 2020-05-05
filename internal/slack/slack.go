@@ -103,12 +103,10 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine
-				go func() {
-					apiReqObj := cmd.EveReqObj(callBackURL)
-
-					switch apiReqObj.(type) {
+				go func(reqObj interface{}) {
+					switch reqObj.(type) {
 					case eveapi.DeploymentPlanOptions:
-						_, err := p.EveAPIClient.Deploy(context.TODO(), apiReqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
+						_, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), ev.User, ev.Channel)
 						if err != nil {
 							log.Logger.Debug("eve-api error", zap.Error(err))
 
@@ -122,10 +120,8 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 					default:
 						log.Logger.Error("invalid eve api command request object")
 					}
-
-				}()
+				}(cmd.EveReqObj(callBackURL))
 			}
-
 			// Immediately respond to the Slack HTTP Request.
 			// This doesn't actually do anything except free up the incoming request
 			return "OK", nil

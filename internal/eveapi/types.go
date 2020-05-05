@@ -109,7 +109,19 @@ func (cbs *CallbackState) SlackMsgHeader() string {
 }
 
 func (cbs *CallbackState) SlackMsgResults() string {
-	return "```\n" + artifactResultMsg(cbs.Payload.Services) + "```" + "\n\n" + "```\n" + apiMessages(cbs.Payload.Messages) + "```"
+
+	artifactMsg := artifactResultMsg(cbs.Payload.Services)
+	apiMsgs := apiMessages(cbs.Payload.Messages)
+
+	if len(artifactMsg) > 0 {
+		artifactMsg = "```\n" + artifactMsg + "```\n"
+	}
+
+	if len(apiMsgs) > 0 {
+		apiMsgs = "```\n" + apiMsgs + "```\n"
+	}
+
+	return artifactMsg + apiMsgs
 }
 
 type ArtifactDefinitions []*ArtifactDefinition

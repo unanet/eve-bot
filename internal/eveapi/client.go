@@ -71,15 +71,11 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 	var success DeploymentPlanOptions
 	var failure eveerror.RestError
 
-	//params := &EveParams{State: CallbackState{User: slackUser, Channel: slackChannel}}
-
 	cbUrlVals := url.Values{}
 	cbUrlVals.Set("user", slackUser)
 	cbUrlVals.Add("channel", slackChannel)
 
-	cbURL := dp.CallbackURL + "?" + cbUrlVals.Encode()
-
-	dp.CallbackURL = cbURL
+	dp.CallbackURL = dp.CallbackURL + "?" + cbUrlVals.Encode()
 	dp.User = slackUser
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).Request()
