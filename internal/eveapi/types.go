@@ -109,7 +109,7 @@ func (cbs *CallbackState) SlackMsgHeader() string {
 }
 
 func (cbs *CallbackState) SlackMsgResults() string {
-	return artifactResultMsg(cbs.Payload.Services) + "\n\n" + apiMessages(cbs.Payload.Messages)
+	return "```\n" + artifactResultMsg(cbs.Payload.Services) + "```" + "\n\n" + "```\n" + apiMessages(cbs.Payload.Messages) + "```"
 }
 
 type ArtifactDefinitions []*ArtifactDefinition
