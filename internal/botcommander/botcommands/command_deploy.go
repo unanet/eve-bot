@@ -63,6 +63,7 @@ func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
 		if artifactDefs, ok := val.([]eveapi.ArtifactDefinition); ok {
 			opts.Artifacts = artifactDefs
 		} else {
+
 			return nil
 		}
 	}

@@ -74,19 +74,19 @@ func artifactResultMsg(services eve.DeployServices) string {
 }
 
 func apiMessages(msgs []string) string {
-	infoHeader := "*Info:*\n"
+	infoHeader := "Info:\n"
 	infoMsgs := ""
 	for _, msg := range msgs {
 		if len(infoMsgs) == 0 {
-			infoMsgs = "```\n- " + msg + "\n"
+			infoMsgs = "\n- " + msg
 		} else {
-			infoMsgs = infoMsgs + "- " + msg + "\n"
+			infoMsgs = infoMsgs + "\n- " + msg
 		}
 	}
 	if len(infoMsgs) == 0 {
 		return ""
 	}
-	return infoHeader + infoMsgs + "```\n"
+	return infoHeader + infoMsgs
 }
 
 func environmentNamespaceMsg(env, ns string) string {
