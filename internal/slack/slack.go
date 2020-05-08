@@ -92,6 +92,11 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine
 				go func(reqObj interface{}, slackUser, slackChannel string) {
+					if reqObj == nil {
+						log.Logger.Error("eve api request object is nil")
+						_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf("invalid request object"))
+						return
+					}
 					switch reqObj.(type) {
 					case eveapi.DeploymentPlanOptions:
 						log.Logger.Debug("eve-api req", zap.Any("req", reqObj.(eveapi.DeploymentPlanOptions)))
