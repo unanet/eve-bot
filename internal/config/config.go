@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	values *Config
-	mutex  = sync.Mutex{}
+	cfg   *Config
+	mutex = sync.Mutex{}
 )
 
 type (
@@ -36,18 +36,33 @@ type Config struct {
 	EveAPIConfig
 }
 
-// Values returns the environmental config values (prefix: EVEBOT_)
-func Values() *Config {
+func GetConfig() Config {
 	mutex.Lock()
 	defer mutex.Unlock()
-	if values != nil {
-		return values
+	if cfg != nil {
+		return *cfg
 	}
 	c := Config{}
 	err := envconfig.Process("EVEBOT", &c)
 	if err != nil {
 		log.Logger.Panic("Unable to Load Config", zap.Error(err))
 	}
-	values = &c
-	return values
+	cfg = &c
+	return *cfg
+}
+
+// Values returns the environmental config values (prefix: EVEBOT_)
+func Values() *Config {
+	mutex.Lock()
+	defer mutex.Unlock()
+	if cfg != nil {
+		return cfg
+	}
+	c := Config{}
+	err := envconfig.Process("EVEBOT", &c)
+	if err != nil {
+		log.Logger.Panic("Unable to Load Config", zap.Error(err))
+	}
+	cfg = &c
+	return cfg
 }

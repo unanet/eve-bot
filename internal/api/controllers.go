@@ -9,15 +9,14 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/mux"
 )
 
-// Controllers contains all of the route controller (handlers)
-var Controllers = []mux.EveController{
-	NewPingController(),
-	NewSlackController(
-		islack.NewProvider(
-			slack.New(config.Values().SlackUserOauthAccessToken),
-			botcommander.NewResolver(),
-			eveapi.NewClient(config.Values().EveAPIConfig),
-			config.Values().SlackConfig,
-		),
-	),
+func InitController(c config.Config) []mux.EveController {
+	botCommResolver := botcommander.NewResolver()
+	eveApiClient := eveapi.NewClient(c.EveAPIConfig)
+	slackClient := slack.New(c.SlackUserOauthAccessToken)
+	slackProvider := islack.NewProvider(slackClient, botCommResolver, eveApiClient, c.SlackConfig)
+
+	return []mux.EveController{
+		NewPingController(),
+		NewSlackController(slackProvider),
+	}
 }
