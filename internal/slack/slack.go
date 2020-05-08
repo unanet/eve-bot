@@ -50,19 +50,6 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	return nil
 }
 
-func newBlockMsgOpt(text string) slack.MsgOption {
-	return slack.MsgOptionBlocks(
-		slack.NewSectionBlock(
-			slack.NewTextBlockObject(
-				slack.MarkdownType,
-				text,
-				true,
-				false),
-			nil,
-			nil),
-		slack.NewDividerBlock())
-}
-
 // HandleEvent takes an http request and handles the Slack API Event
 // this is where we do our request signature validation
 // ..and switch the incoming api event types
@@ -107,6 +94,7 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 				go func(reqObj interface{}, slackUser, slackChannel string) {
 					switch reqObj.(type) {
 					case eveapi.DeploymentPlanOptions:
+						log.Logger.Debug("eve-api req", zap.Any("req", reqObj.(eveapi.DeploymentPlanOptions)))
 						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel)
 						if err != nil {
 							log.Logger.Debug("eve-api error", zap.Error(err))

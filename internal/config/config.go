@@ -3,9 +3,8 @@ package config
 import (
 	"sync"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-
 	"github.com/kelseyhightower/envconfig"
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"gitlab.unanet.io/devops/eve/pkg/mux"
@@ -36,7 +35,7 @@ type Config struct {
 	EveAPIConfig
 }
 
-func GetConfig() Config {
+func Load() Config {
 	mutex.Lock()
 	defer mutex.Unlock()
 	if cfg != nil {
@@ -49,20 +48,4 @@ func GetConfig() Config {
 	}
 	cfg = &c
 	return *cfg
-}
-
-// Values returns the environmental config values (prefix: EVEBOT_)
-func Values() *Config {
-	mutex.Lock()
-	defer mutex.Unlock()
-	if cfg != nil {
-		return cfg
-	}
-	c := Config{}
-	err := envconfig.Process("EVEBOT", &c)
-	if err != nil {
-		log.Logger.Panic("Unable to Load Config", zap.Error(err))
-	}
-	cfg = &c
-	return cfg
 }

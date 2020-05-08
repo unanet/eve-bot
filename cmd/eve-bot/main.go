@@ -10,7 +10,7 @@ import (
 
 // adding a comment to test deploys
 func main() {
-	cfg := config.GetConfig()
+	cfg := config.Load()
 
 	app, err := mux.NewApi(api.InitController(cfg), cfg.MuxConfig)
 	if err != nil {
