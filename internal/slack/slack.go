@@ -147,11 +147,3 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 	}
 	return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
 }
-
-//	queue.WorkQueue <- queue.WorkRequest{
-//		Name:    ev.Channel,
-//		User:    ev.User,
-//		Channel: ev.Channel,
-//		EveType: cmd.Name(),
-//		Delay:   time.Second * 60, // Just for testing/simulation
-//	}
