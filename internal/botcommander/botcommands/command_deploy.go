@@ -55,38 +55,48 @@ func defaultDeployCommand() DeployCmd {
 //Type        string              `json:"type"`
 func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
 
-	opts := eveapi.DeploymentPlanOptions{
-		CallbackURL: cbURL,
-		Type:        "application",
-	}
+	// The deploy command type is 'application'
+	// the migration command type is 'migration'
+	opts := eveapi.DeploymentPlanOptions{CallbackURL: cbURL, Type: "application"}
 
 	if val, ok := cmd.apiOptions[botargs.ServicesName]; ok {
-		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
+		if artifactDefs, ok := val.([]eveapi.ArtifactDefinition); ok {
 			opts.Artifacts = artifactDefs
 		} else {
 			return nil
 		}
-		//if artifactDefs, ok := val.([]eveapi.ArtifactDefinition); ok {
-		//	opts.Artifacts = artifactDefs
-		//} else {
-		//	return nil
-		//}
 	}
 
 	if val, ok := cmd.apiOptions[botargs.ForceDeployName]; ok {
-		opts.ForceDeploy = val.(bool)
+		if forceDepVal, ok := val.(bool); ok {
+			opts.ForceDeploy = forceDepVal
+		} else {
+			return nil
+		}
 	}
 
 	if val, ok := cmd.apiOptions[botargs.DryrunName]; ok {
-		opts.DryRun = val.(bool)
+		if dryRunVal, ok := val.(bool); ok {
+			opts.DryRun = dryRunVal
+		} else {
+			return nil
+		}
 	}
 
 	if val, ok := cmd.apiOptions[botparams.EnvironmentName]; ok {
-		opts.Environment = val.(string)
+		if envVal, ok := val.(string); ok {
+			opts.Environment = envVal
+		} else {
+			return nil
+		}
 	}
 
 	if val, ok := cmd.apiOptions[botparams.NamespaceName]; ok {
-		opts.Namespaces = []string{val.(string)}
+		if nsVal, ok := val.(string); ok {
+			opts.Namespaces = []string{nsVal}
+		} else {
+			return nil
+		}
 	}
 
 	return opts
