@@ -61,7 +61,7 @@ func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
 	}
 
 	if val, ok := cmd.apiOptions[botargs.ServicesName]; ok {
-		opts.Artifacts = val.(eveapi.ArtifactDefinitions)
+		opts.Artifacts = val.([]eveapi.ArtifactDefinition)
 	}
 
 	if val, ok := cmd.apiOptions[botargs.ForceDeployName]; ok {
