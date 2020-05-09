@@ -102,8 +102,7 @@ func (cbs *CallbackState) SlackMsgResults() string {
 	apiMsgs := apiMessages(cbs.Payload.Messages)
 
 	if len(artifactMsg) > 0 {
-		slackMsg = slackMsg + "```\n" + artifactMsg + "\n```"
-		//artifactMsg = "```" + artifactMsg + "```"
+		slackMsg = "```\n" + artifactMsg + "\n```"
 	}
 
 	if len(apiMsgs) > 0 {
