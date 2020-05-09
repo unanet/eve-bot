@@ -20,7 +20,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 	failedResultsHeader := "Failed:\n"
 	failedResults := ""
 	noopResultsMsg := ""
-	noopResults := "Plan:"
+	noopResults := "Plan:\n"
 	for _, svc := range services {
 		switch svc.Result {
 		case eve.DeployArtifactResultFailed:
@@ -96,20 +96,18 @@ func (cbs *CallbackState) SlackMsgHeader() string {
 
 func (cbs *CallbackState) SlackMsgResults() string {
 
-	slackMsg := ""
-
 	artifactMsg := artifactResultMsg(cbs.Payload.Services)
 	apiMsgs := apiMessages(cbs.Payload.Messages)
 
 	if len(artifactMsg) > 0 {
-		slackMsg = "```\n" + artifactMsg + "\n```"
+		artifactMsg = "```\n" + artifactMsg + "\n```"
 	}
 
 	if len(apiMsgs) > 0 {
-		slackMsg = slackMsg + "\n```\n" + apiMsgs + "\n```"
+		apiMsgs = "```\n" + apiMsgs + "\n```"
 	}
 
-	return slackMsg
+	return artifactMsg + "\n" + apiMsgs
 }
 
 type DeploymentPlanOptions struct {
