@@ -17,7 +17,7 @@ import (
 
 	"github.com/dghubble/sling"
 
-	ehttp "gitlab.unanet.io/devops/eve/pkg/http"
+	evehttp "gitlab.unanet.io/devops/eve/pkg/http"
 )
 
 const (
@@ -46,7 +46,7 @@ type client struct {
 func NewClient(cfg Config) Client {
 	var httpClient = &http.Client{
 		Timeout:   cfg.EveapiTimeout,
-		Transport: ehttp.LoggingTransport,
+		Transport: evehttp.LoggingTransport,
 	}
 
 	if !strings.HasSuffix(cfg.EveapiBaseUrl, "/") {

@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 type CallbackState struct {
@@ -18,10 +21,12 @@ func headerMsg(val string) string {
 }
 
 func availableLabel(svc *eve.DeployService) string {
+	log.Logger.Debug("available label", zap.Any("deploy_service", *svc))
 	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 }
 
 func deployedLabel(svc *eve.DeployService) string {
+	log.Logger.Debug("deployed label", zap.Any("deploy_service", *svc))
 	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
 }
 
@@ -63,6 +68,8 @@ func artifactResultBlock(svcResultMap eve.ArtifactDeployResultMap, eveResult eve
 func artifactResultMsg(services eve.DeployServices) string {
 
 	svcMap := services.TopResultMap()
+
+	log.Logger.Debug("svcMap", zap.Any("map_val", svcMap))
 
 	successMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultSuccess)
 	failedMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultFailed)
