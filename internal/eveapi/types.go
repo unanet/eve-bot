@@ -143,7 +143,7 @@ func (cbs *CallbackState) ToChatMsg() string {
 			// Let's break out early when this is a pending result
 			// this happens on the first callback is the deployment plan
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending {
-				deploymentResults = artifactResultBlock(svcs, svcResult)
+				deploymentResults = "\n```" + artifactResultBlock(svcs, svcResult) + "```"
 				break
 			}
 
