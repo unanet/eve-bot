@@ -15,6 +15,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// ErrorNotification is generic error function so that we can message to the slack user that something bad has happened
+// we should probably have
 func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, err error) error {
 	slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%v```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", user, err.Error())
 	_, _, _ = p.Client.PostMessageContext(
@@ -24,9 +26,8 @@ func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, 
 	return nil
 }
 
-// HandleEveCallback handles the callbacks from eve-api
+// EveCallbackNotification handles the callbacks from eve-api and notifies the slack user
 func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) error {
-
 	msg := fmt.Sprintf("%s\n%s", cbState.SlackMsgHeader(), cbState.SlackMsgResults())
 
 	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(msg, false))

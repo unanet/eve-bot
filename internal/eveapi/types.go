@@ -16,8 +16,38 @@ type CallbackState struct {
 	Payload eve.NSDeploymentPlan `json:"payload"`
 }
 
+type ArtifactDefinitions []*ArtifactDefinition
+
+type StringList []string
+
+type DeploymentPlanType string
+
+type DeploymentPlanOptions struct {
+	Artifacts        ArtifactDefinitions `json:"artifacts"`
+	ForceDeploy      bool                `json:"force_deploy"`
+	User             string              `json:"user"`
+	DryRun           bool                `json:"dry_run"`
+	CallbackURL      string              `json:"callback_url"`
+	Environment      string              `json:"environment"`
+	NamespaceAliases StringList          `json:"namespaces,omitempty"`
+	Messages         []string            `json:"messages,omitempty"`
+	Type             DeploymentPlanType  `json:"type"`
+}
+
+type ArtifactDefinition struct {
+	ID               int    `json:"id"`
+	Name             string `json:"name"`
+	RequestedVersion string `json:"requested_version,omitempty"`
+	AvailableVersion string `json:"available_version"`
+	ArtifactoryFeed  string `json:"artifactory_feed"`
+	ArtifactoryPath  string `json:"artifactory_path"`
+	FunctionPointer  string `json:"function_pointer"`
+	FeedType         string `json:"feed_type"`
+	Matched          bool   `json:"-"`
+}
+
 func headerMsg(val string) string {
-	return fmt.Sprintf("%s\n", strings.Title(strings.ToLower(val)))
+	return fmt.Sprintf("\n%s", strings.Title(strings.ToLower(val)))
 }
 
 func availableLabel(svc *eve.DeployService) string {
@@ -30,7 +60,7 @@ func deployedLabel(svc *eve.DeployService) string {
 	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
 }
 
-func artifactResultBlock(svcResultMap eve.ArtifactDeployResultMap, eveResult eve.DeployArtifactResult) string {
+func artifactResultBlock(svcResultMap eve.ArtifactDeployResultMap, eveResult eve.DeployArtifactResult, status eve.DeploymentPlanStatus) string {
 	result := ""
 
 	svcs := svcResultMap[eveResult]
@@ -62,20 +92,12 @@ func artifactResultBlock(svcResultMap eve.ArtifactDeployResultMap, eveResult eve
 		}
 	}
 
+	// this is for the initial callback when we are telling the user about the plan
+	if status == eve.DeploymentPlanStatusPending {
+		return headerMsg("plan") + result + "\n"
+	}
+
 	return headerMsg(eveResult.String()) + result + "\n"
-}
-
-func artifactResultMsg(services eve.DeployServices) string {
-
-	svcMap := services.TopResultMap()
-
-	log.Logger.Debug("svcMap", zap.Any("map_val", svcMap))
-
-	successMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultSuccess)
-	failedMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultFailed)
-	noopMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultNoop)
-
-	return failedMsg + successMsg + noopMsg
 }
 
 func apiMessages(msgs []string) string {
@@ -101,7 +123,7 @@ func environmentNamespaceMsg(env, ns string) string {
 func (cbs *CallbackState) SlackMsgHeader() string {
 
 	if cbs.Payload.NothingToDeploy() {
-		return fmt.Sprintf("\n<@%s>, We're all caught up! Nothing to deploy...\n", cbs.User)
+		return fmt.Sprintf("\n<@%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
 	}
 
 	switch cbs.Payload.Status {
@@ -119,9 +141,25 @@ func (cbs *CallbackState) SlackMsgHeader() string {
 }
 
 func (cbs *CallbackState) SlackMsgResults() string {
+	var artifactMsg, apiMsgs string
 
-	artifactMsg := artifactResultMsg(cbs.Payload.Services)
-	apiMsgs := apiMessages(cbs.Payload.Messages)
+	if cbs == nil {
+		log.Logger.Error("invalid callback state")
+		return ""
+	}
+
+	if cbs.Payload.Services != nil {
+		svcMap := cbs.Payload.Services.TopResultMap()
+		log.Logger.Debug("svcMap", zap.Any("map_val", svcMap))
+
+		artifactMsg = artifactResultBlock(svcMap, eve.DeployArtifactResultFailed, cbs.Payload.Status) +
+			artifactResultBlock(svcMap, eve.DeployArtifactResultSuccess, cbs.Payload.Status) +
+			artifactResultBlock(svcMap, eve.DeployArtifactResultNoop, cbs.Payload.Status)
+	}
+
+	if cbs.Payload.Messages != nil {
+		apiMsgs = apiMessages(cbs.Payload.Messages)
+	}
 
 	if len(artifactMsg) > 0 {
 		artifactMsg = "```\n" + artifactMsg + "\n```"
@@ -132,34 +170,4 @@ func (cbs *CallbackState) SlackMsgResults() string {
 	}
 
 	return artifactMsg + apiMsgs
-}
-
-type ArtifactDefinitions []*ArtifactDefinition
-
-type StringList []string
-
-type DeploymentPlanType string
-
-type DeploymentPlanOptions struct {
-	Artifacts        ArtifactDefinitions `json:"artifacts"`
-	ForceDeploy      bool                `json:"force_deploy"`
-	User             string              `json:"user"`
-	DryRun           bool                `json:"dry_run"`
-	CallbackURL      string              `json:"callback_url"`
-	Environment      string              `json:"environment"`
-	NamespaceAliases StringList          `json:"namespaces,omitempty"`
-	Messages         []string            `json:"messages,omitempty"`
-	Type             DeploymentPlanType  `json:"type"`
-}
-
-type ArtifactDefinition struct {
-	ID               int    `json:"id"`
-	Name             string `json:"name"`
-	RequestedVersion string `json:"requested_version,omitempty"`
-	AvailableVersion string `json:"available_version"`
-	ArtifactoryFeed  string `json:"artifactory_feed"`
-	ArtifactoryPath  string `json:"artifactory_path"`
-	FunctionPointer  string `json:"function_pointer"`
-	FeedType         string `json:"feed_type"`
-	Matched          bool   `json:"-"`
 }

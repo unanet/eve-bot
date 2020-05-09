@@ -8,16 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
 
-	eveerror "gitlab.unanet.io/devops/eve/pkg/errors"
-
-	evejson "gitlab.unanet.io/devops/eve/pkg/json"
-
 	"github.com/dghubble/sling"
-
+	eveerror "gitlab.unanet.io/devops/eve/pkg/errors"
 	evehttp "gitlab.unanet.io/devops/eve/pkg/http"
+	evejson "gitlab.unanet.io/devops/eve/pkg/json"
+	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 const (
