@@ -12,28 +12,14 @@ type CallbackState struct {
 	Payload eve.NSDeploymentPlan `json:"payload"`
 }
 
-//func newBlockMsgOpt(text string) slack.MsgOption {
-//	return slack.MsgOptionBlocks(
-//		slack.NewSectionBlock(
-//			slack.NewTextBlockObject(
-//				slack.MarkdownType,
-//				text,
-//				false,
-//				false),
-//			nil,
-//			nil),
-//		slack.NewDividerBlock())
-//}
-
 func artifactResultMsg(services eve.DeployServices) string {
 	successfulResultsMsg := ""
-	successfulResultsHeader := "*Successful:*\n"
+	successfulResultsHeader := "Successful:\n"
 	successfulResults := ""
 	failedResultsMsg := ""
-	failedResultsHeader := "*Failed:*\n"
+	failedResultsHeader := "Failed:\n"
 	failedResults := ""
 	noopResultsMsg := ""
-	//noopResultsHeader := "*Noop:*\n"
 	noopResults := ""
 	for _, svc := range services {
 		switch svc.Result {
@@ -74,7 +60,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 }
 
 func apiMessages(msgs []string) string {
-	infoHeader := "Info:\n"
+	infoHeader := "\nMessages:\n"
 	infoMsgs := ""
 	for _, msg := range msgs {
 		if len(infoMsgs) == 0 {
