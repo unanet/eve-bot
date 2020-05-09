@@ -2,6 +2,7 @@ package eveapi
 
 import (
 	"fmt"
+	"strings"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
@@ -12,54 +13,62 @@ type CallbackState struct {
 	Payload eve.NSDeploymentPlan `json:"payload"`
 }
 
-func artifactResultMsg(services eve.DeployServices) string {
-	successfulResultsMsg := ""
-	successfulResultsHeader := "Succeeded:\n"
-	successfulResults := ""
+func headerMsg(val string) string {
+	return fmt.Sprintf("%s\n", strings.Title(strings.ToLower(val)))
+}
 
-	failedResultsMsg := ""
-	failedResultsHeader := "Failed:\n"
-	failedResults := ""
+func availableLabel(svc *eve.DeployService) string {
+	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
+}
 
-	noopResultsMsg := ""
-	noopResultsHeader := "Todo:\n"
-	noopResults := ""
-	for _, svc := range services {
-		switch svc.Result {
-		case eve.DeployArtifactResultFailed:
-			if len(failedResults) == 0 {
-				failedResults = fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
-			} else {
-				failedResults = failedResults + fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
-			}
-		case eve.DeployArtifactResultSucceeded:
-			if len(successfulResults) == 0 {
-				successfulResults = fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
-			} else {
-				successfulResults = successfulResults + fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
-			}
+func deployedLabel(svc *eve.DeployService) string {
+	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
+}
+
+func artifactResultBlock(svcResultMap eve.ArtifactDeployResultMap, eveResult eve.DeployArtifactResult) string {
+	result := ""
+
+	svcs := svcResultMap[eveResult]
+
+	if svcs == nil || len(svcs) == 0 {
+		return ""
+	}
+
+	for _, svc := range svcs {
+		switch eveResult {
 		case eve.DeployArtifactResultNoop:
-			if len(noopResults) == 0 {
-				noopResults = fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
+			if len(result) == 0 {
+				result = availableLabel(svc)
 			} else {
-				noopResults = noopResults + fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
+				result = result + availableLabel(svc)
+			}
+		case eve.DeployArtifactResultSuccess:
+			if len(result) == 0 {
+				result = deployedLabel(svc)
+			} else {
+				result = result + deployedLabel(svc)
+			}
+		case eve.DeployArtifactResultFailed:
+			if len(result) == 0 {
+				result = availableLabel(svc)
+			} else {
+				result = result + availableLabel(svc)
 			}
 		}
 	}
 
-	if len(successfulResults) > 0 {
-		successfulResultsMsg = successfulResultsHeader + successfulResults
-	}
+	return headerMsg(eveResult.String()) + result + "\n"
+}
 
-	if len(failedResults) > 0 {
-		failedResultsMsg = failedResultsHeader + failedResults
-	}
+func artifactResultMsg(services eve.DeployServices) string {
 
-	if len(noopResults) > 0 {
-		noopResultsMsg = noopResultsHeader + noopResults
-	}
+	svcMap := services.TopResultMap()
 
-	return successfulResultsMsg + failedResultsMsg + noopResultsMsg
+	successMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultSuccess)
+	failedMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultFailed)
+	noopMsg := artifactResultBlock(svcMap, eve.DeployArtifactResultNoop)
+
+	return failedMsg + successMsg + noopMsg
 }
 
 func apiMessages(msgs []string) string {
@@ -83,6 +92,11 @@ func environmentNamespaceMsg(env, ns string) string {
 }
 
 func (cbs *CallbackState) SlackMsgHeader() string {
+
+	if cbs.Payload.NothingToDeploy() {
+		return fmt.Sprintf("\n<@%s>, We're all caught up! Nothing to deploy...\n", cbs.User)
+	}
+
 	switch cbs.Payload.Status {
 	case eve.DeploymentPlanStatusComplete:
 		return fmt.Sprintf("\n<@%s>, your deployment is complete...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
@@ -103,7 +117,7 @@ func (cbs *CallbackState) SlackMsgResults() string {
 	apiMsgs := apiMessages(cbs.Payload.Messages)
 
 	if len(artifactMsg) > 0 {
-		artifactMsg = "```\n" + artifactMsg + "\n```\n"
+		artifactMsg = "```\n" + artifactMsg + "\n```"
 	}
 
 	if len(apiMsgs) > 0 {
