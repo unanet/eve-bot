@@ -109,7 +109,7 @@ func apiMessages(msgs []string) string {
 }
 
 func environmentNamespaceMsg(env, ns string) string {
-	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s```\n\n", ns, env)
+	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s```", ns, env)
 }
 
 func (cbs *CallbackState) ToChatMsg() string {
