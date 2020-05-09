@@ -22,7 +22,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 	failedResults := ""
 
 	noopResultsMsg := ""
-	noopResultsHeader := "Noop:\n"
+	noopResultsHeader := "Todo:\n"
 	noopResults := ""
 	for _, svc := range services {
 		switch svc.Result {
