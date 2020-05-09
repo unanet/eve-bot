@@ -49,7 +49,7 @@ func baseAckMsg(cmd EvebotCommand, userID string, cmdInput []string) string {
 		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", userID, cmdInput, cmd.Name())
 	}
 	if len(cmd.ErrMsg()) > 0 {
-		return fmt.Sprintf("Whoops <@%s>! I detected some *errors:*\n\n ```%v```", userID, cmd.ErrMsg())
+		return fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", userID, cmd.ErrMsg())
 	}
 	// Happy Path
 	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", userID, cmd.Name())

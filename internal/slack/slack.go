@@ -107,7 +107,7 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 								context.TODO(),
 								ev.Channel,
 								slack.MsgOptionText(
-									fmt.Sprintf("Whoops <@%s>! I detected some *errors:*\n\n ```%v```", ev.User, err.Error()), false))
+									fmt.Sprintf("Whoops <@%s>! I detected some deployment *errors:*\n\n ```%v```", ev.User, err.Error()), false))
 							return
 						}
 
