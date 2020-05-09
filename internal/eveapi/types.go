@@ -140,9 +140,8 @@ func (cbs *CallbackState) ToChatMsg() string {
 
 	if cbs.Payload.Services != nil {
 		for svcResult, svcs := range cbs.Payload.Services.TopResultMap() {
-			// Let's break out early when this is a pending result
-			// this happens on the first callback is the deployment plan
-			if cbs.Payload.Status == eve.DeploymentPlanStatusPending {
+			// Let's break out early when this is a pending/dryrun result
+			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
 				deploymentResults = "\n```" + artifactResultBlock(svcs, svcResult) + "```"
 				break
 			}
