@@ -106,7 +106,7 @@ func (cbs *CallbackState) SlackMsgResults() string {
 	}
 
 	if len(apiMsgs) > 0 {
-		slackMsg = slackMsg + "```\n" + apiMsgs + "\n```"
+		slackMsg = slackMsg + "\n```\n" + apiMsgs + "\n```"
 	}
 
 	return slackMsg
