@@ -60,10 +60,9 @@ func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
 	opts := eveapi.DeploymentPlanOptions{CallbackURL: cbURL, Type: "application"}
 
 	if val, ok := cmd.apiOptions[botargs.ServicesName]; ok {
-		if artifactDefs, ok := val.([]eveapi.ArtifactDefinition); ok {
+		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
 			opts.Artifacts = artifactDefs
 		} else {
-
 			return nil
 		}
 	}
@@ -94,7 +93,7 @@ func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
 
 	if val, ok := cmd.apiOptions[botparams.NamespaceName]; ok {
 		if nsVal, ok := val.(string); ok {
-			opts.Namespaces = []string{nsVal}
+			opts.NamespaceAliases = eveapi.StringList{nsVal}
 		} else {
 			return nil
 		}

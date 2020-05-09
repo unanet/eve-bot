@@ -29,10 +29,10 @@ func (ebas Services) Description() string {
 }
 
 func (ebas Services) Value() interface{} {
-	var artifactDefs []eveapi.ArtifactDefinition
+	var artifactDefs eveapi.ArtifactDefinitions
 
 	for _, v := range ebas {
-		artifactDefs = append(artifactDefs, eveapi.ArtifactDefinition{
+		artifactDefs = append(artifactDefs, &eveapi.ArtifactDefinition{
 			Name:             v.Name,
 			RequestedVersion: v.Version,
 		})

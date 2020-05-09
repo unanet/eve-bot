@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	eveerror "gitlab.unanet.io/devops/eve/pkg/errors"
+
 	evejson "gitlab.unanet.io/devops/eve/pkg/json"
 
 	"github.com/dghubble/sling"

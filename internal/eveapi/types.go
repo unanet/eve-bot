@@ -127,16 +127,22 @@ func (cbs *CallbackState) SlackMsgResults() string {
 	return artifactMsg + apiMsgs
 }
 
+type ArtifactDefinitions []*ArtifactDefinition
+
+type StringList []string
+
+type DeploymentPlanType string
+
 type DeploymentPlanOptions struct {
-	Artifacts   []ArtifactDefinition `json:"artifacts"`
-	ForceDeploy bool                 `json:"force_deploy"`
-	DryRun      bool                 `json:"dry_run"`
-	CallbackURL string               `json:"callback_url"`
-	Environment string               `json:"environment"`
-	Namespaces  []string             `json:"namespaces,omitempty"`
-	Messages    []string             `json:"messages,omitempty"`
-	Type        string               `json:"type"`
-	User        string               `json:"user"`
+	Artifacts        ArtifactDefinitions `json:"artifacts"`
+	ForceDeploy      bool                `json:"force_deploy"`
+	User             string              `json:"user"`
+	DryRun           bool                `json:"dry_run"`
+	CallbackURL      string              `json:"callback_url"`
+	Environment      string              `json:"environment"`
+	NamespaceAliases StringList          `json:"namespaces,omitempty"`
+	Messages         []string            `json:"messages,omitempty"`
+	Type             DeploymentPlanType  `json:"type"`
 }
 
 type ArtifactDefinition struct {
@@ -146,5 +152,7 @@ type ArtifactDefinition struct {
 	AvailableVersion string `json:"available_version"`
 	ArtifactoryFeed  string `json:"artifactory_feed"`
 	ArtifactoryPath  string `json:"artifactory_path"`
+	FunctionPointer  string `json:"function_pointer"`
+	FeedType         string `json:"feed_type"`
 	Matched          bool   `json:"-"`
 }
