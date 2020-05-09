@@ -96,18 +96,21 @@ func (cbs *CallbackState) SlackMsgHeader() string {
 
 func (cbs *CallbackState) SlackMsgResults() string {
 
+	slackMsg := ""
+
 	artifactMsg := artifactResultMsg(cbs.Payload.Services)
 	apiMsgs := apiMessages(cbs.Payload.Messages)
 
 	if len(artifactMsg) > 0 {
-		artifactMsg = "```" + artifactMsg + "```"
+		slackMsg = slackMsg + "```\n" + artifactMsg + "\n```"
+		//artifactMsg = "```" + artifactMsg + "```"
 	}
 
 	if len(apiMsgs) > 0 {
-		apiMsgs = "```" + apiMsgs + "```"
+		slackMsg = slackMsg + "```\n" + apiMsgs + "\n```"
 	}
 
-	return artifactMsg + apiMsgs
+	return slackMsg
 }
 
 type DeploymentPlanOptions struct {
