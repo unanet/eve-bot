@@ -100,14 +100,14 @@ func (cbs *CallbackState) SlackMsgResults() string {
 	apiMsgs := apiMessages(cbs.Payload.Messages)
 
 	if len(artifactMsg) > 0 {
-		artifactMsg = "```\n" + artifactMsg + "\n```"
+		artifactMsg = "```\n" + artifactMsg + "\n```\n"
 	}
 
 	if len(apiMsgs) > 0 {
-		apiMsgs = "```\n" + apiMsgs + "\n```"
+		apiMsgs = "\n```\n" + apiMsgs + "\n```\n"
 	}
 
-	return artifactMsg + "\n" + apiMsgs
+	return artifactMsg + apiMsgs
 }
 
 type DeploymentPlanOptions struct {
