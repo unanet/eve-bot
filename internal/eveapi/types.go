@@ -47,7 +47,7 @@ type ArtifactDefinition struct {
 }
 
 func headerMsg(val string) string {
-	return fmt.Sprintf("\n%s", strings.Title(strings.ToLower(val)))
+	return fmt.Sprintf("\n*%s*", strings.Title(strings.ToLower(val)))
 }
 
 func availableLabel(svc *eve.DeployService) string {
@@ -60,10 +60,8 @@ func deployedLabel(svc *eve.DeployService) string {
 	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
 }
 
-func artifactResultBlock(svcResultMap eve.ArtifactDeployResultMap, eveResult eve.DeployArtifactResult, status eve.DeploymentPlanStatus) string {
+func artifactResultBlock(svcs eve.DeployServices, eveResult eve.DeployArtifactResult) string {
 	result := ""
-
-	svcs := svcResultMap[eveResult]
 
 	if svcs == nil || len(svcs) == 0 {
 		return ""
@@ -92,16 +90,10 @@ func artifactResultBlock(svcResultMap eve.ArtifactDeployResultMap, eveResult eve
 		}
 	}
 
-	// this is for the initial callback when we are telling the user about the plan
-	if status == eve.DeploymentPlanStatusPending {
-		return headerMsg("plan") + result + "\n"
-	}
-
-	return headerMsg(eveResult.String()) + result + "\n"
+	return result
 }
 
 func apiMessages(msgs []string) string {
-	infoHeader := "Messages:\n"
 	infoMsgs := ""
 	for _, msg := range msgs {
 		if len(infoMsgs) == 0 {
@@ -113,61 +105,60 @@ func apiMessages(msgs []string) string {
 	if len(infoMsgs) == 0 {
 		return ""
 	}
-	return infoHeader + infoMsgs
+	return infoMsgs
 }
 
 func environmentNamespaceMsg(env, ns string) string {
 	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s```\n\n", ns, env)
 }
 
-func (cbs *CallbackState) SlackMsgHeader() string {
-
-	if cbs.Payload.NothingToDeploy() {
-		return fmt.Sprintf("\n<@%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
-	}
-
-	switch cbs.Payload.Status {
-	case eve.DeploymentPlanStatusComplete:
-		return fmt.Sprintf("\n<@%s>, your deployment is complete...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
-	case eve.DeploymentPlanStatusErrors:
-		return fmt.Sprintf("\n<@%s>, we encountered some errors during the deployment...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
-	case eve.DeploymentPlanStatusDryrun:
-		return fmt.Sprintf("\n<@%s>, here's your *dryrun* results ...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
-	case eve.DeploymentPlanStatusPending:
-		return fmt.Sprintf("\n<@%s>, your deployment is pending. Here's the plan...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
-	default:
-		return ""
-	}
-}
-
-func (cbs *CallbackState) SlackMsgResults() string {
-	var artifactMsg, apiMsgs string
+func (cbs *CallbackState) ToChatMsg() string {
 
 	if cbs == nil {
 		log.Logger.Error("invalid callback state")
 		return ""
 	}
 
+	if cbs.Payload.NothingToDeploy() {
+		return fmt.Sprintf("\n<@%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
+	}
+
+	var result string
+
+	switch cbs.Payload.Status {
+	case eve.DeploymentPlanStatusComplete:
+		result = fmt.Sprintf("\n<@%s>, your deployment is complete...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+	case eve.DeploymentPlanStatusErrors:
+		result = fmt.Sprintf("\n<@%s>, we encountered some errors during the deployment...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+	case eve.DeploymentPlanStatusDryrun:
+		result = fmt.Sprintf("\n<@%s>, here's your *dryrun* results ...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+	case eve.DeploymentPlanStatusPending:
+		result = fmt.Sprintf("\n<@%s>, your deployment is pending. Here's the plan...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+	}
+
+	var deploymentResults string
+
 	if cbs.Payload.Services != nil {
-		svcMap := cbs.Payload.Services.TopResultMap()
-		log.Logger.Debug("svcMap", zap.Any("map_val", svcMap))
+		for svcResult, svcs := range cbs.Payload.Services.TopResultMap() {
+			// Let's break out early when this is a pending result
+			// this happens on the first callback is the deployment plan
+			if cbs.Payload.Status == eve.DeploymentPlanStatusPending {
+				deploymentResults = artifactResultBlock(svcs, svcResult)
+				break
+			}
 
-		artifactMsg = artifactResultBlock(svcMap, eve.DeployArtifactResultFailed, cbs.Payload.Status) +
-			artifactResultBlock(svcMap, eve.DeployArtifactResultSuccess, cbs.Payload.Status) +
-			artifactResultBlock(svcMap, eve.DeployArtifactResultNoop, cbs.Payload.Status)
+			if len(deploymentResults) == 0 {
+				deploymentResults = headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs, svcResult) + "```"
+			} else {
+				deploymentResults = deploymentResults + headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs, svcResult) + "```"
+			}
+		}
+		result = result + "\n" + deploymentResults
 	}
 
-	if cbs.Payload.Messages != nil {
-		apiMsgs = apiMessages(cbs.Payload.Messages)
+	if cbs.Payload.Messages == nil || len(cbs.Payload.Messages) == 0 {
+		return result
 	}
 
-	if len(artifactMsg) > 0 {
-		artifactMsg = "```\n" + artifactMsg + "\n```"
-	}
-
-	if len(apiMsgs) > 0 {
-		apiMsgs = "\n```\n" + apiMsgs + "\n```\n"
-	}
-
-	return artifactMsg + apiMsgs
+	return result + headerMsg("Messages:") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
 }
