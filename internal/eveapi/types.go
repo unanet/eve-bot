@@ -14,13 +14,13 @@ type CallbackState struct {
 
 func artifactResultMsg(services eve.DeployServices) string {
 	successfulResultsMsg := ""
-	successfulResultsHeader := "Successful:\n"
+	successfulResultsHeader := "Succeeded:\n"
 	successfulResults := ""
 	failedResultsMsg := ""
 	failedResultsHeader := "Failed:\n"
 	failedResults := ""
 	noopResultsMsg := ""
-	noopResults := ""
+	noopResults := "Plan:"
 	for _, svc := range services {
 		switch svc.Result {
 		case eve.DeployArtifactResultFailed:
@@ -60,7 +60,7 @@ func artifactResultMsg(services eve.DeployServices) string {
 }
 
 func apiMessages(msgs []string) string {
-	infoHeader := "\nMessages:\n"
+	infoHeader := "Messages:\n"
 	infoMsgs := ""
 	for _, msg := range msgs {
 		if len(infoMsgs) == 0 {
