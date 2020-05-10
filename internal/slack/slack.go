@@ -46,7 +46,7 @@ func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.C
 
 func (p *Provider) messageNotification(ctx context.Context, user, channel, message string) {
 	log.Logger.Debug("slack deployment message notification", zap.String("message", message))
-	slackErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", msgNotification, user, message)
+	slackErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", user, msgNotification, message)
 	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
 }
 
