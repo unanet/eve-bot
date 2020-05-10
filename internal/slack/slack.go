@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -17,24 +18,47 @@ import (
 
 // ErrorNotification is generic error function so that we can message to the slack user that something bad has happened
 // we should probably have
-func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, err error) error {
-	slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%v```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", user, err.Error())
-	_, _, _ = p.Client.PostMessageContext(
-		ctx,
-		channel,
-		slack.MsgOptionText(slackErrMsg, false))
-	return nil
+func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, err error) {
+	log.Logger.Error("slack error notification", zap.Error(err))
+	slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%s```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", user, err.Error())
+	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
 }
 
 // EveCallbackNotification handles the callbacks from eve-api and notifies the slack user
-func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) error {
+func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) {
 	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false))
 	if err != nil {
-		log.Logger.Error("slack message error", zap.Error(err))
-		return p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
+		p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
+	}
+}
+
+func (p *Provider) messageNotification(ctx context.Context, user, channel, message string) {
+	log.Logger.Debug("slack deployment message notification", zap.String("message", message))
+	slackErrMsg := fmt.Sprintf("<@%s>! Something has happened:\n\n ```%s```\n\n", user, message)
+	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
+}
+
+func (p *Provider) deploymentErrorNotification(ctx context.Context, user, channel string, err error) {
+	log.Logger.Debug("deployment error notification", zap.Error(err))
+	slackDeploymentErrMsg := fmt.Sprintf("Whoops <@%s>! I detected some deployment *errors:*\n\n ```%s```", user, err.Error())
+	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackDeploymentErrMsg, false))
+}
+
+func (p *Provider) handleEveApiResponse(slackUser, slackChannel string, resp *eveapi.DeploymentPlanOptions, err error) {
+	if err != nil {
+		p.deploymentErrorNotification(context.TODO(), slackChannel, slackChannel, err)
+		return
 	}
 
-	return nil
+	if resp == nil {
+		p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidEveApiResponse)
+		return
+	}
+
+	if len(resp.Messages) > 0 {
+		p.messageNotification(context.TODO(), slackUser, slackChannel, strings.Join(resp.Messages, ","))
+		return
+	}
 }
 
 // HandleInteraction handles the interactive callbacks (buttons, dropdowns, etc.)
@@ -92,50 +116,34 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 				// Call API in separate Go Routine
 				go func(reqObj interface{}, slackUser, slackChannel string) {
 					if reqObj == nil {
-						log.Logger.Error("eve api request object is nil")
-						_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf("invalid request object"))
+						p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidRequestObj)
 						return
 					}
 					switch reqObj.(type) {
 					case eveapi.DeploymentPlanOptions:
-						log.Logger.Debug("eve-api req", zap.Any("req", reqObj.(eveapi.DeploymentPlanOptions)))
 						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel)
-						if err != nil {
-							log.Logger.Debug("eve-api error", zap.Error(err))
-
-							_, _, _ = p.Client.PostMessageContext(
-								context.TODO(),
-								ev.Channel,
-								slack.MsgOptionText(
-									fmt.Sprintf("Whoops <@%s>! I detected some deployment *errors:*\n\n ```%s```", ev.User, err.Error()), false))
-							return
-						}
-
-						if resp == nil {
-							log.Logger.Error("eve-api nil response")
-							_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf("invalid api response"))
-							return
-						}
-
-						if len(resp.Messages) > 0 {
-							log.Logger.Debug("eve-api messages", zap.Strings("messages", resp.Messages))
-							_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf(strings.Join(resp.Messages, ",")))
-							return
-						}
+						p.handleEveApiResponse(slackUser, slackChannel, resp, err)
 
 					default:
-						log.Logger.Error("invalid eve api command request object")
-						_ = p.ErrorNotification(context.TODO(), slackUser, slackChannel, fmt.Errorf("invalid request object"))
+						p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidRequestObj)
 						return
 					}
 				}(cmd.EveReqObj(callBackURL), ev.User, ev.Channel)
 			}
 			// Immediately respond to the Slack HTTP Request.
-			// This doesn't actually do anything except free up the incoming request
 			return "OK", nil
 		}
 	default:
-		return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
+		return nil, unknownSlackEventErr(slackAPIEvent.Type)
 	}
-	return nil, fmt.Errorf("unknown slack event: %v", slackAPIEvent.Type)
+	return nil, unknownSlackEventErr(slackAPIEvent.Type)
 }
+
+func unknownSlackEventErr(slackEvent string) error {
+	return fmt.Errorf("unknown slack event: %s", slackEvent)
+}
+
+var (
+	errInvalidRequestObj     = errors.New("invalid request object")
+	errInvalidEveApiResponse = errors.New("invalid api response")
+)

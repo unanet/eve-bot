@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.unanet.io/devops/eve/pkg/eve"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -43,15 +43,12 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		_ = c.slackProvider.ErrorNotification(r.Context(), user, channel, err)
+		c.slackProvider.ErrorNotification(r.Context(), user, channel, err)
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
 
-	if err := c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload}); err != nil {
-		render.Respond(w, r, errors.Wrap(err))
-		return
-	}
+	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload})
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return

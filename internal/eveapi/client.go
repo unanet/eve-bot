@@ -81,6 +81,7 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 		return nil, err
 	}
 
+	log.Logger.Debug("eve-api req", zap.Any("req", dp))
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
 		log.Logger.Error("error calling eve-api", zap.Error(err))
