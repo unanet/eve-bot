@@ -16,11 +16,23 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	errInvalidRequestObj     = errors.New("invalid request object")
+	errInvalidEveApiResponse = errors.New("invalid api response")
+)
+
+const (
+	msgErrNotification           = "Something terrible has happened..."
+	msgErrNotificationAssurance  = "I've dispatched a semi-competent team of monkeys to battle the issue..."
+	msgNotification              = "I've got some news..."
+	msgDeploymentErrNotification = "I detected some deployment *errors:*"
+)
+
 // ErrorNotification is generic error function so that we can message to the slack user that something bad has happened
 // we should probably have
 func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, err error) {
 	log.Logger.Error("slack error notification", zap.Error(err))
-	slackErrMsg := fmt.Sprintf("Sorry <@%s>! Something terrible has happened:\n\n ```%s```\n\nI've dispatched a semi-competent team of monkeys to battle the issue...", user, err.Error())
+	slackErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n%s", user, msgErrNotification, err.Error(), msgErrNotificationAssurance)
 	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
 }
 
@@ -34,13 +46,13 @@ func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.C
 
 func (p *Provider) messageNotification(ctx context.Context, user, channel, message string) {
 	log.Logger.Debug("slack deployment message notification", zap.String("message", message))
-	slackErrMsg := fmt.Sprintf("<@%s>! Something has happened:\n\n ```%s```\n\n", user, message)
+	slackErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", msgNotification, user, message)
 	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
 }
 
 func (p *Provider) deploymentErrorNotification(ctx context.Context, user, channel string, err error) {
 	log.Logger.Debug("deployment error notification", zap.Error(err))
-	slackDeploymentErrMsg := fmt.Sprintf("Whoops <@%s>! I detected some deployment *errors:*\n\n ```%s```", user, err.Error())
+	slackDeploymentErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```", msgDeploymentErrNotification, user, err.Error())
 	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackDeploymentErrMsg, false))
 }
 
@@ -124,7 +136,6 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 					case eveapi.DeploymentPlanOptions:
 						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel)
 						p.handleEveApiResponse(slackUser, slackChannel, resp, err)
-
 					default:
 						p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidRequestObj)
 						return
@@ -143,8 +154,3 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 func unknownSlackEventErr(slackEvent string) error {
 	return fmt.Errorf("unknown slack event: %s", slackEvent)
 }
-
-var (
-	errInvalidRequestObj     = errors.New("invalid request object")
-	errInvalidEveApiResponse = errors.New("invalid api response")
-)
