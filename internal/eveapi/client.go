@@ -89,7 +89,7 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 	}
 
 	switch resp.StatusCode {
-	case http.StatusOK, http.StatusCreated, http.StatusAccepted:
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return &success, nil
 	default:
 		log.Logger.Debug("an error occurred while trying to call eve-api deploy", zap.String("error_msg", failure.Message))
