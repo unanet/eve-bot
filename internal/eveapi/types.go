@@ -159,5 +159,5 @@ func (cbs *CallbackState) ToChatMsg() string {
 		return result
 	}
 
-	return result + headerMsg("Messages:") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
+	return result + headerMsg("Messages") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
 }
