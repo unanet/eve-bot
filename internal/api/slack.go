@@ -68,12 +68,10 @@ func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.
 func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Request) {
 	// Payload here is only used for initial URL route verification
 	payload, err := c.slackProvider.HandleSlackEvent(r)
-
 	if err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
-
 	// returning payload response here
 	// this is usually just a nil response except for URL verification event
 	render.Respond(w, r, payload)

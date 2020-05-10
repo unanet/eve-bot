@@ -46,7 +46,7 @@ func (p *Provider) deploymentErrorNotification(ctx context.Context, user, channe
 
 func (p *Provider) handleEveApiResponse(slackUser, slackChannel string, resp *eveapi.DeploymentPlanOptions, err error) {
 	if err != nil {
-		p.deploymentErrorNotification(context.TODO(), slackChannel, slackChannel, err)
+		p.deploymentErrorNotification(context.TODO(), slackUser, slackChannel, err)
 		return
 	}
 
