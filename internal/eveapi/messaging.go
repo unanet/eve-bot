@@ -18,10 +18,6 @@ func availableLabel(svc *eve.DeployService) string {
 	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 }
 
-func deployedLabel(svc *eve.DeployService) string {
-	log.Logger.Debug("deployed label", zap.Any("deploy_service", *svc))
-	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
-}
 
 func artifactResultBlock(svcs eve.DeployServices, eveResult eve.DeployArtifactResult) string {
 	result := ""
@@ -31,25 +27,10 @@ func artifactResultBlock(svcs eve.DeployServices, eveResult eve.DeployArtifactRe
 	}
 
 	for _, svc := range svcs {
-		switch eveResult {
-		case eve.DeployArtifactResultNoop:
-			if len(result) == 0 {
-				result = availableLabel(svc)
-			} else {
-				result = result + availableLabel(svc)
-			}
-		case eve.DeployArtifactResultSuccess:
-			if len(result) == 0 {
-				result = deployedLabel(svc)
-			} else {
-				result = result + deployedLabel(svc)
-			}
-		case eve.DeployArtifactResultFailed:
-			if len(result) == 0 {
-				result = availableLabel(svc)
-			} else {
-				result = result + availableLabel(svc)
-			}
+		if len(result) == 0 {
+			result = availableLabel(svc)
+		} else {
+			result = result + availableLabel(svc)
 		}
 	}
 
