@@ -8,7 +8,7 @@ import (
 
 var (
 	// Setting this up here for now
-	// no need to resolve this every quest
+	// no need to resolve this every request
 	callBackURL   string
 	signingSecret string
 )
@@ -19,7 +19,7 @@ type Provider struct {
 	Client          *slack.Client
 	CommandResolver botcommander.Resolver
 	EveAPIClient    eveapi.Client
-	cfg             Config
+	Cfg             Config
 }
 
 // NewProvider creates a new provider
@@ -30,6 +30,6 @@ func NewProvider(sClient *slack.Client, commander botcommander.Resolver, eveAPIC
 		Client:          sClient,
 		CommandResolver: commander,
 		EveAPIClient:    eveAPIClient,
-		cfg:             cfg,
+		Cfg:             cfg,
 	}
 }

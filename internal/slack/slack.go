@@ -12,6 +12,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
+	eveerrs "gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
 )
@@ -86,26 +87,23 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	return nil
 }
 
-// HandleEvent takes an http request and handles the Slack API Event
-// this is where we do our request signature validation
-// ..and switch the incoming api event types
-func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
-	body, err := validateSlackRequest(req)
-	if err != nil {
-		log.Logger.Debug("Validate Slack Request Error", zap.Error(err))
-		return nil, err
-	}
-
-	slackAPIEvent, err := slackevents.ParseEvent(body,
+func parseSlackEvent(vToken string, body []byte) (slackevents.EventsAPIEvent, error) {
+	return slackevents.ParseEvent(body,
 		slackevents.OptionVerifyToken(
 			&slackevents.TokenComparator{
-				VerificationToken: p.cfg.SlackVerificationToken,
+				VerificationToken: vToken,
 			},
 		),
 	)
+}
 
+// HandleEvent takes an http request and handles the Slack API Event
+// this is where we do our request signature validation
+// ..and switch the incoming api event types
+func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface{}, error) {
+	slackAPIEvent, err := parseSlackEvent(p.Cfg.SlackVerificationToken, body)
 	if err != nil {
-		return nil, botError(err, "failed parse slack event", http.StatusNotAcceptable)
+		return nil, &eveerrs.RestError{Code: http.StatusNotAcceptable, Message: "failed parse slack event", OriginalError: err}
 	}
 
 	switch slackAPIEvent.Type {
@@ -113,7 +111,11 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal(body, &r)
 		if err != nil {
-			return nil, botError(err, "failed to unmarshal slack reg event", http.StatusBadRequest)
+			return nil, &eveerrs.RestError{
+				Code:          http.StatusBadRequest,
+				Message:       "failed to unmarshal slack reg event",
+				OriginalError: err,
+			}
 		}
 		return r.Challenge, nil
 	case slackevents.CallbackEvent:
@@ -123,7 +125,7 @@ func (p *Provider) HandleSlackEvent(req *http.Request) (interface{}, error) {
 			// Resolve the input and return a Command object
 			cmd := p.CommandResolver.Resolve(ev.Text)
 			// Send the immediate Acknowledgement Message back to the chat user
-			_, _, _ = p.Client.PostMessageContext(req.Context(), ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
+			_, _, _ = p.Client.PostMessageContext(ctx, ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
 
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine

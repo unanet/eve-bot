@@ -2,9 +2,6 @@ package eveapi
 
 import (
 	"fmt"
-	"strings"
-
-	"go.uber.org/zap"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -46,74 +43,9 @@ type ArtifactDefinition struct {
 	Matched          bool   `json:"-"`
 }
 
-func headerMsg(val string) string {
-	return fmt.Sprintf("\n*%s*", strings.Title(strings.ToLower(val)))
-}
-
-func availableLabel(svc *eve.DeployService) string {
-	log.Logger.Debug("available label", zap.Any("deploy_service", *svc))
-	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
-}
-
-func deployedLabel(svc *eve.DeployService) string {
-	log.Logger.Debug("deployed label", zap.Any("deploy_service", *svc))
-	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
-}
-
-func artifactResultBlock(svcs eve.DeployServices, eveResult eve.DeployArtifactResult) string {
-	result := ""
-
-	if svcs == nil || len(svcs) == 0 {
-		return ""
-	}
-
-	for _, svc := range svcs {
-		switch eveResult {
-		case eve.DeployArtifactResultNoop:
-			if len(result) == 0 {
-				result = availableLabel(svc)
-			} else {
-				result = result + availableLabel(svc)
-			}
-		case eve.DeployArtifactResultSuccess:
-			if len(result) == 0 {
-				result = deployedLabel(svc)
-			} else {
-				result = result + deployedLabel(svc)
-			}
-		case eve.DeployArtifactResultFailed:
-			if len(result) == 0 {
-				result = availableLabel(svc)
-			} else {
-				result = result + availableLabel(svc)
-			}
-		}
-	}
-
-	return result
-}
-
-func apiMessages(msgs []string) string {
-	infoMsgs := ""
-	for _, msg := range msgs {
-		if len(infoMsgs) == 0 {
-			infoMsgs = "\n- " + msg
-		} else {
-			infoMsgs = infoMsgs + "\n- " + msg
-		}
-	}
-	if len(infoMsgs) == 0 {
-		return ""
-	}
-	return infoMsgs
-}
-
-func environmentNamespaceMsg(env, ns string) string {
-	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s```", ns, env)
-}
-
+// ToChatMsg takes the eve-api callback payload
+// and converts it to a Chat Message (string with formatting/proper messaging)
 func (cbs *CallbackState) ToChatMsg() string {
-
 	if cbs == nil {
 		log.Logger.Error("invalid callback state")
 		return ""
@@ -123,18 +55,19 @@ func (cbs *CallbackState) ToChatMsg() string {
 		return fmt.Sprintf("\n<@%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
 	}
 
-	var result string
-
+	var ackMessage string
 	switch cbs.Payload.Status {
 	case eve.DeploymentPlanStatusComplete:
-		result = fmt.Sprintf("\n<@%s>, your deployment is complete...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		ackMessage = "your deployment is complete"
 	case eve.DeploymentPlanStatusErrors:
-		result = fmt.Sprintf("\n<@%s>, we encountered some errors during the deployment...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		ackMessage = "we encountered some errors during the deployment"
 	case eve.DeploymentPlanStatusDryrun:
-		result = fmt.Sprintf("\n<@%s>, here's your *dryrun* results ...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		ackMessage = "here's your *dryrun* results"
 	case eve.DeploymentPlanStatusPending:
-		result = fmt.Sprintf("\n<@%s>, your deployment is pending. Here's the plan...\n\n%s", cbs.User, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+		ackMessage = "your deployment is pending, here's the plan"
 	}
+
+	result := fmt.Sprintf("\n<@%s>, %s...\n\n%s", cbs.User, ackMessage, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
 
 	var deploymentResults string
 
@@ -146,10 +79,12 @@ func (cbs *CallbackState) ToChatMsg() string {
 				break
 			}
 
+			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs, svcResult) + "```"
+
 			if len(deploymentResults) == 0 {
-				deploymentResults = headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs, svcResult) + "```"
+				deploymentResults = svcResultMessage
 			} else {
-				deploymentResults = deploymentResults + headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs, svcResult) + "```"
+				deploymentResults = deploymentResults + svcResultMessage
 			}
 		}
 		result = result + "\n" + deploymentResults
