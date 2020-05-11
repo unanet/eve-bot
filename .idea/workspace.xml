@@ -41,7 +41,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" path="/usr/local/go" />
+  <component name="GOROOT" path="/usr/local/Cellar/go/1.14.2_1/libexec" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -136,10 +136,11 @@
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
     <state x="3346" y="32" key="#Dockerfile/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1587700036576" />
-    <state x="3280" y="389" key="#GOROOT" timestamp="1588461653705">
-      <screen x="1920" y="-234" width="3440" height="1417" />
+    <state x="759" y="488" key="#GOROOT" timestamp="1589228039592">
+      <screen x="0" y="23" width="1920" height="1057" />
     </state>
     <state x="664" y="475" key="#GOROOT/0.23.1680.1027@0.23.1680.1027" timestamp="1588390053862" />
+    <state x="759" y="488" key="#GOROOT/0.23.1920.1057/-1680.329.1680.1027@0.23.1920.1057" timestamp="1589228039592" />
     <state x="3280" y="389" key="#GOROOT/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1588461653705" />
     <state x="2439" y="182" key="#GOROOT/1680.-283.1920.1057/0.23.1680.1027@1680.-283.1920.1057" timestamp="1586737417472" />
     <state x="3531" y="344" key="#Notifications" timestamp="1587700023545">
@@ -195,9 +196,10 @@
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1680.1027@0.23.1680.1027" timestamp="1586746591000" />
-    <state x="3345" y="110" width="588" height="729" key="find.popup" timestamp="1589073256922">
-      <screen x="1920" y="-234" width="3440" height="1417" />
+    <state x="795" y="280" width="556" height="544" key="find.popup" timestamp="1589228015644">
+      <screen x="0" y="23" width="1920" height="1057" />
     </state>
+    <state x="795" y="280" width="556" height="544" key="find.popup/0.23.1920.1057/-1680.329.1680.1027@0.23.1920.1057" timestamp="1589228015644" />
     <state x="3345" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1589073256922" />
     <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1588036185635">
       <screen x="1920" y="-234" width="3440" height="1417" />

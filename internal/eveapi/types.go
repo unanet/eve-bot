@@ -57,7 +57,7 @@ func availableLabel(svc *eve.DeployService) string {
 
 func deployedLabel(svc *eve.DeployService) string {
 	log.Logger.Debug("deployed label", zap.Any("deploy_service", *svc))
-	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.DeployedVersion)
+	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 }
 
 func artifactResultBlock(svcs eve.DeployServices, eveResult eve.DeployArtifactResult) string {
