@@ -25,7 +25,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="" />
+    <list default="true" id="305396f5-9846-4616-8b3a-5a9729545306" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/slack/slack.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/slack/slack.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -193,11 +196,11 @@
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state x="628" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1680.1027@0.23.1680.1027" timestamp="1586746591000" />
-    <state x="3345" y="110" width="588" height="729" key="find.popup" timestamp="1589208628969">
+    <state x="3345" y="110" width="588" height="729" key="find.popup" timestamp="1589425682592">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>
     <state x="795" y="280" width="556" height="544" key="find.popup/0.23.1920.1057/-1680.329.1680.1027@0.23.1920.1057" timestamp="1589228015644" />
-    <state x="3345" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1589208628969" />
+    <state x="3345" y="110" width="588" height="729" key="find.popup/0.23.1920.1057/1920.-234.3440.1417@1920.-234.3440.1417" timestamp="1589425682592" />
     <state x="3305" y="91" width="670" height="676" key="search.everywhere.popup" timestamp="1588036185635">
       <screen x="1920" y="-234" width="3440" height="1417" />
     </state>

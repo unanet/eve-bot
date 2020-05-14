@@ -127,6 +127,12 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 			// Send the immediate Acknowledgement Message back to the chat user
 			_, _, _ = p.Client.PostMessageContext(ctx, ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
 
+			realUser, err := p.Client.GetUserInfo(ev.User)
+			if err != nil {
+				p.ErrorNotification(context.TODO(), ev.User, ev.Channel, fmt.Errorf("failed to get user details"))
+			}
+			log.Logger.Debug("Slack user details", zap.Any("slack_user", realUser))
+
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine
 				go func(reqObj interface{}, slackUser, slackChannel string) {
