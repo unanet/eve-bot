@@ -38,7 +38,7 @@ func (c SlackController) Setup(r chi.Router) {
 	r.Post("/slack-events", c.slackEventHandler)
 	r.Post("/slack-interactive", c.slackInteractiveHandler)
 	r.Post("/eve-callback", c.eveCallbackHandler)
-	r.Post("/eve-cron-callback", c.eveCallbackHandler)
+	r.Post("/eve-cron-callback", c.eveCronCallbackHandler)
 
 }
 
