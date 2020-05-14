@@ -18,7 +18,7 @@ type EvebotCommand interface {
 	MakeAsyncReq() bool
 	AckMsg(userID string) string
 	ErrMsg() string
-	EveReqObj(cbURL string) interface{}
+	EveReqObj(cbURL, user string) interface{}
 }
 
 //

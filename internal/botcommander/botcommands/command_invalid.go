@@ -31,7 +31,7 @@ func defaultInvalidCommand() InvalidCmd {
 	}}
 }
 
-func (cmd InvalidCmd) EveReqObj(cbURL string) interface{} {
+func (cmd InvalidCmd) EveReqObj(cbURL, user string) interface{} {
 	return nil
 }
 

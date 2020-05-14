@@ -148,7 +148,7 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 						p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidRequestObj)
 						return
 					}
-				}(cmd.EveReqObj(callBackURL), ev.User, ev.Channel)
+				}(cmd.EveReqObj(callBackURL, realUser.Name), ev.User, ev.Channel)
 			}
 			// Immediately respond to the Slack HTTP Request.
 			return "OK", nil

@@ -53,7 +53,7 @@ func defaultDeployCommand() DeployCmd {
 //Namespaces  []string            `json:"namespaces,omitempty"`
 //Messages    []string            `json:"messages,omitempty"`
 //Type        string              `json:"type"`
-func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
+func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
 
 	// The deploy command type is 'application'
 	// the migration command type is 'migration'
@@ -98,6 +98,8 @@ func (cmd DeployCmd) EveReqObj(cbURL string) interface{} {
 			return nil
 		}
 	}
+
+	opts.User = user
 
 	return opts
 }

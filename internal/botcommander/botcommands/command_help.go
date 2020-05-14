@@ -12,7 +12,7 @@ func NewHelpCommand(cmdFields []string) EvebotCommand {
 	return cmd
 }
 
-func (cmd HelpCmd) EveReqObj(cbURL string) interface{} {
+func (cmd HelpCmd) EveReqObj(cbURL, user string) interface{} {
 	return nil
 }
 

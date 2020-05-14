@@ -22,7 +22,7 @@ func NewRootCmd() EvebotCommand {
 	}}
 }
 
-func (cmd RootCmd) EveReqObj(cbURL string) interface{} {
+func (cmd RootCmd) EveReqObj(cbURL, user string) interface{} {
 	return nil
 }
 

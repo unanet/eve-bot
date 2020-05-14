@@ -78,7 +78,7 @@ func (cmd *MigrateCmd) resolveArgs() {
 	return
 }
 
-func (cmd MigrateCmd) EveReqObj(cbURL string) interface{} {
+func (cmd MigrateCmd) EveReqObj(cbURL, user string) interface{} {
 	return nil
 }
 
