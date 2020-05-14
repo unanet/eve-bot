@@ -74,7 +74,6 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 	cbUrlVals.Add("channel", slackChannel)
 
 	dp.CallbackURL = dp.CallbackURL + "?" + cbUrlVals.Encode()
-	dp.User = slackUser
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).Request()
 	if err != nil {
