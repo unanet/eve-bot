@@ -53,7 +53,7 @@ func (p *Provider) messageNotification(ctx context.Context, user, channel, messa
 
 func (p *Provider) deploymentErrorNotification(ctx context.Context, user, channel string, err error) {
 	log.Logger.Debug("deployment error notification", zap.Error(err))
-	slackDeploymentErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```", msgDeploymentErrNotification, user, err.Error())
+	slackDeploymentErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```", user, msgDeploymentErrNotification, err.Error())
 	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackDeploymentErrMsg, false))
 }
 
