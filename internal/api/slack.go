@@ -8,12 +8,17 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/slack-go/slack"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
+)
+
+const (
+	DevopsSlackGroupID = "S013MD29N3X"
 )
 
 // Controller for slack routes
@@ -33,6 +38,8 @@ func (c SlackController) Setup(r chi.Router) {
 	r.Post("/slack-events", c.slackEventHandler)
 	r.Post("/slack-interactive", c.slackInteractiveHandler)
 	r.Post("/eve-callback", c.eveCallbackHandler)
+	r.Post("/eve-cron-callback", c.eveCallbackHandler)
+
 }
 
 func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +58,27 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload})
+	// Just returning an empty response here...
+	render.Respond(w, r, nil)
+	return
+
+}
+
+func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract the URL Params
+	channel := r.URL.Query().Get("channel")
+
+	// Get the Body
+	payload := eve.NSDeploymentPlan{}
+
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		c.slackProvider.ErrorNotification(r.Context(), DevopsSlackGroupID, channel, err)
+		render.Respond(w, r, errors.Wrap(err))
+		return
+	}
+
+	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: DevopsSlackGroupID, Channel: channel, Payload: payload})
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return

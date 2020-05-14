@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
 	"github.com/slack-go/slack"
@@ -39,6 +41,18 @@ func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, 
 
 // EveCallbackNotification handles the callbacks from eve-api and notifies the slack user
 func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) {
+	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false))
+	if err != nil {
+		p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
+	}
+}
+
+func (p *Provider) EveCronCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) {
+	// ignore the message unless it's a deployment plan that's finished..
+	if cbState.Payload.Status != eve.DeploymentPlanStatusComplete {
+		return
+	}
+
 	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false))
 	if err != nil {
 		p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)

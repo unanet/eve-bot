@@ -13,7 +13,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/prometheus/client_golang v1.6.0 // indirect
 	github.com/slack-go/slack v0.6.4
-	gitlab.unanet.io/devops/eve v0.0.0-20200514145311-c9877d91367b
+	gitlab.unanet.io/devops/eve v0.0.0-20200514151605-3e3b48ab42dd
 	go.uber.org/zap v1.15.0
 	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
 )
