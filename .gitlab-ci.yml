@@ -2,6 +2,7 @@ stages:
   - test
   - dist
   - deploy
+  - scan
 
 Dist:
   stage: dist
