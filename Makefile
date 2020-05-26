@@ -69,4 +69,4 @@ proxy-bot:
 	ssh evebot -R 3000:localhost:3000 -Nf
 
 scan:
-	docker run -e SONAR_TOKEN=${SONARQUBE_TOKEN} -e SONAR_HOST_URL=https://sonarqube.unanet.io -it -v $(pwd):/usr/src sonarsource/sonar-scanner-cli
+	docker run -e SONAR_TOKEN=${SONARQUBE_TOKEN} -e SONAR_HOST_URL=https://sonarqube.unanet.io -it -v $(CUR_DIR):/usr/src sonarsource/sonar-scanner-cli
