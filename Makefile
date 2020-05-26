@@ -5,6 +5,8 @@ CI_PIPELINE_IID ?= 0
 GOPATH ?= ${HOME}/go
 MODCACHE ?= ${GOPATH}/pkg/mod
 
+SONARQUBE_TOKEN := ${SONARQUBE_TOKEN}
+
 VERSION_MAJOR := 0
 VERSION_MINOR := 1
 VERSION_PATCH := 0
@@ -65,3 +67,6 @@ deploy:
 
 proxy-bot: 
 	ssh evebot -R 3000:localhost:3000 -Nf
+
+scan:
+	docker run -e SONAR_TOKEN=${SONARQUBE_TOKEN} -e SONAR_HOST_URL=https://sonarqube.unanet.io -it -v $(pwd):/usr/src sonarsource/sonar-scanner-cli

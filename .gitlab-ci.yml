@@ -29,3 +29,12 @@ Deploy:
     - linux
   only:
     - master
+
+Sonar Scan:
+  stage: scan
+  script:
+    - make scan
+  tags:
+    - linux
+  only:
+    - master
