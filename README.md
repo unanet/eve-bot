@@ -50,5 +50,3 @@ New secrets should be generated through the Slack UI, and then pushed up to Vaul
 ### Local Dev
 
 To run/develop locally: `docker-compose up` **Note:Still need to setup ngrok to proxy bot/slack request**
-
-05463a1a8ab15818fb71d6bb4d3e5e4db4cb000a
