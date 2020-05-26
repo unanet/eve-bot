@@ -88,3 +88,6 @@ bin
 eve-bot
 
 .env
+
+.scannerwork
+.sonar
