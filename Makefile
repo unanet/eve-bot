@@ -30,6 +30,13 @@ IMAGE_LABELS := \
 	--label "${LABEL_PREFIX}.build_number=${BUILD_NUMBER}" \
 	--label "${LABEL_PREFIX}.version=${VERSION}"
 
+docker-scanner-exec = docker run --rm \
+	-e SONAR_TOKEN=${SONARQUBE_TOKEN} \
+	-e SONAR_HOST_URL=https://sonarqube.unanet.io \
+	-v $(CUR_DIR):/usr/src \
+	--user="${DOCKER_UID}:${DOCKER_GID}" \
+	sonarsource/sonar-scanner-cli
+
 docker-exec = docker run --rm \
 	-e DOCKER_UID=${DOCKER_UID} \
 	-e DOCKER_GID=${DOCKER_GID} \
@@ -69,4 +76,4 @@ proxy-bot:
 	ssh evebot -R 3000:localhost:3000 -Nf
 
 scan:
-	docker run --rm -e SONAR_TOKEN=${SONARQUBE_TOKEN} -e SONAR_HOST_URL=https://sonarqube.unanet.io -v $(CUR_DIR):/usr/src sonarsource/sonar-scanner-cli
+	$(docker-scanner-exec)
