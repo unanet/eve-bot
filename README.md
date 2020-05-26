@@ -1,6 +1,18 @@
 # eve-bot
 
-[![pipeline status](https://gitlab.unanet.io/devops/eve-bot/badges/master/pipeline.svg)](https://gitlab.unanet.io/devops/eve-bot/-/commits/master)
+| Code Health                                                                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![pipeline status](https://gitlab.unanet.io/devops/eve-bot/badges/master/pipeline.svg)](https://gitlab.unanet.io/devops/eve-bot/-/commits/master)                          |
+| [![Bugs](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=bugs)](https://sonarqube.unanet.io/dashboard?id=eve-bot)                             |
+| [![Code Smells](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=code_smells)](https://sonarqube.unanet.io/dashboard?id=eve-bot)               |
+| [![Coverage](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=coverage)](https://sonarqube.unanet.io/dashboard?id=eve-bot)                     |
+| [![Lines of Code](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=ncloc)](https://sonarqube.unanet.io/dashboard?id=eve-bot)                   |
+| [![Maintainability Rating](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=sqale_rating)](https://sonarqube.unanet.io/dashboard?id=eve-bot)   |
+| [![Quality Gate Status](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=alert_status)](https://sonarqube.unanet.io/dashboard?id=eve-bot)      |
+| [![Reliability Rating](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=reliability_rating)](https://sonarqube.unanet.io/dashboard?id=eve-bot) |
+| [![Security Rating](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=security_rating)](https://sonarqube.unanet.io/dashboard?id=eve-bot)       |
+| [![Technical Debt](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=sqale_index)](https://sonarqube.unanet.io/dashboard?id=eve-bot)            |
+| [![Vulnerabilities](https://sonarqube.unanet.io/api/project_badges/measure?project=eve-bot&metric=vulnerabilities)](https://sonarqube.unanet.io/dashboard?id=eve-bot)       |
 
 ## Summary
 
