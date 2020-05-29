@@ -52,7 +52,11 @@ func (cbs *CallbackState) ToChatMsg() string {
 	}
 
 	if cbs.Payload.NothingToDeploy() {
-		return fmt.Sprintf("\n<@%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
+		msg := fmt.Sprintf("\n<@%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
+		if len(cbs.Payload.Messages) > 0 {
+			return msg + headerMsg("Messages") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
+		}
+		return msg
 	}
 
 	var ackMessage string
