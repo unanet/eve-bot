@@ -18,7 +18,6 @@ func availableLabel(svc *eve.DeployService) string {
 	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
 }
 
-
 func artifactResultBlock(svcs eve.DeployServices, eveResult eve.DeployArtifactResult) string {
 	result := ""
 
@@ -52,6 +51,6 @@ func apiMessages(msgs []string) string {
 	return infoMsgs
 }
 
-func environmentNamespaceMsg(env, ns string) string {
-	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s```", ns, env)
+func environmentNamespaceMsg(deploymentResponsePayload *eve.NSDeploymentPlan) string {
+	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s\nCluster: %s```", deploymentResponsePayload.Namespace.Alias, deploymentResponsePayload.EnvironmentName, deploymentResponsePayload.Namespace.ClusterName)
 }

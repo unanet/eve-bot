@@ -67,7 +67,8 @@ func (cbs *CallbackState) ToChatMsg() string {
 		ackMessage = "your deployment is pending, here's the plan"
 	}
 
-	result := fmt.Sprintf("\n<@%s>, %s...\n\n%s", cbs.User, ackMessage, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+	//result := fmt.Sprintf("\n<@%s>, %s...\n\n%s", cbs.User, ackMessage, environmentNamespaceMsg(cbs.Payload.EnvironmentName, cbs.Payload.Namespace.Alias))
+	result := fmt.Sprintf("\n<@%s>, %s...\n\n%s", cbs.User, ackMessage, environmentNamespaceMsg(&cbs.Payload))
 
 	var deploymentResults string
 
