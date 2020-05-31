@@ -38,70 +38,27 @@ func defaultDeployCommand() DeployCmd {
 			"deploy current in qa services=infocus-cloud-client:2020.2.232,infocus-proxy:2020.2.199 dryrun=true force=true",
 			"deploy current in qa services=infocus-cloud-client,infocus-proxy",
 		},
-		async:          true,
-		optionalArgs:   botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultServicesArg()},
-		requiredParams: botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
-		apiOptions:     make(map[string]interface{}),
+		async:               true,
+		optionalArgs:        botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultServicesArg()},
+		requiredParams:      botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
+		apiOptions:          make(map[string]interface{}),
+		requiredInputLength: 4,
 	}}
 }
 
-//Artifacts   ArtifactDefinitions `json:"artifacts"`
-//ForceDeploy bool                `json:"force_deploy"`
-//DryRun      bool                `json:"dry_run"`
-//CallbackURL string              `json:"callback_url"`
-//Environment string              `json:"environment"`
-//Namespaces  []string            `json:"namespaces,omitempty"`
-//Messages    []string            `json:"messages,omitempty"`
-//Type        string              `json:"type"`
+// EveReqObj hydrates the data needed to make the EveAPI Request for the EveBot Command (deploy)
 func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
-
-	// The deploy command type is 'application'
-	// the migration command type is 'migration'
-	opts := eveapi.DeploymentPlanOptions{CallbackURL: cbURL, Type: "application"}
-
-	if val, ok := cmd.apiOptions[botargs.ServicesName]; ok {
-		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
-			opts.Artifacts = artifactDefs
-		} else {
-			return nil
-		}
+	return eveapi.DeploymentPlanOptions{
+		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
+		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
+		User:             user,
+		DryRun:           extractDryrunOpt(cmd.apiOptions),
+		CallbackURL:      cbURL,
+		Environment:      extractEnvironmentOpt(cmd.apiOptions),
+		NamespaceAliases: extractNSOpt(cmd.apiOptions),
+		Messages:         nil,
+		Type:             "application",
 	}
-
-	if val, ok := cmd.apiOptions[botargs.ForceDeployName]; ok {
-		if forceDepVal, ok := val.(bool); ok {
-			opts.ForceDeploy = forceDepVal
-		} else {
-			return nil
-		}
-	}
-
-	if val, ok := cmd.apiOptions[botargs.DryrunName]; ok {
-		if dryRunVal, ok := val.(bool); ok {
-			opts.DryRun = dryRunVal
-		} else {
-			return nil
-		}
-	}
-
-	if val, ok := cmd.apiOptions[botparams.EnvironmentName]; ok {
-		if envVal, ok := val.(string); ok {
-			opts.Environment = envVal
-		} else {
-			return nil
-		}
-	}
-
-	if val, ok := cmd.apiOptions[botparams.NamespaceName]; ok {
-		if nsVal, ok := val.(string); ok {
-			opts.NamespaceAliases = eveapi.StringList{nsVal}
-		} else {
-			return nil
-		}
-	}
-
-	opts.User = user
-
-	return opts
 }
 
 func (cmd DeployCmd) AckMsg(userID string) string {
@@ -109,7 +66,7 @@ func (cmd DeployCmd) AckMsg(userID string) string {
 }
 
 func (cmd DeployCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= 4 {
+	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
 		return true
 	}
 	return false
@@ -146,8 +103,8 @@ func (cmd DeployCmd) IsHelpRequest() bool {
 // resolveParams attempts to resolve the input params
 // be sure and use a pointer receiver here since we are modifying the receiver object
 func (cmd *DeployCmd) resolveParams() {
-	if len(cmd.input) < 4 {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
+	if len(cmd.input) < cmd.requiredInputLength {
+		cmd.errs = append(cmd.errs, fmt.Errorf("resolve cmd params err invalid input: %v", cmd.input))
 		return
 	}
 	cmd.apiOptions[botparams.NamespaceName] = cmd.input[1]
@@ -159,9 +116,8 @@ func (cmd *DeployCmd) resolveParams() {
 // resolveArgs attempts to resolve the input argument
 // be sure and use a pointer receiver here since we are modifying the receiver object
 func (cmd *DeployCmd) resolveArgs() {
-	// haven't calculated the args and no need since they weren't supplied
-	if len(cmd.input) < 4 {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
+	if len(cmd.input) < cmd.requiredInputLength {
+		cmd.errs = append(cmd.errs, fmt.Errorf("resolve cmd args err invalid input: %v", cmd.input))
 		return
 	}
 

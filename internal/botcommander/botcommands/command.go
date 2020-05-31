@@ -3,6 +3,8 @@ package botcommands
 import (
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
@@ -69,22 +71,73 @@ func baseErrMsg(errs []error) string {
 	return msg
 }
 
+func extractArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
+	if val, ok := opts[botargs.ServicesName]; ok {
+		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
+			return artifactDefs
+		} else {
+			return nil
+		}
+	}
+	return nil
+}
+
+func extractForceDeployOpt(opts map[string]interface{}) bool {
+	if val, ok := opts[botargs.ForceDeployName]; ok {
+		if forceDepVal, ok := val.(bool); ok {
+			return forceDepVal
+		} else {
+			return false
+		}
+	}
+	return false
+}
+
+func extractDryrunOpt(opts map[string]interface{}) bool {
+	if val, ok := opts[botargs.DryrunName]; ok {
+		if dryRunVal, ok := val.(bool); ok {
+			return dryRunVal
+		} else {
+			return false
+		}
+	}
+	return false
+}
+
+func extractEnvironmentOpt(opts map[string]interface{}) string {
+	if val, ok := opts[botparams.EnvironmentName]; ok {
+		if envVal, ok := val.(string); ok {
+			return envVal
+		} else {
+			return ""
+		}
+	}
+	return ""
+}
+
+func extractNSOpt(opts map[string]interface{}) eveapi.StringList {
+	if val, ok := opts[botparams.NamespaceName]; ok {
+		if nsVal, ok := val.(string); ok {
+			return eveapi.StringList{nsVal}
+		} else {
+			return nil
+		}
+	}
+	return nil
+}
+
 type baseCommand struct {
-	input    []string
-	name     string
-	async    bool
-	valid    bool
-	errs     []error
-	summary  bothelp.Summary
-	usage    bothelp.Usage
-	examples bothelp.Examples
-
-	// these are used for the help command
-	optionalArgs botargs.Args
-
-	// these are used so we know what the user should supply
-	requiredParams botparams.Params
-
+	input               []string
+	requiredInputLength int
+	name                string
+	async               bool
+	valid               bool
+	errs                []error
+	summary             bothelp.Summary
+	usage               bothelp.Usage
+	examples            bothelp.Examples
+	optionalArgs        botargs.Args
+	requiredParams      botparams.Params
 	// when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
 	apiOptions map[string]interface{}
 }

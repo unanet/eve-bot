@@ -38,15 +38,16 @@ func defaultMigrateCommand() MigrateCmd {
 			"migrate current in qa databases=infocus dryrun=true force=true",
 			"migrate current in qa databases=infocus,cloud-support dryrun=true force=true",
 		},
-		async:          true,
-		optionalArgs:   botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultDatabasesArg()},
-		requiredParams: botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
+		async:               true,
+		optionalArgs:        botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultDatabasesArg()},
+		requiredParams:      botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
+		requiredInputLength: 4,
 	}}
 }
 
 func (cmd *MigrateCmd) resolveParams() {
 
-	if len(cmd.input) < 4 {
+	if len(cmd.input) < cmd.requiredInputLength {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return
 	}
@@ -59,7 +60,7 @@ func (cmd *MigrateCmd) resolveParams() {
 
 func (cmd *MigrateCmd) resolveArgs() {
 	// haven't calculated the args and no need since they weren't supplied
-	if len(cmd.input) < 4 {
+	if len(cmd.input) < cmd.requiredInputLength {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command args: %v", cmd.input))
 		return
 	}
@@ -98,7 +99,7 @@ func (cmd MigrateCmd) MakeAsyncReq() bool {
 }
 
 func (cmd MigrateCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= 4 {
+	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
 		return true
 	}
 	return false
