@@ -15,10 +15,10 @@ func headerMsg(val string) string {
 
 func availableLabel(svc *eve.DeployService) string {
 	log.Logger.Debug("available label", zap.Any("deploy_service", *svc))
-	return fmt.Sprintf("\n%s:%s", svc.ArtifactName, svc.AvailableVersion)
+	return fmt.Sprintf("\n%s (%s):%s", svc.ArtifactName, svc.ServiceName, svc.AvailableVersion)
 }
 
-func artifactResultBlock(svcs eve.DeployServices, eveResult eve.DeployArtifactResult) string {
+func artifactResultBlock(svcs eve.DeployServices) string {
 	result := ""
 
 	if svcs == nil || len(svcs) == 0 {

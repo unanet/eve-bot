@@ -80,11 +80,11 @@ func (cbs *CallbackState) ToChatMsg() string {
 		for svcResult, svcs := range cbs.Payload.Services.TopResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deploymentResults = "\n```" + artifactResultBlock(svcs, svcResult) + "```"
+				deploymentResults = "\n```" + artifactResultBlock(svcs) + "```"
 				break
 			}
 
-			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs, svcResult) + "```"
+			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs) + "```"
 
 			if len(deploymentResults) == 0 {
 				deploymentResults = svcResultMessage
