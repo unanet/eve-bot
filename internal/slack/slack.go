@@ -143,7 +143,7 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 			// Resolve the input and return a Command object
 			cmd := p.CommandResolver.Resolve(ev.Text)
 			// Send the immediate Acknowledgement Message back to the chat user
-			_, respTS, _ := p.Client.PostMessageContext(ctx, ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false), slack.MsgOptionTS(ev.TimeStamp))
+			_, respTS, _ := p.Client.PostMessageContext(ctx, ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false), slack.MsgOptionTS(ev.ThreadTimeStamp))
 			realUser, err := p.Client.GetUserInfo(ev.User)
 			if err != nil {
 				p.ErrorNotification(context.TODO(), ev.User, ev.Channel, respTS, fmt.Errorf("failed to get user details"))
