@@ -7,7 +7,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 // EvebotCommand interface
@@ -73,10 +72,7 @@ func baseErrMsg(errs []error) string {
 
 func extractArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
 	if val, ok := opts[botargs.ServicesName]; ok {
-		log.Logger.Debug(fmt.Sprintf("extract service opt val: %v", val))
 		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
-
-			log.Logger.Debug(fmt.Sprintf("extract service opt artifactDefs: %v", artifactDefs))
 			return artifactDefs
 		} else {
 			return nil

@@ -2,7 +2,6 @@ package botcommands
 
 import (
 	"fmt"
-	"reflect"
 
 	"strings"
 
@@ -10,7 +9,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 func NewDeployCommand(cmdFields []string) EvebotCommand {
@@ -51,18 +49,8 @@ func defaultDeployCommand() DeployCmd {
 
 // EveReqObj hydrates the data needed to make the EveAPI Request for the EveBot Command (deploy)
 func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
-
-	artifacts := extractArtifactsOpt(cmd.apiOptions)
-
-	for i, a := range artifacts {
-		log.Logger.Debug(fmt.Sprintf("Artifacts: %v %v", i, a))
-		log.Logger.Debug(fmt.Sprintf("Artifacts2: %v %v", i, &a))
-		log.Logger.Debug(fmt.Sprintf("Artifacts3: %v %v", i, &a.Name))
-		log.Logger.Debug(fmt.Sprintf("Artifacts4: %v %v", i, a.Name))
-	}
-
-	deploymentPlanOpts := eveapi.DeploymentPlanOptions{
-		Artifacts:        artifacts,
+	return eveapi.DeploymentPlanOptions{
+		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
 		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
 		User:             user,
 		DryRun:           extractDryrunOpt(cmd.apiOptions),
@@ -72,8 +60,6 @@ func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
 		Messages:         nil,
 		Type:             "application",
 	}
-
-	return deploymentPlanOpts
 }
 
 func (cmd DeployCmd) AckMsg(userID string) string {
@@ -124,7 +110,6 @@ func (cmd *DeployCmd) resolveParams() {
 	}
 	cmd.apiOptions[botparams.NamespaceName] = cmd.input[1]
 	cmd.apiOptions[botparams.EnvironmentName] = cmd.input[3]
-
 	return
 }
 
@@ -140,15 +125,6 @@ func (cmd *DeployCmd) resolveArgs() {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
 			if suppliedArg := botargs.ResolveArgumentKV(argKV); suppliedArg != nil {
-				log.Logger.Debug(fmt.Sprintf("supplied arg type: %v", reflect.TypeOf(suppliedArg)))
-				switch suppliedArg.(type) {
-				case botargs.Services:
-					log.Logger.Debug(fmt.Sprintf("supplied arg value: %v", suppliedArg.Value()))
-				case botargs.Dryrun:
-				case botargs.Force:
-				case botargs.Databases:
-				}
-
 				cmd.apiOptions[suppliedArg.Name()] = suppliedArg.Value()
 			} else {
 				cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", argKV))

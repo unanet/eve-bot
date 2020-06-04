@@ -158,10 +158,12 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 					case eveapi.DeploymentPlanOptions:
 						log.Logger.Debug(fmt.Sprintf("deployment request: %v", reqObj.(eveapi.DeploymentPlanOptions)))
 						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel)
-						log.Logger.Debug(fmt.Sprintf("deployment response: %v", resp))
-						for i, a := range resp.Artifacts {
-							log.Logger.Debug(fmt.Sprintf("deployment response i: %v", i))
-							log.Logger.Debug(fmt.Sprintf("deployment response a: %v", a))
+						log.Logger.Debug(
+							fmt.Sprintf(
+								"deployment response: %v", resp),
+							zap.Int("artifact_length", len(resp.Artifacts)),
+						)
+						for _, a := range resp.Artifacts {
 							log.Logger.Debug(fmt.Sprintf("deployment response a.Name: %v", a.Name))
 						}
 						p.handleEveApiResponse(slackUser, slackChannel, resp, err)
