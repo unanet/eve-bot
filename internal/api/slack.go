@@ -46,18 +46,19 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 	// Extract the URL Params
 	channel := r.URL.Query().Get("channel")
 	user := r.URL.Query().Get("user")
+	ts := r.URL.Query().Get("ts")
 
 	// Get the Body
 	payload := eve.NSDeploymentPlan{}
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		c.slackProvider.ErrorNotification(r.Context(), user, channel, err)
+		c.slackProvider.ErrorNotification(r.Context(), user, channel, ts, err)
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
 
-	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload})
+	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts})
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return
@@ -73,7 +74,7 @@ func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.R
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		c.slackProvider.ErrorNotification(r.Context(), DevopsSlackGroupID, channel, err)
+		c.slackProvider.ErrorNotification(r.Context(), DevopsSlackGroupID, channel, "", err)
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}

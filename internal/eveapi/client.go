@@ -31,7 +31,7 @@ type Config struct {
 }
 
 type Client interface {
-	Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser string, slackChannel string) (*DeploymentPlanOptions, error)
+	Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser, slackChannel, ts string) (*DeploymentPlanOptions, error)
 	CallBackURL() string
 }
 
@@ -65,13 +65,14 @@ func (c *client) CallBackURL() string {
 	return c.cfg.EveapiCallbackUrl
 }
 
-func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser string, slackChannel string) (*DeploymentPlanOptions, error) {
+func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser, slackChannel, ts string) (*DeploymentPlanOptions, error) {
 	var success DeploymentPlanOptions
 	var failure eveerror.RestError
 
 	cbUrlVals := url.Values{}
 	cbUrlVals.Set("user", slackUser)
 	cbUrlVals.Add("channel", slackChannel)
+	cbUrlVals.Add("ts", ts)
 
 	dp.CallbackURL = dp.CallbackURL + "?" + cbUrlVals.Encode()
 

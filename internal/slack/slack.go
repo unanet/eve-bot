@@ -33,17 +33,21 @@ const (
 
 // ErrorNotification is generic error function so that we can message to the slack user that something bad has happened
 // we should probably have
-func (p *Provider) ErrorNotification(ctx context.Context, user, channel string, err error) {
+func (p *Provider) ErrorNotification(ctx context.Context, user, channel, ts string, err error) {
 	log.Logger.Error("slack error notification", zap.Error(err))
 	slackErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n%s", user, msgErrNotification, err.Error(), msgErrNotificationAssurance)
-	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
+	if len(ts) > 0 {
+		_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false), slack.MsgOptionTS(ts))
+	} else {
+		_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
+	}
 }
 
 // EveCallbackNotification handles the callbacks from eve-api and notifies the slack user
 func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) {
-	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false))
+	respChannel, respTS, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false), slack.MsgOptionTS(cbState.TS))
 	if err != nil {
-		p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
+		p.ErrorNotification(ctx, cbState.User, respChannel, respTS, err)
 	}
 }
 
@@ -53,38 +57,38 @@ func (p *Provider) EveCronCallbackNotification(ctx context.Context, cbState evea
 		return
 	}
 
-	_, _, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false))
+	respChannel, respTS, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false))
 	if err != nil {
-		p.ErrorNotification(ctx, cbState.User, cbState.Channel, err)
+		p.ErrorNotification(ctx, cbState.User, respChannel, respTS, err)
 	}
 }
 
-func (p *Provider) messageNotification(ctx context.Context, user, channel, message string) {
+func (p *Provider) messageNotification(ctx context.Context, user, channel, respTS, message string) {
 	log.Logger.Debug("slack deployment message notification", zap.String("message", message))
 	slackErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", user, msgNotification, message)
-	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false))
+	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false), slack.MsgOptionTS(respTS))
 }
 
-func (p *Provider) deploymentErrorNotification(ctx context.Context, user, channel string, err error) {
+func (p *Provider) deploymentErrorNotification(ctx context.Context, user, channel, respTS string, err error) {
 	log.Logger.Debug("deployment error notification", zap.Error(err))
 	slackDeploymentErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```", user, msgDeploymentErrNotification, err.Error())
-	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackDeploymentErrMsg, false))
+	_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackDeploymentErrMsg, false), slack.MsgOptionTS(respTS))
 }
 
-func (p *Provider) handleEveApiResponse(slackUser, slackChannel string, resp *eveapi.DeploymentPlanOptions, err error) {
+func (p *Provider) handleEveApiResponse(slackUser, slackChannel, respTS string, resp *eveapi.DeploymentPlanOptions, err error) {
 	// The err is coming back with an empty message...
 	if err != nil && len(err.Error()) > 0 {
-		p.deploymentErrorNotification(context.TODO(), slackUser, slackChannel, err)
+		p.deploymentErrorNotification(context.TODO(), slackUser, slackChannel, respTS, err)
 		return
 	}
 
 	if resp == nil {
-		p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidEveApiResponse)
+		p.ErrorNotification(context.TODO(), slackUser, slackChannel, respTS, errInvalidEveApiResponse)
 		return
 	}
 
 	if len(resp.Messages) > 0 {
-		p.messageNotification(context.TODO(), slackUser, slackChannel, strings.Join(resp.Messages, ","))
+		p.messageNotification(context.TODO(), slackUser, slackChannel, respTS, strings.Join(resp.Messages, ","))
 		return
 	}
 }
@@ -139,27 +143,28 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 			// Resolve the input and return a Command object
 			cmd := p.CommandResolver.Resolve(ev.Text)
 			// Send the immediate Acknowledgement Message back to the chat user
-			_, _, _ = p.Client.PostMessageContext(ctx, ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false))
+			_, respTS, _ := p.Client.PostMessageContext(ctx, ev.Channel, slack.MsgOptionText(cmd.AckMsg(ev.User), false), slack.MsgOptionTS(ev.ThreadTimeStamp))
 			realUser, err := p.Client.GetUserInfo(ev.User)
 			if err != nil {
-				p.ErrorNotification(context.TODO(), ev.User, ev.Channel, fmt.Errorf("failed to get user details"))
+				p.ErrorNotification(context.TODO(), ev.User, ev.Channel, respTS, fmt.Errorf("failed to get user details"))
+				return "OK", nil
 			}
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine
-				go func(reqObj interface{}, slackUser, slackChannel string) {
+				go func(reqObj interface{}, slackUser, slackChannel, respTS string) {
 					if reqObj == nil {
-						p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidRequestObj)
+						p.ErrorNotification(context.TODO(), slackUser, slackChannel, respTS, errInvalidRequestObj)
 						return
 					}
 					switch reqObj.(type) {
 					case eveapi.DeploymentPlanOptions:
-						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel)
-						p.handleEveApiResponse(slackUser, slackChannel, resp, err)
+						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel, respTS)
+						p.handleEveApiResponse(slackUser, slackChannel, respTS, resp, err)
 					default:
-						p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidRequestObj)
+						p.ErrorNotification(context.TODO(), slackUser, slackChannel, respTS, errInvalidRequestObj)
 						return
 					}
-				}(cmd.EveReqObj(callBackURL, realUser.Name), ev.User, ev.Channel)
+				}(cmd.EveReqObj(callBackURL, realUser.Name), ev.User, ev.Channel, respTS)
 			}
 			// Immediately respond to the Slack HTTP Request.
 			return "OK", nil

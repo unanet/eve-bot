@@ -10,6 +10,7 @@ import (
 type CallbackState struct {
 	User    string               `json:"user"`
 	Channel string               `json:"channel"`
+	TS      string               `json:"ts"`
 	Payload eve.NSDeploymentPlan `json:"payload"`
 }
 
