@@ -156,7 +156,9 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 					}
 					switch reqObj.(type) {
 					case eveapi.DeploymentPlanOptions:
+						log.Logger.Debug(fmt.Sprintf("deployment request: %v", reqObj.(eveapi.DeploymentPlanOptions)))
 						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel)
+						log.Logger.Debug(fmt.Sprintf("deployment response: %v", resp))
 						p.handleEveApiResponse(slackUser, slackChannel, resp, err)
 					default:
 						p.ErrorNotification(context.TODO(), slackUser, slackChannel, errInvalidRequestObj)
