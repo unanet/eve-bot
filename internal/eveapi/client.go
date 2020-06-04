@@ -73,6 +73,11 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 	cbUrlVals.Set("user", slackUser)
 	cbUrlVals.Add("channel", slackChannel)
 
+	log.Logger.Debug(fmt.Sprintf("Deploy: %v", dp))
+	log.Logger.Debug(fmt.Sprintf("Deploy2: %v", dp.Artifacts))
+	log.Logger.Debug(fmt.Sprintf("Deploy3: %v", dp.Artifacts[0].Name))
+	log.Logger.Debug(fmt.Sprintf("Deploy3: %v", dp.Artifacts[1].Name))
+
 	dp.CallbackURL = dp.CallbackURL + "?" + cbUrlVals.Encode()
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).Request()
