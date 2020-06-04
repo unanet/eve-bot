@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
@@ -34,15 +36,69 @@ func defaultMigrateCommand() MigrateCmd {
 		},
 		examples: bothelp.Examples{
 			"migrate current in qa",
-			"migrate current in qa databases=infocus dryrun=true",
-			"migrate current in qa databases=infocus dryrun=true force=true",
-			"migrate current in qa databases=infocus,cloud-support dryrun=true force=true",
+			"migrate current in una-int databases=unanetbi dryrun=true",
+			"migrate current in una-int databases=unanetbi dryrun=true force=true",
+			"migrate current in una-int databases=unanetbi,unaneta dryrun=true force=true",
 		},
 		async:               true,
 		optionalArgs:        botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultDatabasesArg()},
 		requiredParams:      botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
+		apiOptions:          make(map[string]interface{}),
 		requiredInputLength: 4,
 	}}
+}
+
+func (cmd MigrateCmd) EveReqObj(cbURL, user string) interface{} {
+	return eveapi.DeploymentPlanOptions{
+		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
+		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
+		User:             user,
+		DryRun:           extractDryrunOpt(cmd.apiOptions),
+		CallbackURL:      cbURL,
+		Environment:      extractEnvironmentOpt(cmd.apiOptions),
+		NamespaceAliases: extractNSOpt(cmd.apiOptions),
+		Messages:         nil,
+		Type:             "migration",
+	}
+}
+
+func (cmd MigrateCmd) AckMsg(userID string) string {
+	return baseAckMsg(cmd, userID, cmd.input)
+}
+
+func (cmd MigrateCmd) IsValid() bool {
+	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
+		return true
+	}
+	return false
+}
+
+func (cmd MigrateCmd) MakeAsyncReq() bool {
+	if cmd.IsHelpRequest() || cmd.IsValid() == false || len(cmd.errs) > 0 {
+		return false
+	}
+	return cmd.async
+}
+
+func (cmd MigrateCmd) ErrMsg() string {
+	return baseErrMsg(cmd.errs)
+}
+
+func (cmd MigrateCmd) Name() string {
+	return cmd.name
+}
+
+func (cmd MigrateCmd) Help() *bothelp.Help {
+	return bothelp.New(
+		bothelp.HeaderOpt(cmd.summary.String()),
+		bothelp.UsageOpt(cmd.usage.String()),
+		bothelp.ArgsOpt(cmd.optionalArgs.String()),
+		bothelp.ExamplesOpt(cmd.examples.String()),
+	)
+}
+
+func (cmd MigrateCmd) IsHelpRequest() bool {
+	return isHelpRequest(cmd.input, cmd.name)
 }
 
 func (cmd *MigrateCmd) resolveParams() {
@@ -77,47 +133,4 @@ func (cmd *MigrateCmd) resolveArgs() {
 	}
 
 	return
-}
-
-func (cmd MigrateCmd) EveReqObj(cbURL, user string) interface{} {
-	return nil
-}
-
-func (cmd MigrateCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd MigrateCmd) AckMsg(userID string) string {
-	return baseAckMsg(cmd, userID, cmd.input)
-}
-
-func (cmd MigrateCmd) MakeAsyncReq() bool {
-	if cmd.IsHelpRequest() || cmd.IsValid() == false || len(cmd.errs) > 0 {
-		return false
-	}
-	return cmd.async
-}
-
-func (cmd MigrateCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
-		return true
-	}
-	return false
-}
-
-func (cmd MigrateCmd) Name() string {
-	return cmd.name
-}
-
-func (cmd MigrateCmd) Help() *bothelp.Help {
-	return bothelp.New(
-		bothelp.HeaderOpt(cmd.summary.String()),
-		bothelp.UsageOpt(cmd.usage.String()),
-		bothelp.ArgsOpt(cmd.optionalArgs.String()),
-		bothelp.ExamplesOpt(cmd.examples.String()),
-	)
-}
-
-func (cmd MigrateCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
 }
