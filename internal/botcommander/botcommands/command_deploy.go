@@ -2,12 +2,15 @@ package botcommands
 
 import (
 	"fmt"
+	"reflect"
+
 	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 func NewDeployCommand(cmdFields []string) EvebotCommand {
@@ -125,6 +128,14 @@ func (cmd *DeployCmd) resolveArgs() {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
 			if suppliedArg := botargs.ResolveArgumentKV(argKV); suppliedArg != nil {
+				log.Logger.Debug(fmt.Sprintf("supplied arg type: %v", reflect.TypeOf(suppliedArg)))
+				switch suppliedArg.(type) {
+				case botargs.Services:
+				case botargs.Dryrun:
+				case botargs.Force:
+				case botargs.Databases:
+				}
+
 				cmd.apiOptions[suppliedArg.Name()] = suppliedArg.Value()
 			} else {
 				cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", argKV))
