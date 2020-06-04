@@ -3,10 +3,11 @@ package botcommands
 import (
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
 // EvebotCommand interface

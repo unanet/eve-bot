@@ -16,6 +16,6 @@ func nonHelpCmd() []EvebotCommand {
 			cmds = append(cmds, v.(func([]string) EvebotCommand)([]string{}))
 		}
 	}
-
 	return cmds
+
 }

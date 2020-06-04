@@ -2,7 +2,6 @@ package botcommands
 
 import (
 	"fmt"
-
 	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
@@ -110,6 +109,7 @@ func (cmd *DeployCmd) resolveParams() {
 	}
 	cmd.apiOptions[botparams.NamespaceName] = cmd.input[1]
 	cmd.apiOptions[botparams.EnvironmentName] = cmd.input[3]
+
 	return
 }
 
