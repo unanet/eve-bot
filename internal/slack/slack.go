@@ -36,7 +36,13 @@ const (
 // we should probably have
 func (p *Provider) ErrorNotification(ctx context.Context, user, channel, ts string, err error) {
 	log.Logger.Error("slack error notification", zap.Error(err))
-	slackErrMsg := fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n%s", user, msgErrNotification, err.Error(), msgErrNotificationAssurance)
+	var slackErrMsg string
+	if len(user) > 0 {
+		slackErrMsg = fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n%s", user, msgErrNotification, err.Error(), msgErrNotificationAssurance)
+	} else {
+		slackErrMsg = fmt.Sprintf("%s\n\n ```%s```\n\n%s", msgErrNotification, err.Error(), msgErrNotificationAssurance)
+	}
+
 	if len(ts) > 0 {
 		_, _, _ = p.Client.PostMessageContext(ctx, channel, slack.MsgOptionText(slackErrMsg, false), slack.MsgOptionTS(ts))
 	} else {

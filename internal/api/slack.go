@@ -17,10 +17,6 @@ import (
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 )
 
-const (
-	DevopsSlackGroupID = "S013MD29N3X"
-)
-
 // Controller for slack routes
 type SlackController struct {
 	slackProvider *islack.Provider
@@ -74,12 +70,12 @@ func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.R
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		c.slackProvider.ErrorNotification(r.Context(), DevopsSlackGroupID, channel, "", err)
+		c.slackProvider.ErrorNotification(r.Context(), "", channel, "", err)
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
 
-	c.slackProvider.EveCronCallbackNotification(r.Context(), eveapi.CallbackState{User: DevopsSlackGroupID, Channel: channel, Payload: payload})
+	c.slackProvider.EveCronCallbackNotification(r.Context(), eveapi.CallbackState{User: "", Channel: channel, Payload: payload})
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return
