@@ -51,8 +51,18 @@ func defaultDeployCommand() DeployCmd {
 
 // EveReqObj hydrates the data needed to make the EveAPI Request for the EveBot Command (deploy)
 func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
-	return eveapi.DeploymentPlanOptions{
-		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
+
+	artifacts := extractArtifactsOpt(cmd.apiOptions)
+
+	for i, a := range artifacts {
+		log.Logger.Debug(fmt.Sprintf("Artifacts: %v %v", i, a))
+		log.Logger.Debug(fmt.Sprintf("Artifacts2: %v %v", i, &a))
+		log.Logger.Debug(fmt.Sprintf("Artifacts3: %v %v", i, &a.Name))
+		log.Logger.Debug(fmt.Sprintf("Artifacts4: %v %v", i, a.Name))
+	}
+
+	deploymentPlanOpts := eveapi.DeploymentPlanOptions{
+		Artifacts:        artifacts,
 		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
 		User:             user,
 		DryRun:           extractDryrunOpt(cmd.apiOptions),
@@ -62,6 +72,8 @@ func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
 		Messages:         nil,
 		Type:             "application",
 	}
+
+	return deploymentPlanOpts
 }
 
 func (cmd DeployCmd) AckMsg(userID string) string {
