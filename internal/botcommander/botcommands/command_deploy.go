@@ -131,6 +131,7 @@ func (cmd *DeployCmd) resolveArgs() {
 				log.Logger.Debug(fmt.Sprintf("supplied arg type: %v", reflect.TypeOf(suppliedArg)))
 				switch suppliedArg.(type) {
 				case botargs.Services:
+					log.Logger.Debug(fmt.Sprintf("supplied arg value: %v", suppliedArg.Value()))
 				case botargs.Dryrun:
 				case botargs.Force:
 				case botargs.Databases:
