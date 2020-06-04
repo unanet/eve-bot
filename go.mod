@@ -3,7 +3,7 @@ module gitlab.unanet.io/devops/eve-bot
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.31.9 // indirect
+	github.com/aws/aws-sdk-go v1.31.11 // indirect
 	github.com/dghubble/sling v1.3.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/render v1.0.1
@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/client_golang v1.6.0 // indirect
 	github.com/prometheus/common v0.10.0 // indirect
 	github.com/slack-go/slack v0.6.5
-	gitlab.unanet.io/devops/eve v0.0.0-20200602202854-4996ad85d5c9
+	gitlab.unanet.io/devops/eve v0.0.0-20200604221850-322bf34e636a
 	go.uber.org/zap v1.15.0
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	google.golang.org/protobuf v1.24.0 // indirect
