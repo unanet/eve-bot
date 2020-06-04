@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
@@ -160,6 +161,7 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 					case eveapi.DeploymentPlanOptions:
 						resp, err := p.EveAPIClient.Deploy(context.TODO(), reqObj.(eveapi.DeploymentPlanOptions), slackUser, slackChannel, respTS)
 						p.handleEveApiResponse(slackUser, slackChannel, respTS, resp, err)
+						return
 					default:
 						p.ErrorNotification(context.TODO(), slackUser, slackChannel, respTS, errInvalidRequestObj)
 						return
@@ -168,7 +170,9 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 			}
 			// Immediately respond to the Slack HTTP Request.
 			return "OK", nil
+		default:
+			return nil, fmt.Errorf("unknown slack inner event: %s", reflect.TypeOf(innerEvent.Data))
 		}
 	}
-	return nil, fmt.Errorf("unknown slack event: %s", slackAPIEvent.Type)
+	return nil, fmt.Errorf("unknown slack API event: %s", slackAPIEvent.Type)
 }
