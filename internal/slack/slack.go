@@ -177,7 +177,11 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 			// Immediately respond to the Slack HTTP Request.
 			return "OK", nil
 		default:
-			return nil, fmt.Errorf("unknown slack inner event: %s", reflect.TypeOf(innerEvent.Data))
+			return nil, &eveerrs.RestError{
+				Code:          http.StatusBadRequest,
+				Message:       "unknown slack event",
+				OriginalError: fmt.Errorf("unknown slack inner event: %s", reflect.TypeOf(innerEvent.Data)),
+			}
 		}
 	}
 	return nil, fmt.Errorf("unknown slack API event: %s", slackAPIEvent.Type)
