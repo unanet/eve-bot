@@ -52,8 +52,14 @@ func (cbs *CallbackState) ToChatMsg() string {
 		return ""
 	}
 
+	if cbs.User == "channel" {
+		cbs.User = "!channel"
+	} else {
+		cbs.User = "@" + cbs.User
+	}
+
 	if cbs.Payload.NothingToDeploy() {
-		msg := fmt.Sprintf("\n<@%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
+		msg := fmt.Sprintf("\n<%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
 		if len(cbs.Payload.Messages) > 0 {
 			return msg + headerMsg("Messages") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
 		}
@@ -74,7 +80,7 @@ func (cbs *CallbackState) ToChatMsg() string {
 
 	var result string
 	if len(cbs.User) > 0 {
-		result = fmt.Sprintf("\n<@%s>, %s...\n\n%s", cbs.User, ackMessage, environmentNamespaceMsg(&cbs.Payload))
+		result = fmt.Sprintf("\n<%s>, %s...\n\n%s", cbs.User, ackMessage, environmentNamespaceMsg(&cbs.Payload))
 	} else {
 		result = fmt.Sprintf("\n%s...\n\n%s", ackMessage, environmentNamespaceMsg(&cbs.Payload))
 	}
