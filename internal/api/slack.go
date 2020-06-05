@@ -75,7 +75,12 @@ func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	c.slackProvider.EveCronCallbackNotification(r.Context(), eveapi.CallbackState{User: "", Channel: channel, Payload: payload})
+	user := ""
+	if payload.Status == eve.DeploymentPlanStatusErrors {
+		user = "channel"
+	}
+
+	c.slackProvider.EveCronCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload})
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return
