@@ -59,8 +59,8 @@ func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.C
 }
 
 func (p *Provider) EveCronCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) {
-	// ignore the message unless it's a deployment plan that's finished..
-	if cbState.Payload.Status != eve.DeploymentPlanStatusComplete {
+	// ignore pending messages
+	if cbState.Payload.Status == eve.DeploymentPlanStatusPending {
 		return
 	}
 

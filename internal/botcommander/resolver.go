@@ -3,9 +3,10 @@ package botcommander
 import (
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 )
 
 // Resolver resolves the input commands and returns a valid EvebotCommand or an Error
