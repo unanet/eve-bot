@@ -87,11 +87,11 @@ func (cbs *CallbackState) appendDeployServicesResult(result *string) {
 		for svcResult, svcs := range cbs.Payload.Services.ToResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployServicesResults = "\n```" + artifactResultBlock(svcs) + "```"
+				deployServicesResults = "\n```" + servicesResultBlock(svcs) + "```"
 				break
 			}
 
-			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + artifactResultBlock(svcs) + "```"
+			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + servicesResultBlock(svcs) + "```"
 
 			if len(deployServicesResults) == 0 {
 				deployServicesResults = svcResultMessage

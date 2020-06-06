@@ -19,7 +19,7 @@ func serviceLabel(svc *eve.DeployService) string {
 	}
 }
 
-func artifactResultBlock(svcs eve.DeployServices) string {
+func servicesResultBlock(svcs eve.DeployServices) string {
 	result := ""
 
 	if svcs == nil || len(svcs) == 0 {

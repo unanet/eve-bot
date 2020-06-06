@@ -12,6 +12,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/prometheus/client_golang v1.6.0 // indirect
 	github.com/prometheus/common v0.10.0 // indirect
+	github.com/prometheus/procfs v0.1.0 // indirect
 	github.com/slack-go/slack v0.6.5
 	gitlab.unanet.io/devops/eve v0.0.0-20200605230052-15eeb12d23b8
 	go.uber.org/zap v1.15.0
