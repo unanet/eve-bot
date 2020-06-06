@@ -70,14 +70,21 @@ func cleanUser(u *string) {
 	}
 	if *u == "channel" {
 		*u = "!channel"
+		return
 	} else {
 		*u = "@" + *u
+		return
 	}
 }
 
 func cleanAction(a *string) {
 	if *a == "" {
 		*a = "job"
+		return
+	}
+	if *a == "application" {
+		*a = "deployment"
+		return
 	}
 }
 
