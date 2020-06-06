@@ -73,6 +73,7 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser
 	cbUrlVals.Set("user", slackUser)
 	cbUrlVals.Add("channel", slackChannel)
 	cbUrlVals.Add("ts", ts)
+	cbUrlVals.Add("action", dp.Type.String())
 
 	dp.CallbackURL = dp.CallbackURL + "?" + cbUrlVals.Encode()
 

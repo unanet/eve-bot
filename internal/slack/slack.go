@@ -107,19 +107,14 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	if err != nil {
 		return botError(err, "failed to parse interactive slack message payload", http.StatusInternalServerError)
 	}
-
-	fmt.Printf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value)
+	log.Logger.Info(fmt.Sprintf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value))
 	return nil
 }
 
 func parseSlackEvent(vToken string, body []byte) (slackevents.EventsAPIEvent, error) {
-	return slackevents.ParseEvent(body,
-		slackevents.OptionVerifyToken(
-			&slackevents.TokenComparator{
-				VerificationToken: vToken,
-			},
-		),
-	)
+	tokenComp := &slackevents.TokenComparator{VerificationToken: vToken}
+	tokenCompOpt := slackevents.OptionVerifyToken(tokenComp)
+	return slackevents.ParseEvent(body, tokenCompOpt)
 }
 
 // HandleEvent takes an http request and handles the Slack API Event

@@ -43,6 +43,7 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 	channel := r.URL.Query().Get("channel")
 	user := r.URL.Query().Get("user")
 	ts := r.URL.Query().Get("ts")
+	action := r.URL.Query().Get("action")
 
 	// Get the Body
 	payload := eve.NSDeploymentPlan{}
@@ -54,7 +55,7 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts})
+	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts, Action: action})
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
 	return
