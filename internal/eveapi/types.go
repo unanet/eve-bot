@@ -49,49 +49,34 @@ type ArtifactDefinition struct {
 	Matched          bool   `json:"-"`
 }
 
-func ackMsg(status eve.DeploymentPlanStatus, action string) string {
-	var ackMessage string
-	switch status {
-	case eve.DeploymentPlanStatusComplete:
-		ackMessage = fmt.Sprintf("your %s is complete", action)
-	case eve.DeploymentPlanStatusErrors:
-		ackMessage = "we encountered some errors"
-	case eve.DeploymentPlanStatusDryrun:
-		ackMessage = "here's your *dryrun* results"
-	case eve.DeploymentPlanStatusPending:
-		ackMessage = fmt.Sprintf("your %s is pending, here's the plan", action)
-	}
-	return ackMessage
-}
-
-func cleanUser(u *string) {
-	if *u == "" {
+func (cbs *CallbackState) cleanUser() {
+	if cbs.User == "" {
 		return
 	}
-	if *u == "channel" {
-		*u = "!channel"
+	if cbs.User == "channel" {
+		cbs.User = "!channel"
 		return
 	} else {
-		*u = "@" + *u
+		cbs.User = "@" + cbs.User
 		return
 	}
 }
 
-func cleanAction(a *string) {
-	if *a == "" {
-		*a = "job"
+func (cbs *CallbackState) cleanAction() {
+	if cbs.Action == "" {
+		cbs.Action = "job"
 		return
 	}
-	if *a == "application" {
-		*a = "deployment"
+	if cbs.Action == "application" {
+		cbs.Action = "deployment"
 		return
 	}
 }
 
-func nothingToDeployResponse(user string, msgs []string) string {
-	msg := fmt.Sprintf("\n<%s>, we're all caught up! There is nothing to deploy...\n", user)
-	if len(msgs) > 0 {
-		return msg + headerMsg("Messages") + "\n```" + apiMessages(msgs) + "```"
+func (cbs *CallbackState) nothingToDeployResponse() string {
+	msg := fmt.Sprintf("\n<%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
+	if len(cbs.Payload.Messages) > 0 {
+		return msg + headerMsg("Messages") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
 	}
 	return msg
 }
@@ -140,8 +125,18 @@ func (cbs *CallbackState) appendDeployMigrationsResult(result *string) {
 	}
 }
 
-func (cbs *CallbackState) initialResultBuilder() string {
-	ackMessage := ackMsg(cbs.Payload.Status, cbs.Action)
+func (cbs *CallbackState) initialResult() string {
+	var ackMessage string
+	switch cbs.Payload.Status {
+	case eve.DeploymentPlanStatusComplete:
+		ackMessage = fmt.Sprintf("your %s is complete", cbs.Action)
+	case eve.DeploymentPlanStatusErrors:
+		ackMessage = "we encountered some errors"
+	case eve.DeploymentPlanStatusDryrun:
+		ackMessage = "here's your *dryrun* results"
+	case eve.DeploymentPlanStatusPending:
+		ackMessage = fmt.Sprintf("your %s is pending, here's the plan", cbs.Action)
+	}
 
 	var result string
 	if len(cbs.User) > 0 {
@@ -164,15 +159,15 @@ func (cbs *CallbackState) ToChatMsg() string {
 		return ""
 	}
 
-	cleanUser(&cbs.User)
+	cbs.cleanUser()
 
-	cleanAction(&cbs.Action)
+	cbs.cleanAction()
 
 	if cbs.Payload.NothingToDeploy() {
-		return nothingToDeployResponse(cbs.User, cbs.Payload.Messages)
+		return cbs.nothingToDeployResponse()
 	}
 
-	result := cbs.initialResultBuilder()
+	result := cbs.initialResult()
 
 	cbs.appendDeployServicesResult(&result)
 
@@ -183,5 +178,4 @@ func (cbs *CallbackState) ToChatMsg() string {
 	}
 
 	return cbs.appendApiMessages(&result)
-
 }
