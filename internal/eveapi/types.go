@@ -65,8 +65,13 @@ func ackMsg(status eve.DeploymentPlanStatus, action string) string {
 }
 
 func cleanUser(u *string) {
+	if *u == "" {
+		return
+	}
 	if *u == "channel" {
 		*u = "!channel"
+	} else {
+		*u = "@" + *u
 	}
 }
 
