@@ -72,8 +72,5 @@ deploy:
 	kubectl apply -f .kube/manifest.yaml
 	kubectl set image deployment/eve-bot-v1 eve-bot-v1=${IMAGE_DIGEST} --record
 
-proxy-bot: 
-	ssh evebot -R 3000:localhost:3000 -Nf
-
 scan:
 	$(docker-scanner-exec)
