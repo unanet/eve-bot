@@ -11,7 +11,7 @@ func headerMsg(val string) string {
 	return fmt.Sprintf("\n*%s*", strings.Title(strings.ToLower(val)))
 }
 
-func availableServiceLabel(svc *eve.DeployService) string {
+func serviceLabel(svc *eve.DeployService) string {
 	if svc.ArtifactName == svc.ServiceName {
 		return fmt.Sprintf("\n%s:%s", svc.ServiceName, svc.AvailableVersion)
 	} else {
@@ -28,17 +28,21 @@ func artifactResultBlock(svcs eve.DeployServices) string {
 
 	for _, svc := range svcs {
 		if len(result) == 0 {
-			result = availableServiceLabel(svc)
+			result = serviceLabel(svc)
 		} else {
-			result = result + availableServiceLabel(svc)
+			result = result + serviceLabel(svc)
 		}
 	}
 
 	return result
 }
 
-func migrationServiceLabel(mig *eve.DeployMigration) string {
-	return fmt.Sprintf("\n%s:%s", mig.ArtifactName, mig.AvailableVersion)
+func migrationLabel(mig *eve.DeployMigration) string {
+	if mig.ArtifactName == mig.DatabaseName {
+		return fmt.Sprintf("\n%s:%s", mig.DatabaseName, mig.AvailableVersion)
+	} else {
+		return fmt.Sprintf("\n%s (%s):%s", mig.DatabaseName, mig.ArtifactName, mig.AvailableVersion)
+	}
 }
 
 func migrationResultBlock(migs eve.DeployMigrations) string {
@@ -50,9 +54,9 @@ func migrationResultBlock(migs eve.DeployMigrations) string {
 
 	for _, mig := range migs {
 		if len(result) == 0 {
-			result = migrationServiceLabel(mig)
+			result = migrationLabel(mig)
 		} else {
-			result = result + migrationServiceLabel(mig)
+			result = result + migrationLabel(mig)
 		}
 	}
 
