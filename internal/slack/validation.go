@@ -8,9 +8,5 @@ import (
 
 func botError(oerr error, msg string, status int) error {
 	log.Logger.Debug("EveBot Error", zap.Error(oerr))
-	return &errors.RestError{
-		Code:          status,
-		Message:       msg,
-		OriginalError: oerr,
-	}
+	return &errors.RestError{Code: status, Message: msg, OriginalError: oerr}
 }

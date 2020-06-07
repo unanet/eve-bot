@@ -154,6 +154,10 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 				p.ErrorNotification(context.TODO(), ev.User, ev.Channel, respTS, fmt.Errorf("failed to get user details"))
 				return "OK", nil
 			}
+			//go cmd.Execute()
+			//// Immediately respond to the Slack HTTP Request.
+			//return "OK", nil
+
 			if cmd.MakeAsyncReq() {
 				// Call API in separate Go Routine
 				go func(reqObj interface{}, slackUser, slackChannel, respTS string) {
@@ -172,7 +176,7 @@ func (p *Provider) HandleSlackEvent(ctx context.Context, body []byte) (interface
 					}
 				}(cmd.EveReqObj(callBackURL, realUser.Name), ev.User, ev.Channel, respTS)
 			}
-			// Immediately respond to the Slack HTTP Request.
+			//Immediately respond to the Slack HTTP Request.
 			return "OK", nil
 		default:
 			return nil, &eveerrs.RestError{

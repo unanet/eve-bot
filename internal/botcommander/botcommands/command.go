@@ -138,6 +138,6 @@ type baseCommand struct {
 	examples            bothelp.Examples
 	optionalArgs        botargs.Args
 	requiredParams      botparams.Params
-	// when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
-	apiOptions map[string]interface{}
+	apiOptions          map[string]interface{} // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
+
 }
