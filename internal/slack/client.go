@@ -21,10 +21,6 @@ type Provider struct {
 	Cfg             Config
 }
 
-var (
-	callBackURL string
-)
-
 // NewProvider creates a new provider
 func NewProvider(sClient *slack.Client, commander botcommander.Resolver, eveAPIClient eveapi.Client, cfg Config) *Provider {
 	callBackURL = eveAPIClient.CallBackURL()
