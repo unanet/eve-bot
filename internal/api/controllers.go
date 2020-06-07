@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/slack-go/slack"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatprovider"
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
@@ -12,7 +11,7 @@ import (
 
 func InitController(c config.Config) []mux.EveController {
 
-	slackChatProvider := chatprovider.New(chatprovider.Slack, &c)
+	//slackChatProvider := chatprovider.New(chatprovider.Slack, &c)
 
 	botCommResolver := botcommander.NewResolver()
 	eveApiClient := eveapi.NewClient(c.EveAPIConfig)

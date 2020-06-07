@@ -10,20 +10,20 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
-func NewDeployCommand(cmdFields []string) EvebotCommand {
-	cmd := defaultDeployCommand()
-	cmd.input = cmdFields
-	cmd.resolveParams()
-	cmd.resolveArgs()
-	return cmd
+func NewDeployCommand(cmdFields []string, channel, user, timestamp string) EvebotCommand {
+	return defaultDeployCommand(cmdFields, channel, user, timestamp)
 }
 
 type DeployCmd struct {
 	baseCommand
 }
 
-func defaultDeployCommand() DeployCmd {
-	return DeployCmd{baseCommand{
+func defaultDeployCommand(cmdFields []string, channel, user, timestamp string) DeployCmd {
+	cmd := DeployCmd{baseCommand{
+		input:   cmdFields,
+		channel: channel,
+		user:    user,
+		ts:      timestamp,
 		name:    "deploy",
 		summary: "The `deploy` command is used to deploy services to a specific *namespace* and *environment*",
 		usage: bothelp.Usage{
@@ -44,6 +44,9 @@ func defaultDeployCommand() DeployCmd {
 		apiOptions:          make(map[string]interface{}),
 		requiredInputLength: 4,
 	}}
+	cmd.resolveParams()
+	cmd.resolveArgs()
+	return cmd
 }
 
 // EveReqObj hydrates the data needed to make the EveAPI Request for the EveBot Command (deploy)
@@ -59,6 +62,18 @@ func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
 		Messages:         nil,
 		Type:             "application",
 	}
+}
+
+func (cmd DeployCmd) User() string {
+	return cmd.user
+}
+
+func (cmd DeployCmd) Channel() string {
+	return cmd.channel
+}
+
+func (cmd DeployCmd) InitialTimeStamp() string {
+	return cmd.ts
 }
 
 func (cmd DeployCmd) AckMsg(userID string) string {
@@ -109,8 +124,6 @@ func (cmd *DeployCmd) resolveParams() {
 	}
 	cmd.apiOptions[botparams.NamespaceName] = cmd.input[1]
 	cmd.apiOptions[botparams.EnvironmentName] = cmd.input[3]
-
-	return
 }
 
 // resolveArgs attempts to resolve the input argument
@@ -120,7 +133,6 @@ func (cmd *DeployCmd) resolveArgs() {
 		cmd.errs = append(cmd.errs, fmt.Errorf("resolve cmd args err invalid input: %v", cmd.input))
 		return
 	}
-
 	for _, s := range cmd.input[3:] {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
@@ -131,6 +143,4 @@ func (cmd *DeployCmd) resolveArgs() {
 			}
 		}
 	}
-
-	return
 }

@@ -11,7 +11,7 @@ import (
 
 // Resolver resolves the input commands and returns a valid EvebotCommand or an Error
 type Resolver interface {
-	Resolve(input string) botcommands.EvebotCommand
+	Resolve(input, channel, user, timestamp string) botcommands.EvebotCommand
 }
 
 // EvebotResolver implements the Resolver interface
@@ -24,13 +24,13 @@ func NewResolver() Resolver {
 
 // Resolve resolves the command input from the Chat User and returns an EvebotCommand
 // this is where all of the "magic" happens that basically translates a user command to an EveBot command
-func (ebr *EvebotResolver) Resolve(input string) botcommands.EvebotCommand {
+func (ebr *EvebotResolver) Resolve(input, channel, user, timestamp string) botcommands.EvebotCommand {
 	// parse the input string and break out into fields (array)
 	msgFields := strings.Fields(input)
 	if len(msgFields) == 1 {
 		// equivalent to just `@evebot`
 		// botIDField := msgFields[0]
-		return botcommands.NewRootCmd()
+		return botcommands.NewRootCmd([]string{""}, channel, user, timestamp)
 	}
 
 	cmdFields := msgFields[1:]
@@ -40,14 +40,14 @@ func (ebr *EvebotResolver) Resolve(input string) botcommands.EvebotCommand {
 	newCmdFuncInterface := botcommands.CommandInitializerMap[cmdFields[0]]
 
 	// Make sure the New Command func follows the standard New Command signature
-	// =======> func NewCmd(input []string) EvebotCommand { }
+	// =======> func NewCmd(input []string, channel, user, timestamp string) EvebotCommand { }
 	if newCmdFuncInterface != nil {
-		if newCmdFuncVal, ok := newCmdFuncInterface.(func([]string) botcommands.EvebotCommand); ok {
-			return newCmdFuncVal(cmdFields)
+		if newCmdFuncVal, ok := newCmdFuncInterface.(func([]string, string, string, string) botcommands.EvebotCommand); ok {
+			return newCmdFuncVal(cmdFields, channel, user, timestamp)
 		}
 		// this is bad - we will want to be alerted on this error
 		log.Logger.Error("invalid new command initializer func", zap.String("input", cmdFields[0]))
 	}
 
-	return botcommands.NewInvalidCommand(cmdFields)
+	return botcommands.NewInvalidCommand(cmdFields, channel, user, timestamp)
 }

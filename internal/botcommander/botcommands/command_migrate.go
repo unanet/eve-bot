@@ -4,19 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
-func NewMigrateCommand(cmdFields []string) EvebotCommand {
-	cmd := defaultMigrateCommand()
-	cmd.input = cmdFields
-	cmd.resolveParams()
-	cmd.resolveArgs()
-	return cmd
+func NewMigrateCommand(cmdFields []string, channel, user, timestamp string) EvebotCommand {
+	return defaultMigrateCommand(cmdFields, channel, user, timestamp)
 }
 
 type MigrateCmd struct {
@@ -24,8 +19,12 @@ type MigrateCmd struct {
 }
 
 // @evebot migrate current in qa
-func defaultMigrateCommand() MigrateCmd {
-	return MigrateCmd{baseCommand{
+func defaultMigrateCommand(cmdFields []string, channel, user, timestamp string) MigrateCmd {
+	cmd := MigrateCmd{baseCommand{
+		input:   cmdFields,
+		channel: channel,
+		user:    user,
+		ts:      timestamp,
 		name:    "migrate",
 		summary: "The `migrate` command is used to migrate databases by *namespace* and *environment*",
 		usage: bothelp.Usage{
@@ -46,6 +45,9 @@ func defaultMigrateCommand() MigrateCmd {
 		apiOptions:          make(map[string]interface{}),
 		requiredInputLength: 4,
 	}}
+	cmd.resolveParams()
+	cmd.resolveArgs()
+	return cmd
 }
 
 func (cmd MigrateCmd) EveReqObj(cbURL, user string) interface{} {
@@ -60,6 +62,18 @@ func (cmd MigrateCmd) EveReqObj(cbURL, user string) interface{} {
 		Messages:         nil,
 		Type:             "migration",
 	}
+}
+
+func (cmd MigrateCmd) User() string {
+	return cmd.user
+}
+
+func (cmd MigrateCmd) Channel() string {
+	return cmd.channel
+}
+
+func (cmd MigrateCmd) InitialTimeStamp() string {
+	return cmd.ts
 }
 
 func (cmd MigrateCmd) AckMsg(userID string) string {
@@ -102,16 +116,12 @@ func (cmd MigrateCmd) IsHelpRequest() bool {
 }
 
 func (cmd *MigrateCmd) resolveParams() {
-
 	if len(cmd.input) < cmd.requiredInputLength {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return
 	}
-
 	cmd.apiOptions[botparams.NamespaceName] = cmd.input[1]
 	cmd.apiOptions[botparams.EnvironmentName] = cmd.input[3]
-
-	return
 }
 
 func (cmd *MigrateCmd) resolveArgs() {
@@ -120,7 +130,6 @@ func (cmd *MigrateCmd) resolveArgs() {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command args: %v", cmd.input))
 		return
 	}
-
 	for _, s := range cmd.input[3:] {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
@@ -131,6 +140,4 @@ func (cmd *MigrateCmd) resolveArgs() {
 			}
 		}
 	}
-
-	return
 }

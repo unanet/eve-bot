@@ -10,8 +10,12 @@ type RootCmd struct {
 	baseCommand
 }
 
-func NewRootCmd() EvebotCommand {
+func NewRootCmd(cmdFields []string, channel, user, timestamp string) EvebotCommand {
 	return RootCmd{baseCommand{
+		input:          cmdFields,
+		channel:        channel,
+		user:           user,
+		ts:             timestamp,
 		name:           "",
 		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
 		usage:          bothelp.Usage{},
@@ -20,6 +24,18 @@ func NewRootCmd() EvebotCommand {
 		optionalArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
 	}}
+}
+
+func (cmd RootCmd) User() string {
+	return cmd.user
+}
+
+func (cmd RootCmd) Channel() string {
+	return cmd.channel
+}
+
+func (cmd RootCmd) InitialTimeStamp() string {
+	return cmd.ts
 }
 
 func (cmd RootCmd) EveReqObj(cbURL, user string) interface{} {
@@ -52,9 +68,7 @@ func (cmd RootCmd) Name() string {
 }
 
 func (cmd RootCmd) Help() *bothelp.Help {
-	return bothelp.New(
-		bothelp.HeaderOpt(cmd.summary.String()),
-	)
+	return bothelp.New(bothelp.HeaderOpt(cmd.summary.String()))
 }
 
 func (cmd RootCmd) IsHelpRequest() bool {

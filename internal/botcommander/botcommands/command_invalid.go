@@ -8,27 +8,40 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
-func NewInvalidCommand(cmdFields []string) EvebotCommand {
-	cmd := defaultInvalidCommand()
-	cmd.input = cmdFields
-	cmd.summary = bothelp.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmdFields))
-	return cmd
+func NewInvalidCommand(cmdFields []string, channel, user, timestamp string) EvebotCommand {
+	return defaultInvalidCommand(cmdFields, channel, user, timestamp)
 }
 
 type InvalidCmd struct {
 	baseCommand
 }
 
-func defaultInvalidCommand() InvalidCmd {
+func defaultInvalidCommand(cmdFields []string, channel, user, timestamp string) InvalidCmd {
 	return InvalidCmd{baseCommand{
+		input:          cmdFields,
+		channel:        channel,
+		user:           user,
+		ts:             timestamp,
 		name:           "",
-		summary:        "Not sure what to do...",
+		summary:        bothelp.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmdFields)),
 		usage:          bothelp.Usage{},
 		examples:       bothelp.Examples{},
 		async:          false,
 		optionalArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
 	}}
+}
+
+func (cmd InvalidCmd) User() string {
+	return cmd.user
+}
+
+func (cmd InvalidCmd) Channel() string {
+	return cmd.channel
+}
+
+func (cmd InvalidCmd) InitialTimeStamp() string {
+	return cmd.ts
 }
 
 func (cmd InvalidCmd) EveReqObj(cbURL, user string) interface{} {

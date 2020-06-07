@@ -111,7 +111,7 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ebr := &EvebotResolver{}
 
-			resolvedCmd := ebr.Resolve(tt.args.input)
+			resolvedCmd := ebr.Resolve(tt.args.input, "", "", "")
 
 			if !reflect.DeepEqual(resolvedCmd, tt.want) {
 				t.Errorf("got = %v, want %v", resolvedCmd, tt.want)

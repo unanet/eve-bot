@@ -5,16 +5,19 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/slack-go/slack/slackevents"
+
+	goerror "errors"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/slack-go/slack"
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 )
 
 // Controller for slack routes
@@ -104,25 +107,44 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
-	// Payload here is only used for initial URL route verification
-	payload, err := c.slackProvider.HandleSlackEvent(r.Context(), body)
+
+	slackAPIEvent, err := parseSlackEvent(c.slackProvider.Cfg.SlackVerificationToken, body)
 	if err != nil {
+		render.Respond(w, r, errors.Wrap(botError(err, "failed parse slack event", http.StatusNotAcceptable)))
+		return
+	}
+
+	// This is a "special" event and only used when setting up the bot endpoint
+	if slackAPIEvent.Type == slackevents.URLVerification {
+		var slEvent *slackevents.ChallengeResponse
+		err := json.Unmarshal(body, &slEvent)
+		if err != nil {
+			render.Respond(w, r, errors.Wrap(botError(err, "failed to unmarshal slack register event", http.StatusBadRequest)))
+			return
+		}
+		if slEvent == nil || len(slEvent.Challenge) == 0 {
+			render.Respond(w, r, errors.Wrap(botError(goerror.New("invalid slack ChallengeResponse event"), "invalid challenge", http.StatusBadGateway)))
+			return
+		}
+		render.Respond(w, r, slEvent.Challenge)
+		return
+	}
+
+	if err := c.slackProvider.HandleSlackAPIEvent(r.Context(), slackAPIEvent); err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
-	// returning payload response here
-	// this is usually just a nil response except for URL verification event
-	render.Respond(w, r, payload)
-	return
+	render.Respond(w, r, "OK")
+}
+
+func parseSlackEvent(vToken string, body []byte) (slackevents.EventsAPIEvent, error) {
+	tokenComp := &slackevents.TokenComparator{VerificationToken: vToken}
+	return slackevents.ParseEvent(body, slackevents.OptionVerifyToken(tokenComp))
 }
 
 func botError(oerr error, msg string, status int) error {
 	log.Logger.Debug("EveBot Error", zap.Error(oerr))
-	return &errors.RestError{
-		Code:          status,
-		Message:       msg,
-		OriginalError: oerr,
-	}
+	return &errors.RestError{Code: status, Message: msg, OriginalError: oerr}
 }
 
 func validateSlackRequest(req *http.Request, signingSecret string) ([]byte, error) {
