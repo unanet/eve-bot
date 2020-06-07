@@ -9,8 +9,7 @@ import (
 var (
 	// Setting this up here for now
 	// no need to resolve this every request
-	callBackURL   string
-	signingSecret string
+	callBackURL string
 )
 
 // Provider provides access to the Slack Client
@@ -25,7 +24,6 @@ type Provider struct {
 // NewProvider creates a new provider
 func NewProvider(sClient *slack.Client, commander botcommander.Resolver, eveAPIClient eveapi.Client, cfg Config) *Provider {
 	callBackURL = eveAPIClient.CallBackURL()
-	signingSecret = cfg.SlackSigningSecret
 	return &Provider{
 		Client:          sClient,
 		CommandResolver: commander,
