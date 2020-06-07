@@ -52,6 +52,7 @@ func (p *Provider) ErrorNotification(ctx context.Context, user, channel, ts stri
 
 // EveCallbackNotification handles the callbacks from eve-api and notifies the slack user
 func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) {
+	log.Logger.Debug("eve callback notification", zap.Any("cb_state", cbState))
 	respChannel, respTS, err := p.Client.PostMessageContext(ctx, cbState.Channel, slack.MsgOptionText(cbState.ToChatMsg(), false), slack.MsgOptionTS(cbState.TS))
 	if err != nil {
 		p.ErrorNotification(ctx, cbState.User, respChannel, respTS, err)
@@ -59,8 +60,10 @@ func (p *Provider) EveCallbackNotification(ctx context.Context, cbState eveapi.C
 }
 
 func (p *Provider) EveCronCallbackNotification(ctx context.Context, cbState eveapi.CallbackState) {
+	log.Logger.Debug("eve cron callback notification", zap.Any("cb_state", cbState))
 	// ignore pending messages
 	if cbState.Payload.Status == eve.DeploymentPlanStatusPending {
+		log.Logger.Debug("eve cron callback notification pending", zap.Any("status", cbState.Payload.Status))
 		return
 	}
 
