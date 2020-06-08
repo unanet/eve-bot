@@ -26,6 +26,9 @@ func TestNewResolver(t *testing.T) {
 
 func TestEvebotResolver_Resolve(t *testing.T) {
 
+	user := "dummy"
+	channel := "chanelID"
+	ts := "2342341233.221"
 	validDeployCmd := "@evebot deploy current to int"
 	validDeployCmdFull := validDeployCmd + " " + "services=infocus-cloud-client:2020.2.232,infocus-proxy:2020.2.199 dryrun=true force=true"
 	validDeployCmdService := validDeployCmd + " " + "services=infocus-cloud-client,infocus-proxy"
@@ -38,7 +41,7 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 	deployCmdHelp2 := "@evebot deploy help"
 
 	type args struct {
-		input string
+		input, channel, user, ts string
 	}
 	tests := []struct {
 		name string
@@ -49,69 +52,69 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 		{
 			name: "valid basic deploy command",
 			ebr:  &EvebotResolver{},
-			args: args{input: validDeployCmd},
-			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmd)[1:]),
+			args: args{input: validDeployCmd, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmd)[1:], channel, user, ts),
 		},
 		{
 			name: "valid full deploy command",
 			ebr:  &EvebotResolver{},
-			args: args{input: validDeployCmdFull},
-			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdFull)[1:]),
+			args: args{input: validDeployCmdFull, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdFull)[1:], channel, user, ts),
 		},
 		{
 			name: "valid services deploy command",
 			ebr:  &EvebotResolver{},
-			args: args{input: validDeployCmdService},
-			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdService)[1:]),
+			args: args{input: validDeployCmdService, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdService)[1:], channel, user, ts),
 		},
 		{
 			name: "valid dryrun deploy command",
 			ebr:  &EvebotResolver{},
-			args: args{input: validDeployCmdDryrun},
-			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdDryrun)[1:]),
+			args: args{input: validDeployCmdDryrun, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdDryrun)[1:], channel, user, ts),
 		},
 		{
 			name: "valid force deploy command",
 			ebr:  &EvebotResolver{},
-			args: args{input: validDeployCmdForce},
-			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdForce)[1:]),
+			args: args{input: validDeployCmdForce, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(validDeployCmdForce)[1:], channel, user, ts),
 		},
 		{
 			name: "invalid deploy command",
 			ebr:  &EvebotResolver{},
-			args: args{input: invalidDeployCmd},
-			want: botcommands.NewInvalidCommand(strings.Fields(invalidDeployCmd)[1:]),
+			args: args{input: invalidDeployCmd, channel: channel, user: user, ts: ts},
+			want: botcommands.NewInvalidCommand(strings.Fields(invalidDeployCmd)[1:], channel, user, ts),
 		},
 		{
 			name: "invalid deploy command length",
 			ebr:  &EvebotResolver{},
-			args: args{input: invalidDeployCmdLen},
-			want: botcommands.NewDeployCommand(strings.Fields(invalidDeployCmdLen)[1:]),
+			args: args{input: invalidDeployCmdLen, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(invalidDeployCmdLen)[1:], channel, user, ts),
 		},
 		{
 			name: "invalid deploy command length 2",
 			ebr:  &EvebotResolver{},
-			args: args{input: invalidDeployCmdLen2},
-			want: botcommands.NewDeployCommand(strings.Fields(invalidDeployCmdLen2)[1:]),
+			args: args{input: invalidDeployCmdLen2, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(invalidDeployCmdLen2)[1:], channel, user, ts),
 		},
 		{
 			name: "deploy command help",
 			ebr:  &EvebotResolver{},
-			args: args{input: deployCmdHelp},
-			want: botcommands.NewDeployCommand(strings.Fields(deployCmdHelp)[1:]),
+			args: args{input: deployCmdHelp, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(deployCmdHelp)[1:], channel, user, ts),
 		},
 		{
 			name: "deploy command help 2",
 			ebr:  &EvebotResolver{},
-			args: args{input: deployCmdHelp2},
-			want: botcommands.NewDeployCommand(strings.Fields(deployCmdHelp2)[1:]),
+			args: args{input: deployCmdHelp2, channel: channel, user: user, ts: ts},
+			want: botcommands.NewDeployCommand(strings.Fields(deployCmdHelp2)[1:], channel, user, ts),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ebr := &EvebotResolver{}
 
-			resolvedCmd := ebr.Resolve(tt.args.input, "", "", "")
+			resolvedCmd := ebr.Resolve(tt.args.input, tt.args.channel, tt.args.user, tt.args.ts)
 
 			if !reflect.DeepEqual(resolvedCmd, tt.want) {
 				t.Errorf("got = %v, want %v", resolvedCmd, tt.want)
