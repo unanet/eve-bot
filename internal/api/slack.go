@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 
 	"github.com/slack-go/slack/slackevents"
 
@@ -13,7 +15,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/slack-go/slack"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
+	"gitlab.unanet.io/devops/eve-bot/internal/evebotservice"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -22,14 +24,12 @@ import (
 
 // Controller for slack routes
 type SlackController struct {
-	slackProvider *islack.Provider
+	svc *evebotservice.Provider
 }
 
 // New creates a new slack controller (route handler)
-func NewSlackController(slackProvider *islack.Provider) *SlackController {
-	return &SlackController{
-		slackProvider: slackProvider,
-	}
+func NewSlackController(svc *evebotservice.Provider) *SlackController {
+	return &SlackController{svc: svc}
 }
 
 // Setup the routes
@@ -38,7 +38,6 @@ func (c SlackController) Setup(r chi.Router) {
 	r.Post("/slack-interactive", c.slackInteractiveHandler)
 	r.Post("/eve-callback", c.eveCallbackHandler)
 	r.Post("/eve-cron-callback", c.eveCronCallbackHandler)
-
 }
 
 func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,16 +52,15 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		c.slackProvider.ErrorNotification(r.Context(), user, channel, ts, err)
+		c.svc.ChatService.ErrorNotificationThread(r.Context(), user, channel, ts, err)
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
 
-	c.slackProvider.EveCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts, Action: action})
-	// Just returning an empty response here...
+	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts, Action: action}
+	log.Logger.Debug("eve callback notification", zap.Any("cb_state", cbState))
+	c.svc.ChatService.PostMessageThread(r.Context(), cbState.ToChatMsg(), cbState.Channel, cbState.TS)
 	render.Respond(w, r, nil)
-	return
-
 }
 
 func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +72,7 @@ func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.R
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		c.slackProvider.ErrorNotification(r.Context(), "", channel, "", err)
+		c.svc.ChatService.ErrorNotification(r.Context(), "", channel, err)
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
@@ -84,37 +82,41 @@ func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.R
 		user = "channel"
 	}
 
-	c.slackProvider.EveCronCallbackNotification(r.Context(), eveapi.CallbackState{User: user, Channel: channel, Payload: payload})
-	// Just returning an empty response here...
+	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload}
+	log.Logger.Debug("eve cron callback notification", zap.Any("cb_state", cbState))
+	if cbState.Payload.Status == eve.DeploymentPlanStatusPending {
+		render.Respond(w, r, nil)
+		return
+	}
+	c.svc.ChatService.PostMessage(r.Context(), cbState.ToChatMsg(), cbState.Channel)
 	render.Respond(w, r, nil)
 	return
 
 }
 
 func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.Request) {
-	if err := c.slackProvider.HandleSlackInteraction(r); err != nil {
+	if err := c.svc.HandleSlackInteraction(r); err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
 	// Just returning an empty response here...
 	render.Respond(w, r, nil)
-	return
 }
 
 func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Request) {
-	body, err := validateSlackRequest(r, c.slackProvider.Cfg.SlackSigningSecret)
+	body, err := validateSlackRequest(r, c.svc.Cfg.SlackSigningSecret)
 	if err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
 
-	slackAPIEvent, err := parseSlackEvent(c.slackProvider.Cfg.SlackVerificationToken, body)
+	slackAPIEvent, err := parseSlackEvent(c.svc.Cfg.SlackVerificationToken, body)
 	if err != nil {
 		render.Respond(w, r, errors.Wrap(botError(err, "failed parse slack event", http.StatusNotAcceptable)))
 		return
 	}
 
-	// This is a "special" event and only used when setting up the bot endpoint
+	// This is a "special" event and only used when setting up the slackbot endpoint
 	if slackAPIEvent.Type == slackevents.URLVerification {
 		var slEvent *slackevents.ChallengeResponse
 		err := json.Unmarshal(body, &slEvent)
@@ -123,18 +125,46 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 			return
 		}
 		if slEvent == nil || len(slEvent.Challenge) == 0 {
-			render.Respond(w, r, errors.Wrap(botError(goerror.New("invalid slack ChallengeResponse event"), "invalid challenge", http.StatusBadGateway)))
+			render.Respond(w, r, errors.Wrap(invalidSlackChallengeError()))
 			return
 		}
 		render.Respond(w, r, slEvent.Challenge)
 		return
 	}
 
-	if err := c.slackProvider.HandleSlackAPIEvent(r.Context(), slackAPIEvent); err != nil {
-		render.Respond(w, r, errors.Wrap(err))
+	// We are only handling/listening to CallbackEvent
+	if slackAPIEvent.Type != slackevents.CallbackEvent {
+		render.Respond(w, r, errors.Wrap(fmt.Errorf("unknown slack API event: %s", slackAPIEvent.Type)))
+		return
+	}
+	innerEvent := slackAPIEvent.InnerEvent
+	switch ev := innerEvent.Data.(type) {
+	case *slackevents.AppMentionEvent:
+		if err := c.svc.HandleSlackAppMentionEvent(r.Context(), ev); err != nil {
+			render.Respond(w, r, errors.Wrap(err))
+			return
+		}
+	default:
+		render.Respond(w, r, errors.Wrap(unknownSlackEventError(innerEvent)))
 		return
 	}
 	render.Respond(w, r, "OK")
+}
+
+func invalidSlackChallengeError() error {
+	return botError(
+		goerror.New("invalid slack ChallengeResponse event"),
+		"invalid challenge",
+		http.StatusBadGateway,
+	)
+}
+
+func unknownSlackEventError(innerEvent slackevents.EventsAPIInnerEvent) error {
+	return botError(
+		fmt.Errorf("unknown slack inner event: %s", reflect.TypeOf(innerEvent.Data)),
+		"unknown slack event",
+		http.StatusNotAcceptable,
+	)
 }
 
 func parseSlackEvent(vToken string, body []byte) (slackevents.EventsAPIEvent, error) {

@@ -1,25 +1,31 @@
 package api
 
 import (
-	"github.com/slack-go/slack"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander"
+	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
+	"gitlab.unanet.io/devops/eve-bot/internal/evebotservice"
 	"gitlab.unanet.io/devops/eve/pkg/mux"
 )
 
-func InitController(c config.Config) []mux.EveController {
+func InitController(cfg config.Config) []mux.EveController {
 
-	//slackChatProvider := chatprovider.New(chatprovider.Slack, &c)
+	cmdResolver := botcommander.NewResolver()
+	eveAPI := eveapi.NewClient(cfg.EveAPIConfig)
+	chatSvc := chatservice.New(chatservice.Slack, &cfg)
+	cmdHandler := botcommander.NewHandler(eveAPI, chatSvc)
 
-	botCommResolver := botcommander.NewResolver()
-	eveApiClient := eveapi.NewClient(c.EveAPIConfig)
-	slackClient := slack.New(c.SlackUserOauthAccessToken)
-	slackProvider := islack.NewProvider(slackClient, botCommResolver, eveApiClient, c.SlackConfig)
+	svc := evebotservice.New(
+		cfg,
+		cmdResolver,
+		eveAPI,
+		chatSvc,
+		cmdHandler,
+	)
 
 	return []mux.EveController{
 		NewPingController(),
-		NewSlackController(slackProvider),
+		NewSlackController(svc),
 	}
 }

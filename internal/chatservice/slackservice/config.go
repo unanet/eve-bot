@@ -1,4 +1,4 @@
-package slack
+package slackservice
 
 // Config needed for slack
 //		EVEBOT_SLACK_SIGNING_SECRET

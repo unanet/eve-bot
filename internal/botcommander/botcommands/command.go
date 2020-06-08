@@ -17,13 +17,12 @@ type EvebotCommand interface {
 	Help() *bothelp.Help
 	User() string
 	Channel() string
-	InitialTimeStamp() string
 	IsValid() bool
 	IsHelpRequest() bool
 	MakeAsyncReq() bool
 	AckMsg(userID string) string
 	ErrMsg() string
-	EveReqObj(cbURL, user string) interface{}
+	EveReqObj(user string) interface{}
 }
 
 //
@@ -130,16 +129,15 @@ func extractNSOpt(opts map[string]interface{}) eveapi.StringList {
 }
 
 type baseCommand struct {
-	input                   []string
-	requiredInputLength     int
-	name, channel, user, ts string
-	async, valid            bool
-	errs                    []error
-	summary                 bothelp.Summary
-	usage                   bothelp.Usage
-	examples                bothelp.Examples
-	optionalArgs            botargs.Args
-	requiredParams          botparams.Params
-	apiOptions              map[string]interface{} // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
-
+	input               []string
+	requiredInputLength int
+	name, channel, user string
+	async, valid        bool
+	errs                []error
+	summary             bothelp.Summary
+	usage               bothelp.Usage
+	examples            bothelp.Examples
+	optionalArgs        botargs.Args
+	requiredParams      botparams.Params
+	apiOptions          map[string]interface{} // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
 }

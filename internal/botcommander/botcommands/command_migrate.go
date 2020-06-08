@@ -10,8 +10,8 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
-func NewMigrateCommand(cmdFields []string, channel, user, timestamp string) EvebotCommand {
-	return defaultMigrateCommand(cmdFields, channel, user, timestamp)
+func NewMigrateCommand(cmdFields []string, channel, user string) EvebotCommand {
+	return defaultMigrateCommand(cmdFields, channel, user)
 }
 
 type MigrateCmd struct {
@@ -19,12 +19,11 @@ type MigrateCmd struct {
 }
 
 // @evebot migrate current in qa
-func defaultMigrateCommand(cmdFields []string, channel, user, timestamp string) MigrateCmd {
+func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd {
 	cmd := MigrateCmd{baseCommand{
 		input:   cmdFields,
 		channel: channel,
 		user:    user,
-		ts:      timestamp,
 		name:    "migrate",
 		summary: "The `migrate` command is used to migrate databases by *namespace* and *environment*",
 		usage: bothelp.Usage{
@@ -50,13 +49,12 @@ func defaultMigrateCommand(cmdFields []string, channel, user, timestamp string) 
 	return cmd
 }
 
-func (cmd MigrateCmd) EveReqObj(cbURL, user string) interface{} {
+func (cmd MigrateCmd) EveReqObj(user string) interface{} {
 	return eveapi.DeploymentPlanOptions{
 		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
 		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
 		User:             user,
 		DryRun:           extractDryrunOpt(cmd.apiOptions),
-		CallbackURL:      cbURL,
 		Environment:      extractEnvironmentOpt(cmd.apiOptions),
 		NamespaceAliases: extractNSOpt(cmd.apiOptions),
 		Messages:         nil,
@@ -70,10 +68,6 @@ func (cmd MigrateCmd) User() string {
 
 func (cmd MigrateCmd) Channel() string {
 	return cmd.channel
-}
-
-func (cmd MigrateCmd) InitialTimeStamp() string {
-	return cmd.ts
 }
 
 func (cmd MigrateCmd) AckMsg(userID string) string {

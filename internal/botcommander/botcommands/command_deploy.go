@@ -10,20 +10,19 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
-func NewDeployCommand(cmdFields []string, channel, user, timestamp string) EvebotCommand {
-	return defaultDeployCommand(cmdFields, channel, user, timestamp)
+func NewDeployCommand(cmdFields []string, channel, user string) EvebotCommand {
+	return defaultDeployCommand(cmdFields, channel, user)
 }
 
 type DeployCmd struct {
 	baseCommand
 }
 
-func defaultDeployCommand(cmdFields []string, channel, user, timestamp string) DeployCmd {
+func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 	cmd := DeployCmd{baseCommand{
 		input:   cmdFields,
 		channel: channel,
 		user:    user,
-		ts:      timestamp,
 		name:    "deploy",
 		summary: "The `deploy` command is used to deploy services to a specific *namespace* and *environment*",
 		usage: bothelp.Usage{
@@ -50,13 +49,12 @@ func defaultDeployCommand(cmdFields []string, channel, user, timestamp string) D
 }
 
 // EveReqObj hydrates the data needed to make the EveAPI Request for the EveBot Command (deploy)
-func (cmd DeployCmd) EveReqObj(cbURL, user string) interface{} {
+func (cmd DeployCmd) EveReqObj(user string) interface{} {
 	return eveapi.DeploymentPlanOptions{
 		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
 		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
 		User:             user,
 		DryRun:           extractDryrunOpt(cmd.apiOptions),
-		CallbackURL:      cbURL,
 		Environment:      extractEnvironmentOpt(cmd.apiOptions),
 		NamespaceAliases: extractNSOpt(cmd.apiOptions),
 		Messages:         nil,
@@ -70,10 +68,6 @@ func (cmd DeployCmd) User() string {
 
 func (cmd DeployCmd) Channel() string {
 	return cmd.channel
-}
-
-func (cmd DeployCmd) InitialTimeStamp() string {
-	return cmd.ts
 }
 
 func (cmd DeployCmd) AckMsg(userID string) string {

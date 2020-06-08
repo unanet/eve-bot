@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/kelseyhightower/envconfig"
+	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/slackservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	islack "gitlab.unanet.io/devops/eve-bot/internal/slack"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"gitlab.unanet.io/devops/eve/pkg/mux"
 	"go.uber.org/zap"
@@ -20,7 +20,7 @@ type (
 	// LogConfig is the logger config (log level, output...)
 	LogConfig = log.Config
 	// SlackConfig is the slack config (secret, tokens..)
-	SlackConfig = islack.Config
+	SlackConfig = slackservice.Config
 	// MuxConfig is the multiplexer (router) config (ports, timeouts)
 	MuxConfig = mux.Config
 	// EveAPIConfig is the config for the Eve API

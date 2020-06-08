@@ -6,11 +6,11 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
 )
 
-func NewHelpCommand(cmdFields []string, channel, user, timestamp string) EvebotCommand {
-	return defaultHelpCommand(cmdFields, channel, user, timestamp)
+func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
+	return defaultHelpCommand(cmdFields, channel, user)
 }
 
-func (cmd HelpCmd) EveReqObj(cbURL, user string) interface{} {
+func (cmd HelpCmd) EveReqObj(user string) interface{} {
 	return nil
 }
 
@@ -18,12 +18,11 @@ type HelpCmd struct {
 	baseCommand
 }
 
-func defaultHelpCommand(cmdFields []string, channel, user, timestamp string) HelpCmd {
+func defaultHelpCommand(cmdFields []string, channel, user string) HelpCmd {
 	return HelpCmd{baseCommand{
 		input:   cmdFields,
 		channel: channel,
 		user:    user,
-		ts:      timestamp,
 		name:    "help",
 		summary: "Try running one of the commands below",
 		usage: bothelp.Usage{
@@ -42,10 +41,6 @@ func (cmd HelpCmd) User() string {
 
 func (cmd HelpCmd) Channel() string {
 	return cmd.channel
-}
-
-func (cmd HelpCmd) InitialTimeStamp() string {
-	return cmd.ts
 }
 
 func (cmd HelpCmd) AckMsg(userID string) string {

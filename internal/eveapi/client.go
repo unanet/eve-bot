@@ -17,10 +17,6 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
-const (
-	userAgent = "eve-bot"
-)
-
 // EVEBOT_EVEAPI_BASE_URL
 // EVEBOT_EVEAPI_TIMEOUT
 // EVEBOT_EVEAPI_CALLBACK_URL
@@ -32,7 +28,6 @@ type Config struct {
 
 type Client interface {
 	Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser, slackChannel, ts string) (*DeploymentPlanOptions, error)
-	CallBackURL() string
 }
 
 type client struct {
@@ -55,30 +50,27 @@ func NewClient(cfg Config) Client {
 		sling: sling.New().
 			Base(cfg.EveapiBaseUrl).
 			Client(httpClient).
-			Add("User-Agent", userAgent).
+			Add("User-Agent", "eve-bot").
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 
 }
 
-func (c *client) CallBackURL() string {
-	return c.cfg.EveapiCallbackUrl
-}
-
-func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser, slackChannel, ts string) (*DeploymentPlanOptions, error) {
+func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, user, channel, ts string) (*DeploymentPlanOptions, error) {
 	var success DeploymentPlanOptions
 	var failure eveerror.RestError
 
 	cbUrlVals := url.Values{}
-	cbUrlVals.Set("user", slackUser)
-	cbUrlVals.Add("channel", slackChannel)
+	cbUrlVals.Set("user", user)
+	cbUrlVals.Add("channel", channel)
 	cbUrlVals.Add("ts", ts)
 	cbUrlVals.Add("action", dp.Type.String())
 
-	dp.CallbackURL = dp.CallbackURL + "?" + cbUrlVals.Encode()
+	dp.CallbackURL = c.cfg.EveapiCallbackUrl + "?" + cbUrlVals.Encode()
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).Request()
 	if err != nil {
+		log.Logger.Error("error calling eve-api", zap.Error(err))
 		return nil, err
 	}
 

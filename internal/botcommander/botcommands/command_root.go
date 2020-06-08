@@ -10,12 +10,11 @@ type RootCmd struct {
 	baseCommand
 }
 
-func NewRootCmd(cmdFields []string, channel, user, timestamp string) EvebotCommand {
+func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	return RootCmd{baseCommand{
 		input:          cmdFields,
 		channel:        channel,
 		user:           user,
-		ts:             timestamp,
 		name:           "",
 		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
 		usage:          bothelp.Usage{},
@@ -34,11 +33,7 @@ func (cmd RootCmd) Channel() string {
 	return cmd.channel
 }
 
-func (cmd RootCmd) InitialTimeStamp() string {
-	return cmd.ts
-}
-
-func (cmd RootCmd) EveReqObj(cbURL, user string) interface{} {
+func (cmd RootCmd) EveReqObj(user string) interface{} {
 	return nil
 }
 
