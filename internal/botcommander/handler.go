@@ -3,9 +3,13 @@ package botcommander
 import (
 	"context"
 	"errors"
+	"reflect"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands/handlers"
+	"gitlab.unanet.io/devops/eve/pkg/log"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
@@ -35,6 +39,7 @@ func NewHandler(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Handle
 }
 
 func (h *EvebotCommandHandler) Execute(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string) {
+	log.Logger.Debug("Are we there yet...time to execute", zap.Any("cmd_type", reflect.TypeOf(cmd)))
 	switch cmd.(type) {
 	case botcommands.DeployCmd:
 	case botcommands.MigrateCmd:

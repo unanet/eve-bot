@@ -34,6 +34,7 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Channel(), ev.ThreadTimeStamp)
 	// If the AckMessage needs to continue (no errors)...
 	if cont {
+		log.Logger.Debug("lets continue to execute command handler....")
 		go p.CommandHandler.Execute(context.TODO(), cmd, timeStamp) // Asynchronous Command Handler
 		//go p.CommandHandler.Handle(context.TODO(), cmd, timeStamp) // Asynchronous Command Handler
 	}

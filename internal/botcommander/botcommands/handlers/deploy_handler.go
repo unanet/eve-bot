@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
@@ -22,6 +24,7 @@ func NewDeployHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider
 }
 
 func (h DeployHandler) Handle(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string) {
+	log.Logger.Debug("Are we there yet...")
 	chatUser, err := h.chatSvc.GetUser(ctx, cmd.User())
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
