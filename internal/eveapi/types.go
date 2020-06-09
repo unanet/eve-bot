@@ -169,7 +169,7 @@ func (cbs *CallbackState) ToChatMsg() string {
 }
 
 func logLink(ns string) string {
-	return fmt.Sprintf("https://grafana.unanet.io/explore?orgId=1&left=%5B%22now-5m%22,%22now%22,%22Loki%22,%7B%22expr%22:%22%7Bjob%3D~%5C%22%s.*%5C%22%7D%22%7D,%7B%22mode%22:%22Logs%22%7D,%7B%22ui%22:%5Btrue,true,true,%22none%22%5D%7D%5D", ns)
+	return fmt.Sprintf("https://grafana.unanet.io/explore?orgId=1&left=[\"now-5m\",\"now\",\"Loki\",{\"expr\":\"{job=~\"%s.*\"}\"},{\"mode\":\"Logs\"},{\"ui\":[true,true,true,\"none\"]}]", ns)
 }
 
 func (cbs *CallbackState) appendLogLink(result *string) {
