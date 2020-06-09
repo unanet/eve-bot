@@ -50,6 +50,10 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 	user := r.URL.Query().Get("user")
 	ts := r.URL.Query().Get("ts")
 
+	log.Logger.Debug("eve callback handler",
+		zap.String("user", user),
+		zap.String("channel", channel),
+		zap.String("timestamp", ts))
 	// Get the Body
 	payload := eve.NSDeploymentPlan{}
 
@@ -74,6 +78,8 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the URL Params
 	channel := r.URL.Query().Get("channel")
+
+	log.Logger.Debug("eve callback handler", zap.String("channel", channel))
 
 	// Get the Body
 	payload := eve.NSDeploymentPlan{}
