@@ -47,8 +47,8 @@ func (cmd InvalidCmd) ErrMsg() string {
 	return baseErrMsg(cmd.errs)
 }
 
-func (cmd InvalidCmd) AckMsg(userID string) string {
-	return baseAckMsg(cmd, userID, cmd.input)
+func (cmd InvalidCmd) AckMsg() (string, bool) {
+	return baseAckMsg(cmd, cmd.input)
 }
 
 func (cmd InvalidCmd) MakeAsyncReq() bool {

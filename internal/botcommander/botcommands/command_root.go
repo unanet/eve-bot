@@ -41,8 +41,8 @@ func (cmd RootCmd) ErrMsg() string {
 	return baseErrMsg(cmd.errs)
 }
 
-func (cmd RootCmd) AckMsg(userID string) string {
-	return baseAckMsg(cmd, userID, cmd.input)
+func (cmd RootCmd) AckMsg() (string, bool) {
+	return baseAckMsg(cmd, cmd.input)
 }
 
 func (cmd RootCmd) IsValid() bool {

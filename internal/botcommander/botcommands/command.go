@@ -20,7 +20,7 @@ type EvebotCommand interface {
 	IsValid() bool
 	IsHelpRequest() bool
 	MakeAsyncReq() bool
-	AckMsg(userID string) string
+	AckMsg() (string, bool)
 	ErrMsg() string
 	EveReqObj(user string) interface{}
 }
@@ -45,18 +45,18 @@ func baseIsValid(input []string) bool {
 	return true
 }
 
-func baseAckMsg(cmd EvebotCommand, userID string, cmdInput []string) string {
+func baseAckMsg(cmd EvebotCommand, cmdInput []string) (msg string, cont bool) {
 	if cmd.IsHelpRequest() {
-		return fmt.Sprintf("<@%s>...\n\n%s", userID, cmd.Help().String())
+		return fmt.Sprintf("<@%s>...\n\n%s", cmd.User(), cmd.Help().String()), false
 	}
 	if cmd.IsValid() == false {
-		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", userID, cmdInput, cmd.Name())
+		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", cmd.User(), cmdInput, cmd.Name()), false
 	}
 	if len(cmd.ErrMsg()) > 0 {
-		return fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", userID, cmd.ErrMsg())
+		return fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", cmd.User(), cmd.ErrMsg()), false
 	}
 	// Happy Path
-	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", userID, cmd.Name())
+	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", cmd.User(), cmd.Name()), true
 }
 
 func baseErrMsg(errs []error) string {

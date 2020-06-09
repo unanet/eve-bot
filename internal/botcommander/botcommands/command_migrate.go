@@ -70,8 +70,8 @@ func (cmd MigrateCmd) Channel() string {
 	return cmd.channel
 }
 
-func (cmd MigrateCmd) AckMsg(userID string) string {
-	return baseAckMsg(cmd, userID, cmd.input)
+func (cmd MigrateCmd) AckMsg() (string, bool) {
+	return baseAckMsg(cmd, cmd.input)
 }
 
 func (cmd MigrateCmd) IsValid() bool {

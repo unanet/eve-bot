@@ -29,12 +29,20 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// Resolve the input and return a Command object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 	// Send the immediate Acknowledgement Message back to the chat user
-	timeStamp := p.ChatService.PostMessageThread(ctx, cmd.AckMsg(cmd.User()), cmd.Channel(), ev.ThreadTimeStamp)
-	// Handle the command async
-	go p.CommandHandler.Handle(
-		context.TODO(),
-		cmd,
-		timeStamp,
-	)
+
+	ackMsg, cont := cmd.AckMsg()
+
+	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Channel(), ev.ThreadTimeStamp)
+
+	// If the AckMessage needs to continue (no errors)...
+	if cont {
+		// Handle the command async
+		go p.CommandHandler.Handle(
+			context.TODO(),
+			cmd,
+			timeStamp,
+		)
+	}
+
 	return nil
 }

@@ -43,8 +43,8 @@ func (cmd HelpCmd) Channel() string {
 	return cmd.channel
 }
 
-func (cmd HelpCmd) AckMsg(userID string) string {
-	return baseAckMsg(cmd, userID, cmd.input)
+func (cmd HelpCmd) AckMsg() (string, bool) {
+	return baseAckMsg(cmd, cmd.input)
 }
 
 func (cmd HelpCmd) MakeAsyncReq() bool {

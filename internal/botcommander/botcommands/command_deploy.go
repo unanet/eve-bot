@@ -70,8 +70,8 @@ func (cmd DeployCmd) Channel() string {
 	return cmd.channel
 }
 
-func (cmd DeployCmd) AckMsg(userID string) string {
-	return baseAckMsg(cmd, userID, cmd.input)
+func (cmd DeployCmd) AckMsg() (string, bool) {
+	return baseAckMsg(cmd, cmd.input)
 }
 
 func (cmd DeployCmd) IsValid() bool {
