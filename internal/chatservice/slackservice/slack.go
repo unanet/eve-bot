@@ -82,7 +82,15 @@ func (sp Provider) GetUser(ctx context.Context, user string) (*chatmodels.ChatUs
 }
 
 func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user string, channel string, ts string) {
-	//msgOpt := slack.MsgOptionText(fmt.Sprintf("<@%s>! %s\n%s", user, msgLogLinks, url), false)
+	msgOpt := slack.MsgOptionText(fmt.Sprintf("<@%s>! %s\n", user, msgLogLinks), false)
+
+	//headerTxtBlock := &slack.TextBlockObject{
+	//	Type:     slack.MarkdownType,
+	//	Text:     fmt.Sprint("<@%s>! %s\n%s", user),
+	//	Emoji:    false,
+	//	Verbatim: false,
+	//}
+
 	txtBlock := &slack.TextBlockObject{
 		Type:     slack.MarkdownType,
 		Text:     fmt.Sprintf("<%s|Grafana Logs>", url),
@@ -94,6 +102,6 @@ func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user s
 	//opt := slack.MsgOptionUnfurl()
 	linkOpt := slack.MsgOptionEnableLinkUnfurl()
 	threadOpt := slack.MsgOptionTS(ts)
-	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, linkOpt, threadOpt)
+	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOpt, msgOptionBlocks, linkOpt, threadOpt)
 	sp.handleDevOpsErrorNotification(err)
 }
