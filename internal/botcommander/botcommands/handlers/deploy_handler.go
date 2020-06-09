@@ -1,50 +1,27 @@
-package botcommander
+package handlers
 
 import (
 	"context"
-	"errors"
 	"strings"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands/handlers"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
-var (
-	errInvalidRequestObj = errors.New("invalid request object")
-	errInvalidApiResp    = errors.New("invalid api response")
-)
-
-type Handler interface {
-	Handle(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string)
-	Execute(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string)
-}
-
-type EvebotCommandHandler struct {
+type DeployHandler struct {
 	eveAPIClient eveapi.Client
 	chatSvc      chatservice.Provider
 }
 
-func NewHandler(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Handler {
-	return &EvebotCommandHandler{
-		eveAPIClient: eveAPIClient,
-		chatSvc:      chatSVC,
+func NewDeployHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+	return DeployHandler{
+		eveAPIClient: *eveAPIClient,
+		chatSvc:      *chatSvc,
 	}
 }
 
-func (h *EvebotCommandHandler) Execute(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string) {
-	switch cmd.(type) {
-	case botcommands.DeployCmd:
-	case botcommands.MigrateCmd:
-		handlers.NewDeployHandler(&h.eveAPIClient, &h.chatSvc).Handle(ctx, cmd, timestamp)
-	default:
-		h.chatSvc.PostMessage(ctx, "unknown command handler", cmd.Channel())
-	}
-}
-
-func (h *EvebotCommandHandler) Handle(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string) {
+func (h DeployHandler) Handle(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string) {
 	chatUser, err := h.chatSvc.GetUser(ctx, cmd.User())
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)

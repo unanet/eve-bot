@@ -40,7 +40,7 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) botcommands.Eveb
 	newCmdFuncInterface := botcommands.CommandInitializerMap[cmdFields[0]]
 
 	// Make sure the New Command func follows the standard New Command signature
-	// =======> func NewCmd(input []string, channel, user, timestamp string) EvebotCommand { }
+	// =======> func NewCmd(input []string, channel, user string) EvebotCommand { }
 	if newCmdFuncInterface != nil {
 		if newCmdFuncVal, ok := newCmdFuncInterface.(func([]string, string, string) botcommands.EvebotCommand); ok {
 			return newCmdFuncVal(cmdFields, channel, user)
