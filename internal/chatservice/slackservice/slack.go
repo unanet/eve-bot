@@ -100,7 +100,7 @@ func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user s
 		Verbatim: false,
 	}
 	msgSectionBlock := slack.NewSectionBlock(txtBlock, nil, nil)
-	msgOptionBlocks := slack.MsgOptionBlocks(msgSectionBlock, headerSectionBlock)
+	msgOptionBlocks := slack.MsgOptionBlocks(headerSectionBlock, msgSectionBlock)
 	//opt := slack.MsgOptionUnfurl()
 	linkOpt := slack.MsgOptionEnableLinkUnfurl()
 	threadOpt := slack.MsgOptionTS(ts)
