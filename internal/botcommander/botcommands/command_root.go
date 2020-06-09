@@ -19,10 +19,13 @@ func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
 		usage:          bothelp.Usage{},
 		examples:       bothelp.Examples{},
-		async:          false,
 		optionalArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
 	}}
+}
+
+func (cmd RootCmd) APIOptions() map[string]interface{} {
+	return cmd.apiOptions
 }
 
 func (cmd RootCmd) User() string {
@@ -31,10 +34,6 @@ func (cmd RootCmd) User() string {
 
 func (cmd RootCmd) Channel() string {
 	return cmd.channel
-}
-
-func (cmd RootCmd) EveReqObj(user string) interface{} {
-	return nil
 }
 
 func (cmd RootCmd) ErrMsg() string {
@@ -47,10 +46,6 @@ func (cmd RootCmd) AckMsg() (string, bool) {
 
 func (cmd RootCmd) IsValid() bool {
 	return true
-}
-
-func (cmd RootCmd) MakeAsyncReq() bool {
-	return false
 }
 
 func (cmd RootCmd) Initialize(input []string) EvebotCommand {

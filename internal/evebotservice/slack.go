@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
+
+	"go.uber.org/zap"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -22,9 +25,7 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	return nil
 }
 
-// HandleEvent takes an http request and handles the Slack API Event
-// this is where we do our request signature validation
-// ..and switch the incoming api event types
+// HandleSlackAppMentionEvent takes slackevents.AppMentionEvent, resolves an EvebotCommand, and handles/executes it...
 func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackevents.AppMentionEvent) error {
 	// Resolve the input and return a Command object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
@@ -34,9 +35,8 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Channel(), ev.ThreadTimeStamp)
 	// If the AckMessage needs to continue (no errors)...
 	if cont {
-		log.Logger.Debug("lets continue to execute command handler....")
-		go p.CommandHandler.Execute(context.TODO(), cmd, timeStamp) // Asynchronous Command Handler
-		//go p.CommandHandler.Handle(context.TODO(), cmd, timeStamp) // Asynchronous Command Handler
+		log.Logger.Debug("execute command handler", zap.Any("cmd_type", reflect.TypeOf(cmd)))
+		go p.CommandExecutor.Execute(context.TODO(), cmd, timeStamp) // Asynchronous Command Handler
 	}
 	// Let's get back to the party and take a few more request...
 	return nil

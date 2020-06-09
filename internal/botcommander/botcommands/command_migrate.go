@@ -7,7 +7,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
 func NewMigrateCommand(cmdFields []string, channel, user string) EvebotCommand {
@@ -38,7 +37,6 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 			"migrate current in una-int databases=unanetbi dryrun=true force=true",
 			"migrate current in una-int databases=unanetbi,unaneta dryrun=true force=true",
 		},
-		async:               true,
 		optionalArgs:        botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultDatabasesArg()},
 		requiredParams:      botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
 		apiOptions:          make(map[string]interface{}),
@@ -49,17 +47,8 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 	return cmd
 }
 
-func (cmd MigrateCmd) EveReqObj(user string) interface{} {
-	return eveapi.DeploymentPlanOptions{
-		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
-		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
-		User:             user,
-		DryRun:           extractDryrunOpt(cmd.apiOptions),
-		Environment:      extractEnvironmentOpt(cmd.apiOptions),
-		NamespaceAliases: extractNSOpt(cmd.apiOptions),
-		Messages:         nil,
-		Type:             "migration",
-	}
+func (cmd MigrateCmd) APIOptions() map[string]interface{} {
+	return cmd.apiOptions
 }
 
 func (cmd MigrateCmd) User() string {
@@ -79,13 +68,6 @@ func (cmd MigrateCmd) IsValid() bool {
 		return true
 	}
 	return false
-}
-
-func (cmd MigrateCmd) MakeAsyncReq() bool {
-	if cmd.IsHelpRequest() || cmd.IsValid() == false || len(cmd.errs) > 0 {
-		return false
-	}
-	return cmd.async
 }
 
 func (cmd MigrateCmd) ErrMsg() string {

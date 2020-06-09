@@ -8,8 +8,7 @@ import (
 )
 
 var (
-	errInvalidRequestObj = errors.New("invalid request object")
-	errInvalidApiResp    = errors.New("invalid api response")
+	errInvalidApiResp = errors.New("invalid api response")
 )
 
 type CommandHandler interface {

@@ -10,10 +10,6 @@ func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return defaultHelpCommand(cmdFields, channel, user)
 }
 
-func (cmd HelpCmd) EveReqObj(user string) interface{} {
-	return nil
-}
-
 type HelpCmd struct {
 	baseCommand
 }
@@ -29,10 +25,13 @@ func defaultHelpCommand(cmdFields []string, channel, user string) HelpCmd {
 			"{{ command }} help",
 		},
 		examples:       bothelp.Examples{},
-		async:          false,
 		optionalArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
 	}}
+}
+
+func (cmd HelpCmd) APIOptions() map[string]interface{} {
+	return cmd.apiOptions
 }
 
 func (cmd HelpCmd) User() string {
@@ -45,10 +44,6 @@ func (cmd HelpCmd) Channel() string {
 
 func (cmd HelpCmd) AckMsg() (string, bool) {
 	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd HelpCmd) MakeAsyncReq() bool {
-	return false
 }
 
 func (cmd HelpCmd) ErrMsg() string {

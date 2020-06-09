@@ -19,10 +19,9 @@ type EvebotCommand interface {
 	Channel() string
 	IsValid() bool
 	IsHelpRequest() bool
-	MakeAsyncReq() bool
 	AckMsg() (string, bool)
 	ErrMsg() string
-	EveReqObj(user string) interface{}
+	APIOptions() map[string]interface{}
 }
 
 //
@@ -73,7 +72,7 @@ func baseErrMsg(errs []error) string {
 	return msg
 }
 
-func extractArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
+func ExtractArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
 	if val, ok := opts[botargs.ServicesName]; ok {
 		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
 			return artifactDefs
@@ -84,7 +83,7 @@ func extractArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions
 	return nil
 }
 
-func extractForceDeployOpt(opts map[string]interface{}) bool {
+func ExtractForceDeployOpt(opts map[string]interface{}) bool {
 	if val, ok := opts[botargs.ForceDeployName]; ok {
 		if forceDepVal, ok := val.(bool); ok {
 			return forceDepVal
@@ -95,7 +94,7 @@ func extractForceDeployOpt(opts map[string]interface{}) bool {
 	return false
 }
 
-func extractDryrunOpt(opts map[string]interface{}) bool {
+func ExtractDryrunOpt(opts map[string]interface{}) bool {
 	if val, ok := opts[botargs.DryrunName]; ok {
 		if dryRunVal, ok := val.(bool); ok {
 			return dryRunVal
@@ -106,7 +105,7 @@ func extractDryrunOpt(opts map[string]interface{}) bool {
 	return false
 }
 
-func extractEnvironmentOpt(opts map[string]interface{}) string {
+func ExtractEnvironmentOpt(opts map[string]interface{}) string {
 	if val, ok := opts[botparams.EnvironmentName]; ok {
 		if envVal, ok := val.(string); ok {
 			return envVal
@@ -117,7 +116,7 @@ func extractEnvironmentOpt(opts map[string]interface{}) string {
 	return ""
 }
 
-func extractNSOpt(opts map[string]interface{}) eveapi.StringList {
+func ExtractNSOpt(opts map[string]interface{}) eveapi.StringList {
 	if val, ok := opts[botparams.NamespaceName]; ok {
 		if nsVal, ok := val.(string); ok {
 			return eveapi.StringList{nsVal}
@@ -132,7 +131,7 @@ type baseCommand struct {
 	input               []string
 	requiredInputLength int
 	name, channel, user string
-	async, valid        bool
+	valid               bool
 	errs                []error
 	summary             bothelp.Summary
 	usage               bothelp.Usage

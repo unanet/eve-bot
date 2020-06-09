@@ -15,7 +15,7 @@ import (
 type Provider struct {
 	ChatService     chatservice.Provider
 	CommandResolver botcommander.Resolver
-	CommandHandler  botcommander.Handler
+	CommandExecutor botcommander.Executor
 	EveAPI          eveapi.Client
 	Cfg             config.Config
 }
@@ -26,14 +26,14 @@ func New(
 	commandResolver botcommander.Resolver,
 	eveAPI eveapi.Client,
 	chatService chatservice.Provider,
-	commandHandler botcommander.Handler,
+	cmdExecutor botcommander.Executor,
 ) *Provider {
 	return &Provider{
 		CommandResolver: commandResolver,
 		EveAPI:          eveAPI,
 		Cfg:             cfg,
 		ChatService:     chatService,
-		CommandHandler:  commandHandler,
+		CommandExecutor: cmdExecutor,
 	}
 }
 

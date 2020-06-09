@@ -14,14 +14,14 @@ func InitController(cfg config.Config) []mux.EveController {
 	cmdResolver := botcommander.NewResolver()
 	eveAPI := eveapi.NewClient(cfg.EveAPIConfig)
 	chatSvc := chatservice.New(chatservice.Slack, &cfg)
-	cmdHandler := botcommander.NewHandler(eveAPI, chatSvc)
+	cmdExecutor := botcommander.NewExecutor(eveAPI, chatSvc)
 
 	svc := evebotservice.New(
 		cfg,
 		cmdResolver,
 		eveAPI,
 		chatSvc,
-		cmdHandler,
+		cmdExecutor,
 	)
 
 	return []mux.EveController{

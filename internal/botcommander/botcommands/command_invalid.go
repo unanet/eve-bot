@@ -25,10 +25,13 @@ func defaultInvalidCommand(cmdFields []string, channel, user string) InvalidCmd 
 		summary:        bothelp.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmdFields)),
 		usage:          bothelp.Usage{},
 		examples:       bothelp.Examples{},
-		async:          false,
 		optionalArgs:   botargs.Args{},
 		requiredParams: botparams.Params{},
 	}}
+}
+
+func (cmd InvalidCmd) APIOptions() map[string]interface{} {
+	return cmd.apiOptions
 }
 
 func (cmd InvalidCmd) User() string {
@@ -39,20 +42,12 @@ func (cmd InvalidCmd) Channel() string {
 	return cmd.channel
 }
 
-func (cmd InvalidCmd) EveReqObj(user string) interface{} {
-	return nil
-}
-
 func (cmd InvalidCmd) ErrMsg() string {
 	return baseErrMsg(cmd.errs)
 }
 
 func (cmd InvalidCmd) AckMsg() (string, bool) {
 	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd InvalidCmd) MakeAsyncReq() bool {
-	return false
 }
 
 func (cmd InvalidCmd) IsValid() bool {

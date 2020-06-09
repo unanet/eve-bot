@@ -7,7 +7,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/bothelp"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botparams"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
 func NewDeployCommand(cmdFields []string, channel, user string) EvebotCommand {
@@ -37,7 +36,6 @@ func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 			"deploy current in una-int services=unanetbi,unaneta dryrun=true force=true",
 			"deploy current in una-int services=unanetbi:20.2,unaneta",
 		},
-		async:               true,
 		optionalArgs:        botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultServicesArg()},
 		requiredParams:      botparams.Params{botparams.DefaultNamespace(), botparams.DefaultEnvironment()},
 		apiOptions:          make(map[string]interface{}),
@@ -48,18 +46,8 @@ func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 	return cmd
 }
 
-// EveReqObj hydrates the data needed to make the EveAPI Request for the EveBot Command (deploy)
-func (cmd DeployCmd) EveReqObj(user string) interface{} {
-	return eveapi.DeploymentPlanOptions{
-		Artifacts:        extractArtifactsOpt(cmd.apiOptions),
-		ForceDeploy:      extractForceDeployOpt(cmd.apiOptions),
-		User:             user,
-		DryRun:           extractDryrunOpt(cmd.apiOptions),
-		Environment:      extractEnvironmentOpt(cmd.apiOptions),
-		NamespaceAliases: extractNSOpt(cmd.apiOptions),
-		Messages:         nil,
-		Type:             "application",
-	}
+func (cmd DeployCmd) APIOptions() map[string]interface{} {
+	return cmd.apiOptions
 }
 
 func (cmd DeployCmd) User() string {
@@ -79,13 +67,6 @@ func (cmd DeployCmd) IsValid() bool {
 		return true
 	}
 	return false
-}
-
-func (cmd DeployCmd) MakeAsyncReq() bool {
-	if cmd.IsHelpRequest() || cmd.IsValid() == false || len(cmd.errs) > 0 {
-		return false
-	}
-	return cmd.async
 }
 
 func (cmd DeployCmd) ErrMsg() string {
