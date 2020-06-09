@@ -41,8 +41,7 @@ func NewHandler(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Handle
 func (h *EvebotCommandHandler) Execute(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string) {
 	log.Logger.Debug("Are we there yet...time to execute", zap.Any("cmd_type", reflect.TypeOf(cmd)))
 	switch cmd.(type) {
-	case botcommands.DeployCmd:
-	case botcommands.MigrateCmd:
+	case botcommands.DeployCmd, botcommands.MigrateCmd:
 		handlers.NewDeployHandler(&h.eveAPIClient, &h.chatSvc).Handle(ctx, cmd, timestamp)
 	default:
 		h.chatSvc.PostMessage(ctx, "unknown command handler", cmd.Channel())
