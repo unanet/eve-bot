@@ -159,19 +159,9 @@ func (cbs *CallbackState) ToChatMsg() string {
 
 	cbs.appendDeployMigrationsResult(&result)
 
-	cbs.appendLogLink(&result)
-
 	if cbs.Payload.Messages == nil || len(cbs.Payload.Messages) == 0 {
 		return result
 	}
 
 	return cbs.appendApiMessages(&result)
-}
-
-func logLink(ns string) string {
-	return fmt.Sprintf("https://grafana.unanet.io/explore?orgId=1&left=[\"now-5m\",\"now\",\"Loki\",{\"expr\":\"{job=~\"%s.*\"}\"},{\"mode\":\"Logs\"},{\"ui\":[true,true,true,\"none\"]}]", ns)
-}
-
-func (cbs *CallbackState) appendLogLink(result *string) {
-	*result = *result + fmt.Sprintf("\n*Logs*\n%s", logLink(cbs.Payload.Namespace.Name))
 }

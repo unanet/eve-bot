@@ -40,6 +40,10 @@ func (c SlackController) Setup(r chi.Router) {
 	r.Post("/eve-cron-callback", c.eveCronCallbackHandler)
 }
 
+func logLink(ns string) string {
+	return "https://grafana.unanet.io/explore?left=%5B%22now-1h%22,%22now%22,%22Loki%22,%7B%22refId%22:%22A%22,%22expr%22:%22%7Bjob%3D~%5C%22" + ns + ".*%5C%22%7D%22,%22key%22:%22Q-1591690807784-0.2580443768677896-0%22,%22hide%22:false%7D,%7B%22mode%22:%22Logs%22%7D,%7B%22ui%22:%5Btrue,true,true,null%5D%7D%5D"
+}
+
 func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the URL Params
 	channel := r.URL.Query().Get("channel")
@@ -59,6 +63,7 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts}
 	log.Logger.Debug("eve callback notification", zap.Any("cb_state", cbState))
 	c.svc.ChatService.PostMessageThread(r.Context(), cbState.ToChatMsg(), cbState.Channel, cbState.TS)
+	c.svc.ChatService.PostMessageThread(r.Context(), fmt.Sprintf("\n*Logs*\n%s", logLink(cbState.Payload.Namespace.Name)), cbState.Channel, cbState.TS)
 	render.Respond(w, r, nil)
 }
 
