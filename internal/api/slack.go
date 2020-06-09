@@ -63,7 +63,11 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts}
 	log.Logger.Debug("eve callback notification", zap.Any("cb_state", cbState))
 	c.svc.ChatService.PostMessageThread(r.Context(), cbState.ToChatMsg(), cbState.Channel, cbState.TS)
-	c.svc.ChatService.PostMessageThread(r.Context(), fmt.Sprintf("\n*Logs*\n%s", logLink(cbState.Payload.Namespace.Name)), cbState.Channel, cbState.TS)
+
+	if (cbState.Payload.Status == eve.DeploymentPlanStatusErrors) || (cbState.Payload.Status == eve.DeploymentPlanStatusComplete) {
+		c.svc.ChatService.PostLinkMessageThread(r.Context(), fmt.Sprintf("\n*Logs*\n%s", logLink(cbState.Payload.Namespace.Name)), cbState.User, cbState.Channel, cbState.TS)
+	}
+
 	render.Respond(w, r, nil)
 }
 

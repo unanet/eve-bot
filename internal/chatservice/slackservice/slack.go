@@ -2,6 +2,7 @@ package slackservice
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/slack-go/slack"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
@@ -78,4 +79,13 @@ func (sp Provider) GetUser(ctx context.Context, user string) (*chatmodels.ChatUs
 		return nil, err
 	}
 	return mapSlackUser(slackUser), nil
+}
+
+func (sp Provider) PostLinkMessageThread(ctx context.Context, msg string, user string, channel string, ts string) {
+
+	msgOpt := slack.MsgOptionText(fmt.Sprintf("<@%s>! %s\n%s", user, msgLogLinks, msg), false)
+	linkOpt := slack.MsgOptionEnableLinkUnfurl()
+	threadOpt := slack.MsgOptionTS(ts)
+	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOpt, linkOpt, threadOpt)
+	sp.handleDevOpsErrorNotification(err)
 }

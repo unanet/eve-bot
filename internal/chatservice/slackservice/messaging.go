@@ -7,6 +7,7 @@ const (
 	msgErrNotificationAssurance  = "I've dispatched a semi-competent team of monkeys to battle the issue..."
 	msgNotification              = "I've got some news..."
 	msgDeploymentErrNotification = "I detected some deployment *errors:*"
+	msgLogLinks                  = "here are the latest logs..."
 )
 
 const (
