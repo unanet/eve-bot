@@ -11,7 +11,6 @@ type CallbackState struct {
 	User    string               `json:"user"`
 	Channel string               `json:"channel"`
 	TS      string               `json:"ts"`
-	Action  string               `json:"action"`
 	Payload eve.NSDeploymentPlan `json:"payload"`
 }
 
@@ -58,17 +57,6 @@ func (cbs *CallbackState) cleanUser() {
 		return
 	} else {
 		cbs.User = "@" + cbs.User
-		return
-	}
-}
-
-func (cbs *CallbackState) cleanAction() {
-	if cbs.Action == "" {
-		cbs.Action = "job"
-		return
-	}
-	if cbs.Action == "application" {
-		cbs.Action = "deployment"
 		return
 	}
 }
@@ -129,13 +117,13 @@ func (cbs *CallbackState) initialResult() string {
 	var ackMessage string
 	switch cbs.Payload.Status {
 	case eve.DeploymentPlanStatusComplete:
-		ackMessage = fmt.Sprintf("your %s is complete", cbs.Action)
+		ackMessage = fmt.Sprintf("your %s deployment is complete", cbs.Payload.DeploymentPlanType())
 	case eve.DeploymentPlanStatusErrors:
 		ackMessage = "we encountered some errors"
 	case eve.DeploymentPlanStatusDryrun:
 		ackMessage = "here's your *dryrun* results"
 	case eve.DeploymentPlanStatusPending:
-		ackMessage = fmt.Sprintf("your %s is pending, here's the plan", cbs.Action)
+		ackMessage = fmt.Sprintf("your %s is pending, here's the plan", cbs.Payload.DeploymentPlanType())
 	}
 
 	var result string
@@ -160,8 +148,6 @@ func (cbs *CallbackState) ToChatMsg() string {
 	}
 
 	cbs.cleanUser()
-
-	cbs.cleanAction()
 
 	if cbs.Payload.NothingToDeploy() {
 		return cbs.nothingToDeployResponse()

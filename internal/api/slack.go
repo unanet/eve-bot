@@ -45,7 +45,6 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 	channel := r.URL.Query().Get("channel")
 	user := r.URL.Query().Get("user")
 	ts := r.URL.Query().Get("ts")
-	action := r.URL.Query().Get("action")
 
 	// Get the Body
 	payload := eve.NSDeploymentPlan{}
@@ -57,7 +56,7 @@ func (c SlackController) eveCallbackHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts, Action: action}
+	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts}
 	log.Logger.Debug("eve callback notification", zap.Any("cb_state", cbState))
 	c.svc.ChatService.PostMessageThread(r.Context(), cbState.ToChatMsg(), cbState.Channel, cbState.TS)
 	render.Respond(w, r, nil)
@@ -119,8 +118,7 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 	// This is a "special" event and only used when setting up the slackbot endpoint
 	if slackAPIEvent.Type == slackevents.URLVerification {
 		var slEvent *slackevents.ChallengeResponse
-		err := json.Unmarshal(body, &slEvent)
-		if err != nil {
+		if err := json.Unmarshal(body, &slEvent); err != nil {
 			render.Respond(w, r, errors.Wrap(botError(err, "failed to unmarshal slack register event", http.StatusBadRequest)))
 			return
 		}

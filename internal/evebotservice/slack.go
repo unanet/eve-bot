@@ -28,21 +28,14 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackevents.AppMentionEvent) error {
 	// Resolve the input and return a Command object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
-	// Send the immediate Acknowledgement Message back to the chat user
-
+	// Hydrate the Acknowledgement Message and whether or not we should continue...
 	ackMsg, cont := cmd.AckMsg()
-
+	// Send the AckMsg and get the Timestamp back so we can thread it later on...
 	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Channel(), ev.ThreadTimeStamp)
-
 	// If the AckMessage needs to continue (no errors)...
 	if cont {
-		// Handle the command async
-		go p.CommandHandler.Handle(
-			context.TODO(),
-			cmd,
-			timeStamp,
-		)
+		go p.CommandHandler.Handle(context.TODO(), cmd, timeStamp) // Asynchronous Command Handler
 	}
-
+	// Let's get back to the party and take a few more request...
 	return nil
 }

@@ -64,7 +64,6 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, user, cha
 	cbUrlVals.Set("user", user)
 	cbUrlVals.Add("channel", channel)
 	cbUrlVals.Add("ts", ts)
-	cbUrlVals.Add("action", dp.Type.String())
 
 	dp.CallbackURL = c.cfg.EveapiCallbackUrl + "?" + cbUrlVals.Encode()
 
