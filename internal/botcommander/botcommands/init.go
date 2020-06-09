@@ -13,7 +13,7 @@ func nonHelpCmd() []EvebotCommand {
 
 	for k, v := range CommandInitializerMap {
 		if k != "help" {
-			cmds = append(cmds, v.(func([]string) EvebotCommand)([]string{}))
+			cmds = append(cmds, v.(func([]string, string, string) EvebotCommand)([]string{}, "", ""))
 		}
 	}
 	return cmds

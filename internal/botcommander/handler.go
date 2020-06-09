@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommandhandlers"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
@@ -17,6 +18,7 @@ var (
 
 type Handler interface {
 	Handle(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string)
+	Resolve(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string)
 }
 
 type EvebotCommandHandler struct {
@@ -28,6 +30,14 @@ func NewHandler(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Handle
 	return &EvebotCommandHandler{
 		eveAPIClient: eveAPIClient,
 		chatSvc:      chatSVC,
+	}
+}
+
+func (h *EvebotCommandHandler) Resolve(ctx context.Context, cmd botcommands.EvebotCommand, timestamp string) {
+	switch cmd.(type) {
+	case botcommands.DeployCmd:
+		botcommandhandlers.NewDeployHandler(&h.eveAPIClient, &h.chatSvc).Handle(cmd, timestamp)
+	case botcommands.MigrateCmd:
 	}
 }
 
