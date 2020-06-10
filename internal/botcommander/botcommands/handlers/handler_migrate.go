@@ -4,12 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
 )
 
 type MigrateHandler struct {

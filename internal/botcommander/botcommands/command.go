@@ -3,6 +3,9 @@ package botcommands
 import (
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botargs"
@@ -73,8 +76,11 @@ func baseErrMsg(errs []error) string {
 }
 
 func ExtractDatabaseArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
+	log.Logger.Debug("ExtractDatabaseArtifactsOpt", zap.Any("opts", opts))
 	if val, ok := opts[botargs.DatabasesName]; ok {
+		log.Logger.Debug("ExtractDatabaseArtifactsOpt databases", zap.Any("val", val))
 		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
+			log.Logger.Debug("ExtractDatabaseArtifactsOpt databases artifactDefs", zap.Any("artifactDefs", artifactDefs))
 			return artifactDefs
 		} else {
 			return nil
