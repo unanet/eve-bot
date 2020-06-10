@@ -4,6 +4,9 @@ import (
 	"context"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/botcommands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
@@ -30,8 +33,12 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd botcommands.EvebotComman
 
 	cmdAPIOpts := cmd.APIOptions()
 
+	dbArtifacts := botcommands.ExtractDatabaseArtifactsOpt(cmdAPIOpts)
+
+	log.Logger.Debug("migrate handler", zap.Any("opts", cmdAPIOpts), zap.Any("artifacts", dbArtifacts))
+
 	deployOpts := eveapi.DeploymentPlanOptions{
-		Artifacts:        botcommands.ExtractDatabaseArtifactsOpt(cmdAPIOpts),
+		Artifacts:        dbArtifacts,
 		ForceDeploy:      botcommands.ExtractForceDeployOpt(cmdAPIOpts),
 		User:             chatUser.Name,
 		DryRun:           botcommands.ExtractDryrunOpt(cmdAPIOpts),
