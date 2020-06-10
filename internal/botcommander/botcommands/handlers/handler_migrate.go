@@ -31,7 +31,7 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd botcommands.EvebotComman
 	cmdAPIOpts := cmd.APIOptions()
 
 	deployOpts := eveapi.DeploymentPlanOptions{
-		Artifacts:        botcommands.ExtractArtifactsOpt(cmdAPIOpts),
+		Artifacts:        botcommands.ExtractDatabaseArtifactsOpt(cmdAPIOpts),
 		ForceDeploy:      botcommands.ExtractForceDeployOpt(cmdAPIOpts),
 		User:             chatUser.Name,
 		DryRun:           botcommands.ExtractDryrunOpt(cmdAPIOpts),

@@ -72,7 +72,18 @@ func baseErrMsg(errs []error) string {
 	return msg
 }
 
-func ExtractArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
+func ExtractDatabaseArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
+	if val, ok := opts[botargs.DatabasesName]; ok {
+		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
+			return artifactDefs
+		} else {
+			return nil
+		}
+	}
+	return nil
+}
+
+func ExtractServiceArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
 	if val, ok := opts[botargs.ServicesName]; ok {
 		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
 			return artifactDefs

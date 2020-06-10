@@ -31,7 +31,7 @@ func (h DeployHandler) Handle(ctx context.Context, cmd botcommands.EvebotCommand
 	cmdAPIOpts := cmd.APIOptions()
 
 	deployOpts := eveapi.DeploymentPlanOptions{
-		Artifacts:        botcommands.ExtractArtifactsOpt(cmdAPIOpts),
+		Artifacts:        botcommands.ExtractServiceArtifactsOpt(cmdAPIOpts),
 		ForceDeploy:      botcommands.ExtractForceDeployOpt(cmdAPIOpts),
 		User:             chatUser.Name,
 		DryRun:           botcommands.ExtractDryrunOpt(cmdAPIOpts),
