@@ -28,13 +28,14 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 		usage: bothelp.Usage{
 			"migrate {{ namespace }} in {{ environment }}",
 			"migrate {{ namespace }} in {{ environment }} databases={{ database_type }}",
-			"migrate {{ namespace }} in {{ environment }} databases={{ database_type,database_type }} dryrun={{ true }}",
-			"migrate {{ namespace }} in {{ environment }} databases={{ database_type,database_type }} dryrun={{ true }} force={{ true }}",
+			"migrate {{ namespace }} in {{ environment }} databases={{ database_type:version }}",
+			"migrate {{ namespace }} in {{ environment }} databases={{ database_type:version,database_type:version }} dryrun={{ true }}",
+			"migrate {{ namespace }} in {{ environment }} databases={{ database_type:version,database_type }} dryrun={{ true }} force={{ true }}",
 		},
 		examples: bothelp.Examples{
 			"migrate current in qa",
 			"migrate current in una-int databases=unanetbi dryrun=true",
-			"migrate current in una-int databases=unanetbi dryrun=true force=true",
+			"migrate current in una-int databases=unanetd:20.2 dryrun=true force=true",
 			"migrate current in una-int databases=unanetbi,unaneta dryrun=true force=true",
 		},
 		optionalArgs:        botargs.Args{botargs.DefaultDryrunArg(), botargs.DefaultForceArg(), botargs.DefaultDatabasesArg()},
