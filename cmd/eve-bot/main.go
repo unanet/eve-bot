@@ -17,7 +17,7 @@ import (
 func main() {
 	cfg := config.Load()
 
-	app, err := mux.NewApi(api.InitController(cfg), cfg.MuxConfig)
+	app, err := mux.NewApi(api.InitController(&cfg), cfg.MuxConfig)
 	if err != nil {
 		log.Logger.Panic("Failed to Create Api App", zap.Error(err))
 	}
@@ -25,6 +25,9 @@ func main() {
 	app.Start()
 }
 
+// This is required for the HTTP Client Request/Response Logging
+// Not sure why, but setting explicitly only works in the parent eve project
+// when importing the mod from other repos, this needs to be handled via init process
 func init() {
 	http.DefaultTransport = evehttp.LoggingTransport
 }

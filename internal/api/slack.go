@@ -105,7 +105,6 @@ func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.R
 	c.svc.ChatService.PostMessage(r.Context(), cbState.ToChatMsg(), cbState.Channel)
 	render.Respond(w, r, nil)
 	return
-
 }
 
 func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.Request) {
@@ -153,10 +152,7 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 	innerEvent := slackAPIEvent.InnerEvent
 	switch ev := innerEvent.Data.(type) {
 	case *slackevents.AppMentionEvent:
-		if err := c.svc.HandleSlackAppMentionEvent(r.Context(), ev); err != nil {
-			render.Respond(w, r, errors.Wrap(err))
-			return
-		}
+		c.svc.HandleSlackAppMentionEvent(r.Context(), ev)
 	default:
 		render.Respond(w, r, errors.Wrap(unknownSlackEventError(innerEvent)))
 		return
