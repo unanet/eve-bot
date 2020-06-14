@@ -110,6 +110,10 @@ func (cmd *ShowCmd) resolveConditionalParams() {
 		return
 	}
 
+	if len(cmd.errs) > 0 {
+		return
+	}
+
 	if cmd.apiOptions["resource"] == nil {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
 		return

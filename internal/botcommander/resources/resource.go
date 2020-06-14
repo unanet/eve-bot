@@ -24,7 +24,7 @@ type baseResource struct {
 	value       string
 }
 
-var validResources = []Resource{DefaultEnvironment(), DefaultEnvironment(), DefaultService()}
+var validResources = []Resource{DefaultEnvironment(), DefaultNamespace(), DefaultService()}
 
 func IsValid(res string) bool {
 	for _, v := range validResources {
