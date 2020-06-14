@@ -1,11 +1,11 @@
-package params
+package resources
 
 const (
-	EnvironmentName = "environment"
+	EnvironmentName = "environments"
 )
 
 type Environment struct {
-	baseParam
+	baseResource
 }
 
 func (e Environment) Name() string {
@@ -21,8 +21,8 @@ func (e Environment) Value() string {
 }
 
 func DefaultEnvironment() Environment {
-	return Environment{baseParam{
+	return Environment{baseResource{
 		name:        EnvironmentName,
-		description: "the environment where the resource lives (i.e. dev,int,qa,stage,perf,prod)",
+		description: "the environment resource (i.e. una-dev,una-int,una-qa)",
 	}}
 }

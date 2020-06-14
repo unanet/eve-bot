@@ -22,20 +22,10 @@ type baseParam struct {
 	value       string
 }
 
-func GetEnvironmentValue(params Params) string {
-	for _, v := range params {
-		if v.Name() == "environment" {
-			return v.Value()
-		}
-	}
-	return ""
+type ConditionalParam interface {
+	Name() string
+	Description() string
+	Value() string
 }
 
-func GetNamespaceValue(params Params) string {
-	for _, v := range params {
-		if v.Name() == "namespace" {
-			return v.Value()
-		}
-	}
-	return ""
-}
+type ConditionalParams []ConditionalParam

@@ -1,11 +1,11 @@
-package params
+package resources
 
 const (
-	NamespaceName = "namespace"
+	NamespaceName = "namespaces"
 )
 
 type Namespace struct {
-	baseParam
+	baseResource
 }
 
 func (e Namespace) Name() string {
@@ -21,8 +21,8 @@ func (e Namespace) Value() string {
 }
 
 func DefaultNamespace() Namespace {
-	return Namespace{baseParam{
+	return Namespace{baseResource{
 		name:        NamespaceName,
-		description: "the namespace where the resource lives (i.e. k8s namespaces)",
+		description: "the namespace resource (i.e. current, prev, prev-1)",
 	}}
 }

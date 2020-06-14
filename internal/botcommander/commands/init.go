@@ -5,6 +5,7 @@ var (
 		"help":    NewHelpCommand,
 		"deploy":  NewDeployCommand,
 		"migrate": NewMigrateCommand,
+		"show":    NewShowCommand,
 	}
 )
 

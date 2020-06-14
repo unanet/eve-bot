@@ -6,5 +6,6 @@ var (
 	CommandHandlerMap = map[string]interface{}{
 		"deploy":  NewDeployHandler,
 		"migrate": NewMigrateHandler,
+		"show":    NewShowHandler,
 	}
 )
