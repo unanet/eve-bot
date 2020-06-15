@@ -38,7 +38,7 @@ func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 		},
 		optionalArgs:        args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultServicesArg()},
 		requiredParams:      params.Params{params.DefaultNamespace(), params.DefaultEnvironment()},
-		apiOptions:          make(map[string]interface{}),
+		apiOptions:          make(CommandOptions),
 		requiredInputLength: 4,
 	}}
 	cmd.resolveParams()
@@ -46,7 +46,7 @@ func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 	return cmd
 }
 
-func (cmd DeployCmd) APIOptions() map[string]interface{} {
+func (cmd DeployCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 

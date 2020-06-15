@@ -27,10 +27,11 @@ func defaultInvalidCommand(cmdFields []string, channel, user string) InvalidCmd 
 		examples:       help.Examples{},
 		optionalArgs:   args.Args{},
 		requiredParams: params.Params{},
+		apiOptions:     make(CommandOptions),
 	}}
 }
 
-func (cmd InvalidCmd) APIOptions() map[string]interface{} {
+func (cmd InvalidCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 

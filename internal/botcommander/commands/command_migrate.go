@@ -40,7 +40,7 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 		},
 		optionalArgs:        args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultDatabasesArg()},
 		requiredParams:      params.Params{params.DefaultNamespace(), params.DefaultEnvironment()},
-		apiOptions:          make(map[string]interface{}),
+		apiOptions:          make(CommandOptions),
 		requiredInputLength: 4,
 	}}
 	cmd.resolveParams()
@@ -48,7 +48,7 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 	return cmd
 }
 
-func (cmd MigrateCmd) APIOptions() map[string]interface{} {
+func (cmd MigrateCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 

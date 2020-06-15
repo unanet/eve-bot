@@ -21,10 +21,11 @@ func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 		examples:       help.Examples{},
 		optionalArgs:   args.Args{},
 		requiredParams: params.Params{},
+		apiOptions:     make(CommandOptions),
 	}}
 }
 
-func (cmd RootCmd) APIOptions() map[string]interface{} {
+func (cmd RootCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 

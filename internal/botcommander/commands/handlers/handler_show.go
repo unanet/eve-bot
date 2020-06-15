@@ -30,7 +30,7 @@ func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, tim
 
 	cmdAPIOpts := cmd.APIOptions()
 
-	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("resource: %s", cmdAPIOpts["resource"]), cmd.User(), cmd.Channel(), timestamp)
+	h.chatSvc.ShowResultsMessageThread(ctx, fmt.Sprintf("resource: %s", cmdAPIOpts["resource"]), cmd.User(), cmd.Channel(), timestamp)
 
 	//deployOpts := eveapi.DeploymentPlanOptions{
 	//	Artifacts:        commands.ExtractServiceArtifactsOpt(cmdAPIOpts),

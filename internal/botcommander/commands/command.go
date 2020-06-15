@@ -13,6 +13,8 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
+type CommandOptions map[string]interface{}
+
 // EvebotCommand interface
 // each evebot command needs to implement this interface
 type EvebotCommand interface {
@@ -24,7 +26,7 @@ type EvebotCommand interface {
 	IsHelpRequest() bool
 	AckMsg() (string, bool)
 	ErrMsg() string
-	APIOptions() map[string]interface{}
+	APIOptions() CommandOptions
 }
 
 //
@@ -75,7 +77,7 @@ func baseErrMsg(errs []error) string {
 	return msg
 }
 
-func ExtractDatabaseArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
+func ExtractDatabaseArtifactsOpt(opts CommandOptions) eveapi.ArtifactDefinitions {
 	log.Logger.Debug("ExtractDatabaseArtifactsOpt", zap.Any("opts", opts))
 	if val, ok := opts[args.DatabasesName]; ok {
 		log.Logger.Debug("ExtractDatabaseArtifactsOpt databases", zap.Any("val", val))
@@ -89,7 +91,7 @@ func ExtractDatabaseArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDef
 	return nil
 }
 
-func ExtractServiceArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefinitions {
+func ExtractServiceArtifactsOpt(opts CommandOptions) eveapi.ArtifactDefinitions {
 	if val, ok := opts[args.ServicesName]; ok {
 		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
 			return artifactDefs
@@ -100,7 +102,7 @@ func ExtractServiceArtifactsOpt(opts map[string]interface{}) eveapi.ArtifactDefi
 	return nil
 }
 
-func ExtractForceDeployOpt(opts map[string]interface{}) bool {
+func ExtractForceDeployOpt(opts CommandOptions) bool {
 	if val, ok := opts[args.ForceDeployName]; ok {
 		if forceDepVal, ok := val.(bool); ok {
 			return forceDepVal
@@ -111,7 +113,7 @@ func ExtractForceDeployOpt(opts map[string]interface{}) bool {
 	return false
 }
 
-func ExtractDryrunOpt(opts map[string]interface{}) bool {
+func ExtractDryrunOpt(opts CommandOptions) bool {
 	if val, ok := opts[args.DryrunName]; ok {
 		if dryRunVal, ok := val.(bool); ok {
 			return dryRunVal
@@ -122,7 +124,7 @@ func ExtractDryrunOpt(opts map[string]interface{}) bool {
 	return false
 }
 
-func ExtractEnvironmentOpt(opts map[string]interface{}) string {
+func ExtractEnvironmentOpt(opts CommandOptions) string {
 	if val, ok := opts[params.EnvironmentName]; ok {
 		if envVal, ok := val.(string); ok {
 			return envVal
@@ -133,7 +135,7 @@ func ExtractEnvironmentOpt(opts map[string]interface{}) string {
 	return ""
 }
 
-func ExtractNSOpt(opts map[string]interface{}) eveapi.StringList {
+func ExtractNSOpt(opts CommandOptions) eveapi.StringList {
 	if val, ok := opts[params.NamespaceName]; ok {
 		if nsVal, ok := val.(string); ok {
 			return eveapi.StringList{nsVal}
@@ -155,5 +157,5 @@ type baseCommand struct {
 	examples            help.Examples
 	optionalArgs        args.Args
 	requiredParams      params.Params
-	apiOptions          map[string]interface{} // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
+	apiOptions          CommandOptions // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
 }

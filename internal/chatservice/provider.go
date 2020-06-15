@@ -24,6 +24,7 @@ type Provider interface {
 	DeploymentNotificationThread(ctx context.Context, msg, user, channel, ts string)
 	GetUser(ctx context.Context, user string) (*chatmodels.ChatUser, error)
 	PostLinkMessageThread(ctx context.Context, msg string, user string, channel string, ts string)
+	ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string)
 }
 
 func New(st ProviderType, cfg *config.Config) Provider {

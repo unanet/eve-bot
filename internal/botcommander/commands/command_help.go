@@ -27,10 +27,11 @@ func defaultHelpCommand(cmdFields []string, channel, user string) HelpCmd {
 		examples:       help.Examples{},
 		optionalArgs:   args.Args{},
 		requiredParams: params.Params{},
+		apiOptions:     make(CommandOptions),
 	}}
 }
 
-func (cmd HelpCmd) APIOptions() map[string]interface{} {
+func (cmd HelpCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 

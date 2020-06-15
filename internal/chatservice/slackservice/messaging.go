@@ -7,7 +7,8 @@ const (
 	msgErrNotificationAssurance  = "I've dispatched a semi-competent team of monkeys to battle the issue..."
 	msgNotification              = "I've got some news..."
 	msgDeploymentErrNotification = "I detected some deployment *errors:*"
-	msgLogLinks                  = "here are the latest logs..."
+	msgLogLinks                  = "Here are the latest logs..."
+	msgResultsNotification       = "Here are your results..."
 )
 
 const (
@@ -29,4 +30,8 @@ func userNotificationMessage(user, msg string) string {
 
 func userDeploymentNotificationMessage(user, msg string) string {
 	return fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", user, msgDeploymentErrNotification, msg)
+}
+
+func userResultsMessage(user, msg string) string {
+	return fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", user, msgResultsNotification, msg)
 }

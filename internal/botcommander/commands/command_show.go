@@ -36,7 +36,7 @@ func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
 			"show services in current una-int",
 			"show metadata for unaneta",
 		},
-		apiOptions:          make(map[string]interface{}),
+		apiOptions:          make(CommandOptions),
 		requiredInputLength: 2,
 	}}
 	cmd.resolveResource()
@@ -44,7 +44,7 @@ func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
 	return cmd
 }
 
-func (cmd ShowCmd) APIOptions() map[string]interface{} {
+func (cmd ShowCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 

@@ -104,3 +104,26 @@ func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user s
 	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, linkOpt, threadOpt)
 	sp.handleDevOpsErrorNotification(ctx, err)
 }
+
+func (sp Provider) ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
+	log.Logger.Debug("show results", zap.String("user", user), zap.String("message", msg))
+
+	headerSectionBlock := slack.NewSectionBlock(&slack.TextBlockObject{
+		Type:     slack.MarkdownType,
+		Text:     fmt.Sprintf("<@%s>! %s", user, msgResultsNotification),
+		Emoji:    false,
+		Verbatim: false,
+	}, nil, nil)
+
+	msgSectionBlock := slack.NewSectionBlock(&slack.TextBlockObject{
+		Type:     slack.MarkdownType,
+		Text:     fmt.Sprintf("%s", msg),
+		Emoji:    false,
+		Verbatim: false,
+	}, nil, nil)
+
+	msgOptionBlocks := slack.MsgOptionBlocks(headerSectionBlock, msgSectionBlock)
+	threadOpt := slack.MsgOptionTS(ts)
+	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, threadOpt)
+	sp.handleDevOpsErrorNotification(ctx, err)
+}
