@@ -84,21 +84,12 @@ func (sp Provider) GetUser(ctx context.Context, user string) (*chatmodels.ChatUs
 
 func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user string, channel string, ts string) {
 
-	headerSectionBlock := slack.NewSectionBlock(&slack.TextBlockObject{
-		Type:     slack.MarkdownType,
-		Text:     fmt.Sprintf("<@%s>! %s", user, msgLogLinks),
-		Emoji:    false,
-		Verbatim: false,
-	}, nil, nil)
+	msgOptionBlocks := slack.MsgOptionBlocks(
+		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgLogLinks)),
+		slack.NewDividerBlock(),
+		sectionBlockOpt(fmt.Sprintf("<%s|Grafana Logs>", url)),
+	)
 
-	msgSectionBlock := slack.NewSectionBlock(&slack.TextBlockObject{
-		Type:     slack.MarkdownType,
-		Text:     fmt.Sprintf("<%s|Grafana Logs>", url),
-		Emoji:    false,
-		Verbatim: false,
-	}, nil, nil)
-
-	msgOptionBlocks := slack.MsgOptionBlocks(headerSectionBlock, msgSectionBlock)
 	linkOpt := slack.MsgOptionEnableLinkUnfurl()
 	threadOpt := slack.MsgOptionTS(ts)
 	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, linkOpt, threadOpt)
@@ -108,22 +99,21 @@ func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user s
 func (sp Provider) ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
 	log.Logger.Debug("show results", zap.String("user", user), zap.String("message", msg))
 
-	headerSectionBlock := slack.NewSectionBlock(&slack.TextBlockObject{
-		Type:     slack.MarkdownType,
-		Text:     fmt.Sprintf("<@%s>! %s", user, msgResultsNotification),
-		Emoji:    false,
-		Verbatim: false,
-	}, nil, nil)
+	msgOptionBlocks := slack.MsgOptionBlocks(
+		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgResultsNotification)),
+		slack.NewDividerBlock(),
+		sectionBlockOpt(msg),
+	)
+	threadOpt := slack.MsgOptionTS(ts)
+	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, threadOpt)
+	sp.handleDevOpsErrorNotification(ctx, err)
+}
 
-	msgSectionBlock := slack.NewSectionBlock(&slack.TextBlockObject{
+func sectionBlockOpt(msg string) *slack.SectionBlock {
+	return slack.NewSectionBlock(&slack.TextBlockObject{
 		Type:     slack.MarkdownType,
 		Text:     fmt.Sprintf("%s", msg),
 		Emoji:    false,
 		Verbatim: false,
 	}, nil, nil)
-
-	msgOptionBlocks := slack.MsgOptionBlocks(headerSectionBlock, msgSectionBlock)
-	threadOpt := slack.MsgOptionTS(ts)
-	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, threadOpt)
-	sp.handleDevOpsErrorNotification(ctx, err)
 }
