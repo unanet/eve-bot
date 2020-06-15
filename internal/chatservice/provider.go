@@ -16,7 +16,7 @@ const (
 )
 
 type Provider interface {
-	PostMessage(ctx context.Context, msg, channel string)
+	PostMessage(ctx context.Context, msg, channel string) (timestamp string)
 	PostMessageThread(ctx context.Context, msg, channel, ts string) (timestamp string)
 	ErrorNotification(ctx context.Context, user, channel string, err error)
 	ErrorNotificationThread(ctx context.Context, user, channel, ts string, err error)

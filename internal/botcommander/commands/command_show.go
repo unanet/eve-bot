@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -24,19 +23,19 @@ func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
 		channel: channel,
 		user:    user,
 		name:    "show",
-		summary: "The `show` command is used to show resources (environments,namespaces,services)",
+		summary: "The `show` command is used to show resources (environments,namespaces,services,metadata)",
 		usage: help.Usage{
 			"show {{ resources }}",
 			"show namespaces in {{ environment }}",
 			"show services in {{ namespace }} {{ environment }}",
+			"show metadata for {{ service }}",
 		},
 		examples: help.Examples{
 			"show environments",
 			"show namespaces in una-int",
 			"show services in current una-int",
+			"show metadata for unaneta",
 		},
-		optionalArgs:        args.Args{},
-		conditionalParams:   params.Params{params.DefaultEnvironment(), params.DefaultNamespace()},
 		apiOptions:          make(map[string]interface{}),
 		requiredInputLength: 2,
 	}}
@@ -93,10 +92,9 @@ func (cmd *ShowCmd) resolveResource() {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid show command: %v", cmd.input))
 		return
 	}
-	resourceVal := cmd.input[1]
 
-	if resources.IsValid(resourceVal) {
-		cmd.apiOptions["resource"] = resourceVal
+	if resources.IsValid(cmd.input[1]) {
+		cmd.apiOptions["resource"] = cmd.input[1]
 	} else {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid requested resource: %v", cmd.input))
 		return
@@ -121,7 +119,7 @@ func (cmd *ShowCmd) resolveConditionalParams() {
 
 	switch cmd.apiOptions["resource"] {
 	case resources.EnvironmentName:
-		// show environment
+		// show environments
 		//...doesn't have any additional requirements
 		return
 	case resources.NamespaceName:
@@ -133,6 +131,12 @@ func (cmd *ShowCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.NamespaceName] = cmd.input[3]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[4]
 		return
+	case resources.MetadataName:
+		// show metadata for unaneta
+		cmd.apiOptions[params.ServiceName] = cmd.input[3]
+		return
+	default:
+		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))
+		return
 	}
-
 }

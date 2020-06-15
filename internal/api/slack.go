@@ -102,9 +102,12 @@ func (c SlackController) eveCronCallbackHandler(w http.ResponseWriter, r *http.R
 		render.Respond(w, r, nil)
 		return
 	}
-	c.svc.ChatService.PostMessage(r.Context(), cbState.ToChatMsg(), cbState.Channel)
+	ts := c.svc.ChatService.PostMessage(r.Context(), cbState.ToChatMsg(), cbState.Channel)
+	if cbState.Payload.Status == eve.DeploymentPlanStatusErrors {
+		c.svc.ChatService.PostLinkMessageThread(r.Context(), logLink(cbState.Payload.Namespace.Name), user, channel, ts)
+	}
+
 	render.Respond(w, r, nil)
-	return
 }
 
 func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.Request) {

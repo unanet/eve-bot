@@ -67,9 +67,10 @@ func (sp Provider) PostMessageThread(ctx context.Context, msg, channel, ts strin
 	return respTimestamp
 }
 
-func (sp Provider) PostMessage(ctx context.Context, msg, channel string) {
-	_, _, err := sp.client.PostMessageContext(ctx, channel, slack.MsgOptionText(msg, false))
+func (sp Provider) PostMessage(ctx context.Context, msg, channel string) (timestamp string) {
+	_, respTS, err := sp.client.PostMessageContext(ctx, channel, slack.MsgOptionText(msg, false))
 	sp.handleDevOpsErrorNotification(ctx, err)
+	return respTS
 }
 
 func (sp Provider) GetUser(ctx context.Context, user string) (*chatmodels.ChatUser, error) {

@@ -155,6 +155,5 @@ type baseCommand struct {
 	examples            help.Examples
 	optionalArgs        args.Args
 	requiredParams      params.Params
-	conditionalParams   params.Params
 	apiOptions          map[string]interface{} // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
 }
