@@ -31,8 +31,8 @@ func (e Services) ToChatMessage() string {
 	msg := ""
 
 	for _, v := range e {
-		msg += "*Name:* " + "`" + v.Name + "`" + "		" + "*Version:* " + "_" + v.DeployedVersion + "_" + "\n" +
-			"*Sticky:* " + strconv.FormatBool(v.StickySessions) + "		" + "*Count:* " + strconv.Itoa(v.Count) + "\n\n"
+		msg += "*Name:* " + "`" + v.Name + "`" + "		" + "*Sticky:* " + strconv.FormatBool(v.StickySessions) + "\n" +
+			"*Version:* " + "_" + v.DeployedVersion + "_" + "		" + "*Count:* " + strconv.Itoa(v.Count) + "\n\n"
 	}
 
 	return msg
