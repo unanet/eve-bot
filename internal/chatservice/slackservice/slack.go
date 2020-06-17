@@ -112,7 +112,7 @@ func (sp Provider) ShowResultsMessageThread(ctx context.Context, msg, user, chan
 func sectionBlockOpt(msg string) *slack.SectionBlock {
 	return slack.NewSectionBlock(&slack.TextBlockObject{
 		Type:     slack.MarkdownType,
-		Text:     fmt.Sprintf("%s", msg),
+		Text:     msg,
 		Emoji:    false,
 		Verbatim: false,
 	}, nil, nil)
