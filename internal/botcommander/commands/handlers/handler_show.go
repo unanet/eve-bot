@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
@@ -26,6 +28,8 @@ func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, tim
 	switch cmd.APIOptions()["resource"] {
 	case resources.EnvironmentName:
 		h.showEnvironments(ctx, cmd, &timestamp)
+	case resources.NamespaceName:
+		h.showNamespaces(ctx, cmd, &timestamp)
 	}
 
 	return
@@ -47,4 +51,21 @@ func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCo
 		return
 	}
 	h.chatSvc.ShowResultsMessageThread(ctx, envs.ToChatMessage(), cmd.User(), cmd.Channel(), *ts)
+}
+
+func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
+	ns, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.APIOptions()[params.EnvironmentName].(string))
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+	}
+
+	if err != nil && len(err.Error()) > 0 || ns == nil {
+		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	if ns == nil {
+		h.chatSvc.UserNotificationThread(ctx, "no environments", cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	h.chatSvc.ShowResultsMessageThread(ctx, ns.ToChatMessage(), cmd.User(), cmd.Channel(), *ts)
 }

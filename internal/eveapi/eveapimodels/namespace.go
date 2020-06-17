@@ -21,3 +21,17 @@ type Namespace struct {
 }
 
 type Namespaces []Namespace
+
+func (e Namespaces) ToChatMessage() string {
+	if e == nil || len(e) == 0 {
+		return "no environments"
+	}
+
+	msg := ""
+
+	for _, v := range e {
+		msg += v.Alias + "` (" + v.RequestedVersion + ")\n\n"
+	}
+
+	return msg
+}

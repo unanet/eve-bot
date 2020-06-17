@@ -32,8 +32,7 @@ type Client interface {
 	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
 	GetEnvironmentByID(ctx context.Context, id string) (*eveapimodels.Environment, error)
 	GetEnvironments(ctx context.Context) (eveapimodels.Environments, error)
-	GetNamespaces(ctx context.Context) (eveapimodels.Namespaces, error)
-	GetNamespaceByEnvironment(ctx context.Context, environmentName string) (*eveapimodels.Namespace, error)
+	GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error)
 }
 
 type client struct {
@@ -104,47 +103,26 @@ func (c *client) GetEnvironments(ctx context.Context) (eveapimodels.Environments
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
-func (c *client) GetNamespaces(ctx context.Context) (eveapimodels.Namespaces, error) {
+
+func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error) {
 	var success eveapimodels.Namespaces
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get("namespaces").Request()
 	if err != nil {
-		log.Logger.Error("error preparing eve-api GetNamespaces request", zap.Error(err))
+		log.Logger.Error("error preparing eve-api GetNamespacesByEnvironment request", zap.Error(err))
 		return nil, eveerror.Wrap(err)
 	}
+	r.URL.RawQuery = fmt.Sprintf("environmentID=%s", environmentName)
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
-		log.Logger.Error("error calling eve-api GetNamespaces", zap.Error(err))
+		log.Logger.Error("error calling eve-api GetNamespacesByEnvironment", zap.Error(err))
 		return nil, eveerror.Wrap(err)
 	}
 	switch resp.StatusCode {
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespaces", zap.String("error_msg", failure.Message))
-		return nil, fmt.Errorf(failure.Message)
-	}
-}
-
-func (c *client) GetNamespaceByEnvironment(ctx context.Context, environmentName string) (*eveapimodels.Namespace, error) {
-	var success eveapimodels.Namespace
-	var failure eveerror.RestError
-	r, err := c.sling.New().Get("namespaces").Request()
-	if err != nil {
-		log.Logger.Error("error preparing eve-api GetNamespaceByEnvironment request", zap.Error(err))
-		return nil, eveerror.Wrap(err)
-	}
-	r.URL.RawQuery = fmt.Sprintf("environmentID=%s", environmentName)
-	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
-	if err != nil {
-		log.Logger.Error("error calling eve-api GetNamespaceByEnvironment", zap.Error(err))
-		return nil, eveerror.Wrap(err)
-	}
-	switch resp.StatusCode {
-	case http.StatusOK:
-		return &success, nil
-	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespaceByEnvironment", zap.String("error_msg", failure.Message))
+		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespacesByEnvironment", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
