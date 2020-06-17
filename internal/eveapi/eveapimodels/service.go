@@ -14,7 +14,7 @@ func (e Services) ToChatMessage() string {
 	msg := ""
 
 	for _, v := range e {
-		msg += "*" + v.Name + "* - _" + v.DeployedVersion + "_ ( _" + v.ArtifactName + "_ )"
+		msg += "*" + v.Name + "* - _" + v.DeployedVersion + "_ ( _" + v.ArtifactName + "_ )" + "\n"
 	}
 
 	return msg
