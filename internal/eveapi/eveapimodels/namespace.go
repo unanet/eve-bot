@@ -30,7 +30,7 @@ func (e Namespaces) ToChatMessage() string {
 	msg := ""
 
 	for _, v := range e {
-		msg += v.Alias + "` (" + v.RequestedVersion + ")\n\n"
+		msg += v.Alias + " (" + v.RequestedVersion + ")" + "\n\n"
 	}
 
 	return msg
