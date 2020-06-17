@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -11,7 +13,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
 
 type ShowHandler struct {
@@ -67,7 +68,7 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 
 func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
 
-	var nv eveapimodels.Namespace
+	var nv eve.Namespace
 
 	// Gotta get the namespaces first, since we are working with the Alias, and not the Name/ID
 	namespaces, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.APIOptions()[params.EnvironmentName].(string))

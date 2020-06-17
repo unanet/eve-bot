@@ -1,24 +1,10 @@
 package eveapimodels
 
 import (
-	"gitlab.unanet.io/devops/eve/pkg/json"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
-type Namespace struct {
-	ID                 int       `json:"id"`
-	Name               string    `json:"name"`
-	Alias              string    `json:"alias"`
-	EnvironmentID      int       `json:"environment_id"`
-	EnvironmentName    string    `json:"environment_name"`
-	RequestedVersion   string    `json:"requested_version"`
-	ExplicitDeployOnly bool      `json:"explicit_deploy_only"`
-	ClusterID          int       `json:"cluster_id"`
-	Metadata           json.Text `json:"metadata"`
-	CreatedAt          string    `json:"created_at"`
-	UpdatedAt          string    `json:"updated_at"`
-}
-
-type Namespaces []Namespace
+type Namespaces []eve.Namespace
 
 func (e Namespaces) ToChatMessage() string {
 	if e == nil || len(e) == 0 {

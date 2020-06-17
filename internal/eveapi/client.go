@@ -14,6 +14,7 @@ import (
 
 	"github.com/dghubble/sling"
 	eveerror "gitlab.unanet.io/devops/eve/pkg/errors"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 	evehttp "gitlab.unanet.io/devops/eve/pkg/http"
 	evejson "gitlab.unanet.io/devops/eve/pkg/json"
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -30,7 +31,7 @@ type Config struct {
 
 type Client interface {
 	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
-	GetEnvironmentByID(ctx context.Context, id string) (*eveapimodels.Environment, error)
+	GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error)
 	GetEnvironments(ctx context.Context) (eveapimodels.Environments, error)
 	GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error)
 	GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error)
@@ -84,8 +85,8 @@ func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) (
 	}
 }
 
-func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eveapimodels.Environment, error) {
-	var success eveapimodels.Environment
+func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error) {
+	var success eve.Environment
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get(fmt.Sprintf("environments/%s", id)).Request()
 	if err != nil {

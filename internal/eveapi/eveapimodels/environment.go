@@ -1,16 +1,10 @@
 package eveapimodels
 
-import "gitlab.unanet.io/devops/eve/pkg/json"
+import (
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+)
 
-type Environment struct {
-	ID          int       `db:"id"`
-	Name        string    `db:"name"`
-	Alias       string    `db:"alias"`
-	Description string    `db:"description"`
-	Metadata    json.Text `db:"metadata"`
-}
-
-type Environments []Environment
+type Environments []eve.Environment
 
 func (e Environments) ToChatMessage() string {
 	if e == nil || len(e) == 0 {
