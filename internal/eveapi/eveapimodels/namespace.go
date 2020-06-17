@@ -28,7 +28,7 @@ func (e Namespaces) ToChatMessage() string {
 	msg := ""
 
 	for _, v := range e {
-		msg += "*Name:* " + v.Alias + "\n" + "*Version:* " + "_" + v.RequestedVersion + "_" + "\n\n"
+		msg += "*Name:* " + "`" + v.Alias + "`" + "\n" + "*Version:* " + "_" + v.RequestedVersion + "_" + "\n\n"
 	}
 
 	return msg
