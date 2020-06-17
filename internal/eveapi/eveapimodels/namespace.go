@@ -36,7 +36,7 @@ func (e Namespaces) ToChatMessage() string {
 
 		log.Logger.Info("WTF:", zap.Any("namespace", e))
 
-		msg += v.Alias + " (" + v.RequestedVersion + ")" + "\n\n"
+		msg += v.Alias + " ( " + v.RequestedVersion + " )" + "\n\n"
 		msg += " (" + v.EnvironmentName + ")" + "\n\n"
 		msg += " (" + v.Name + ")" + "\n\n"
 	}
