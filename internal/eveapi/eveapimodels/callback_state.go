@@ -1,4 +1,4 @@
-package eveapi
+package eveapimodels
 
 import (
 	"fmt"
@@ -12,40 +12,6 @@ type CallbackState struct {
 	Channel string               `json:"channel"`
 	TS      string               `json:"ts"`
 	Payload eve.NSDeploymentPlan `json:"payload"`
-}
-
-type ArtifactDefinitions []*ArtifactDefinition
-
-type StringList []string
-
-type DeploymentPlanType string
-
-func (dpt DeploymentPlanType) String() string {
-	return string(dpt)
-}
-
-type DeploymentPlanOptions struct {
-	Artifacts        ArtifactDefinitions `json:"artifacts"`
-	ForceDeploy      bool                `json:"force_deploy"`
-	User             string              `json:"user"`
-	DryRun           bool                `json:"dry_run"`
-	CallbackURL      string              `json:"callback_url"`
-	Environment      string              `json:"environment"`
-	NamespaceAliases StringList          `json:"namespaces,omitempty"`
-	Messages         []string            `json:"messages,omitempty"`
-	Type             DeploymentPlanType  `json:"type"`
-}
-
-type ArtifactDefinition struct {
-	ID               int    `json:"id"`
-	Name             string `json:"name"`
-	RequestedVersion string `json:"requested_version,omitempty"`
-	AvailableVersion string `json:"available_version"`
-	ArtifactoryFeed  string `json:"artifactory_feed"`
-	ArtifactoryPath  string `json:"artifactory_path"`
-	FunctionPointer  string `json:"function_pointer"`
-	FeedType         string `json:"feed_type"`
-	Matched          bool   `json:"-"`
 }
 
 func (cbs *CallbackState) cleanUser() {
@@ -64,7 +30,7 @@ func (cbs *CallbackState) cleanUser() {
 func (cbs *CallbackState) nothingToDeployResponse() string {
 	msg := fmt.Sprintf("\n<%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
 	if len(cbs.Payload.Messages) > 0 {
-		return msg + headerMsg("Messages") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
+		return msg + HeaderMsg("Messages") + "\n```" + APIMessages(cbs.Payload.Messages) + "```"
 	}
 	return msg
 }
@@ -75,11 +41,11 @@ func (cbs *CallbackState) appendDeployServicesResult(result *string) {
 		for svcResult, svcs := range cbs.Payload.Services.ToResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployServicesResults = "\n```" + servicesResultBlock(svcs) + "```"
+				deployServicesResults = "\n```" + ServicesResultBlock(svcs) + "```"
 				break
 			}
 
-			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + servicesResultBlock(svcs) + "```"
+			svcResultMessage := HeaderMsg(svcResult.String()) + "\n```" + ServicesResultBlock(svcs) + "```"
 
 			if len(deployServicesResults) == 0 {
 				deployServicesResults = svcResultMessage
@@ -97,11 +63,11 @@ func (cbs *CallbackState) appendDeployMigrationsResult(result *string) {
 		for migResult, migs := range cbs.Payload.Migrations.ToResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployMigrationsResults = "\n```" + migrationResultBlock(migs) + "```"
+				deployMigrationsResults = "\n```" + MigrationResultBlock(migs) + "```"
 				break
 			}
 
-			svcResultMessage := headerMsg(migResult.String()) + "\n```" + migrationResultBlock(migs) + "```"
+			svcResultMessage := HeaderMsg(migResult.String()) + "\n```" + MigrationResultBlock(migs) + "```"
 
 			if len(deployMigrationsResults) == 0 {
 				deployMigrationsResults = svcResultMessage
@@ -128,15 +94,15 @@ func (cbs *CallbackState) initialResult() string {
 
 	var result string
 	if len(cbs.User) > 0 {
-		result = fmt.Sprintf("\n<%s>, %s...\n\n%s", cbs.User, ackMessage, environmentNamespaceMsg(&cbs.Payload))
+		result = fmt.Sprintf("\n<%s>, %s...\n\n%s", cbs.User, ackMessage, EnvironmentNamespaceMsg(&cbs.Payload))
 	} else {
-		result = fmt.Sprintf("\n%s...\n\n%s", ackMessage, environmentNamespaceMsg(&cbs.Payload))
+		result = fmt.Sprintf("\n%s...\n\n%s", ackMessage, EnvironmentNamespaceMsg(&cbs.Payload))
 	}
 	return result
 }
 
 func (cbs *CallbackState) appendApiMessages(result *string) string {
-	return *result + headerMsg("Messages") + "\n```" + apiMessages(cbs.Payload.Messages) + "```"
+	return *result + HeaderMsg("Messages") + "\n```" + APIMessages(cbs.Payload.Messages) + "```"
 }
 
 // ToChatMsg takes the eve-api callback payload

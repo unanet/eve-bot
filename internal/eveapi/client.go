@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+
 	"go.uber.org/zap"
 
 	"github.com/dghubble/sling"
@@ -27,7 +29,11 @@ type Config struct {
 }
 
 type Client interface {
-	Deploy(ctx context.Context, dp DeploymentPlanOptions, slackUser, slackChannel, ts string) (*DeploymentPlanOptions, error)
+	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
+	GetEnvironmentByID(ctx context.Context, id string) (*eveapimodels.Environment, error)
+	GetEnvironments(ctx context.Context) (eveapimodels.Environments, error)
+	GetNamespaces(ctx context.Context) (eveapimodels.Namespaces, error)
+	GetNamespaceByEnvironment(ctx context.Context, environmentName string) (*eveapimodels.Namespace, error)
 }
 
 type client struct {
@@ -56,8 +62,95 @@ func NewClient(cfg Config) Client {
 
 }
 
-func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, user, channel, ts string) (*DeploymentPlanOptions, error) {
-	var success DeploymentPlanOptions
+func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eveapimodels.Environment, error) {
+	var success eveapimodels.Environment
+	var failure eveerror.RestError
+	r, err := c.sling.New().Get(fmt.Sprintf("environments/%s", id)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetEnvironment request", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api GetEnvironment", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return &success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetEnvironment", zap.String("error_msg", failure.Message))
+		return nil, fmt.Errorf(failure.Message)
+	}
+}
+func (c *client) GetEnvironments(ctx context.Context) (eveapimodels.Environments, error) {
+	var success eveapimodels.Environments
+	var failure eveerror.RestError
+	r, err := c.sling.New().Get("environments").Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetEnvironments request", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api GetEnvironments", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetEnvironments", zap.String("error_msg", failure.Message))
+		return nil, fmt.Errorf(failure.Message)
+	}
+}
+func (c *client) GetNamespaces(ctx context.Context) (eveapimodels.Namespaces, error) {
+	var success eveapimodels.Namespaces
+	var failure eveerror.RestError
+	r, err := c.sling.New().Get("namespaces").Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetNamespaces request", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api GetNamespaces", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespaces", zap.String("error_msg", failure.Message))
+		return nil, fmt.Errorf(failure.Message)
+	}
+}
+
+func (c *client) GetNamespaceByEnvironment(ctx context.Context, environmentName string) (*eveapimodels.Namespace, error) {
+	var success eveapimodels.Namespace
+	var failure eveerror.RestError
+	r, err := c.sling.New().Get("namespaces").Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetNamespaceByEnvironment request", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	r.URL.RawQuery = fmt.Sprintf("environmentID=%s", environmentName)
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api GetNamespaceByEnvironment", zap.Error(err))
+		return nil, eveerror.Wrap(err)
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return &success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespaceByEnvironment", zap.String("error_msg", failure.Message))
+		return nil, fmt.Errorf(failure.Message)
+	}
+}
+
+func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, user, channel, ts string) (*eveapimodels.DeploymentPlanOptions, error) {
+	var success eveapimodels.DeploymentPlanOptions
 	var failure eveerror.RestError
 
 	cbUrlVals := url.Values{}
@@ -69,14 +162,14 @@ func (c *client) Deploy(ctx context.Context, dp DeploymentPlanOptions, user, cha
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).Request()
 	if err != nil {
-		log.Logger.Error("error calling eve-api", zap.Error(err))
+		log.Logger.Error("error preparing eve-api Deploy request", zap.Error(err))
 		return nil, err
 	}
 
-	log.Logger.Debug("eve-api req", zap.Any("req", dp))
+	log.Logger.Debug("eve-api Deploy req", zap.Any("req", dp))
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
-		log.Logger.Error("error calling eve-api", zap.Error(err))
+		log.Logger.Error("error calling eve-api Deploy", zap.Error(err))
 		return nil, err
 	}
 

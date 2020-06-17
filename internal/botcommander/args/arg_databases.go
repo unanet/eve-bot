@@ -3,7 +3,7 @@ package args
 import (
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
 
 /*
@@ -29,10 +29,10 @@ func (dbs Databases) Description() string {
 }
 
 func (dbs Databases) Value() interface{} {
-	var artifactDefs eveapi.ArtifactDefinitions
+	var artifactDefs eveapimodels.ArtifactDefinitions
 
 	for _, v := range dbs {
-		artifactDefs = append(artifactDefs, &eveapi.ArtifactDefinition{
+		artifactDefs = append(artifactDefs, &eveapimodels.ArtifactDefinition{
 			Name:             v.Name,
 			RequestedVersion: v.Version,
 		})

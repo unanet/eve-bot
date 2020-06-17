@@ -3,10 +3,10 @@ package commands
 import (
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
@@ -77,11 +77,11 @@ func baseErrMsg(errs []error) string {
 	return msg
 }
 
-func ExtractDatabaseArtifactsOpt(opts CommandOptions) eveapi.ArtifactDefinitions {
+func ExtractDatabaseArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefinitions {
 	log.Logger.Debug("ExtractDatabaseArtifactsOpt", zap.Any("opts", opts))
 	if val, ok := opts[args.DatabasesName]; ok {
 		log.Logger.Debug("ExtractDatabaseArtifactsOpt databases", zap.Any("val", val))
-		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
+		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
 			log.Logger.Debug("ExtractDatabaseArtifactsOpt databases artifactDefs", zap.Any("artifactDefs", artifactDefs))
 			return artifactDefs
 		} else {
@@ -91,9 +91,9 @@ func ExtractDatabaseArtifactsOpt(opts CommandOptions) eveapi.ArtifactDefinitions
 	return nil
 }
 
-func ExtractServiceArtifactsOpt(opts CommandOptions) eveapi.ArtifactDefinitions {
+func ExtractServiceArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefinitions {
 	if val, ok := opts[args.ServicesName]; ok {
-		if artifactDefs, ok := val.(eveapi.ArtifactDefinitions); ok {
+		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
 			return artifactDefs
 		} else {
 			return nil
@@ -135,10 +135,10 @@ func ExtractEnvironmentOpt(opts CommandOptions) string {
 	return ""
 }
 
-func ExtractNSOpt(opts CommandOptions) eveapi.StringList {
+func ExtractNSOpt(opts CommandOptions) eveapimodels.StringList {
 	if val, ok := opts[params.NamespaceName]; ok {
 		if nsVal, ok := val.(string); ok {
-			return eveapi.StringList{nsVal}
+			return eveapimodels.StringList{nsVal}
 		} else {
 			return nil
 		}

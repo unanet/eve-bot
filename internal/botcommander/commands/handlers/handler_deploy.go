@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
@@ -30,7 +32,7 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 
 	cmdAPIOpts := cmd.APIOptions()
 
-	deployOpts := eveapi.DeploymentPlanOptions{
+	deployOpts := eveapimodels.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractServiceArtifactsOpt(cmdAPIOpts),
 		ForceDeploy:      commands.ExtractForceDeployOpt(cmdAPIOpts),
 		User:             chatUser.Name,
@@ -52,8 +54,5 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 	}
 	if len(resp.Messages) > 0 {
 		h.chatSvc.UserNotificationThread(ctx, strings.Join(resp.Messages, ","), cmd.User(), cmd.Channel(), timestamp)
-		return
 	}
-	return
-
 }

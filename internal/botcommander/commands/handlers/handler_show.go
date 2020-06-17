@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
@@ -22,15 +24,12 @@ func NewShowHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) 
 }
 
 func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	//chatUser, err := h.chatSvc.GetUser(ctx, cmd.User())
-	//if err != nil {
-	//	h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
-	//	return
-	//}
+	switch cmd.APIOptions()["resource"] {
+	case resources.EnvironmentName:
+		h.showEnvironments(ctx, cmd, &timestamp)
+	}
 
-	cmdAPIOpts := cmd.APIOptions()
-
-	h.chatSvc.ShowResultsMessageThread(ctx, fmt.Sprintf("resource: %s", cmdAPIOpts["resource"]), cmd.User(), cmd.Channel(), timestamp)
+	h.chatSvc.ShowResultsMessageThread(ctx, fmt.Sprintf("resource: %s", cmd.APIOptions()["resource"]), cmd.User(), cmd.Channel(), timestamp)
 
 	//deployOpts := eveapi.DeploymentPlanOptions{
 	//	Artifacts:        commands.ExtractServiceArtifactsOpt(cmdAPIOpts),
@@ -57,5 +56,23 @@ func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, tim
 	//	return
 	//}
 	return
+
+}
+
+func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
+	envs, err := h.eveAPIClient.GetEnvironments(ctx)
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+	}
+
+	if err != nil && len(err.Error()) > 0 || envs == nil {
+		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	if envs == nil {
+		h.chatSvc.UserNotificationThread(ctx, "no environments", cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	h.chatSvc.ShowResultsMessageThread(ctx, envs.ToChatMessage(), cmd.User(), cmd.Channel(), *ts)
 
 }

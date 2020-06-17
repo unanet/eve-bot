@@ -1,4 +1,4 @@
-package eveapi
+package eveapimodels
 
 import (
 	"fmt"
@@ -6,10 +6,6 @@ import (
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
-
-func headerMsg(val string) string {
-	return fmt.Sprintf("\n*%s*", strings.Title(strings.ToLower(val)))
-}
 
 func serviceLabel(svc *eve.DeployService) string {
 	if svc.ArtifactName == svc.ServiceName {
@@ -19,7 +15,19 @@ func serviceLabel(svc *eve.DeployService) string {
 	}
 }
 
-func servicesResultBlock(svcs eve.DeployServices) string {
+func migrationLabel(mig *eve.DeployMigration) string {
+	if mig.ArtifactName == mig.DatabaseName {
+		return fmt.Sprintf("\n%s:%s", mig.DatabaseName, mig.AvailableVersion)
+	} else {
+		return fmt.Sprintf("\n%s (%s):%s", mig.DatabaseName, mig.ArtifactName, mig.AvailableVersion)
+	}
+}
+
+func HeaderMsg(val string) string {
+	return fmt.Sprintf("\n*%s*", strings.Title(strings.ToLower(val)))
+}
+
+func ServicesResultBlock(svcs eve.DeployServices) string {
 	result := ""
 
 	if svcs == nil || len(svcs) == 0 {
@@ -37,15 +45,7 @@ func servicesResultBlock(svcs eve.DeployServices) string {
 	return result
 }
 
-func migrationLabel(mig *eve.DeployMigration) string {
-	if mig.ArtifactName == mig.DatabaseName {
-		return fmt.Sprintf("\n%s:%s", mig.DatabaseName, mig.AvailableVersion)
-	} else {
-		return fmt.Sprintf("\n%s (%s):%s", mig.DatabaseName, mig.ArtifactName, mig.AvailableVersion)
-	}
-}
-
-func migrationResultBlock(migs eve.DeployMigrations) string {
+func MigrationResultBlock(migs eve.DeployMigrations) string {
 	result := ""
 
 	if migs == nil || len(migs) == 0 {
@@ -63,7 +63,7 @@ func migrationResultBlock(migs eve.DeployMigrations) string {
 	return result
 }
 
-func apiMessages(msgs []string) string {
+func APIMessages(msgs []string) string {
 	infoMsgs := ""
 	for _, msg := range msgs {
 		if len(infoMsgs) == 0 {
@@ -78,6 +78,6 @@ func apiMessages(msgs []string) string {
 	return infoMsgs
 }
 
-func environmentNamespaceMsg(deploymentResponsePayload *eve.NSDeploymentPlan) string {
+func EnvironmentNamespaceMsg(deploymentResponsePayload *eve.NSDeploymentPlan) string {
 	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s\nCluster: %s```", deploymentResponsePayload.Namespace.Alias, deploymentResponsePayload.EnvironmentName, deploymentResponsePayload.Namespace.ClusterName)
 }
