@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 
@@ -29,32 +28,6 @@ func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, tim
 		h.showEnvironments(ctx, cmd, &timestamp)
 	}
 
-	h.chatSvc.ShowResultsMessageThread(ctx, fmt.Sprintf("resource: %s", cmd.APIOptions()["resource"]), cmd.User(), cmd.Channel(), timestamp)
-
-	//deployOpts := eveapi.DeploymentPlanOptions{
-	//	Artifacts:        commands.ExtractServiceArtifactsOpt(cmdAPIOpts),
-	//	ForceDeploy:      commands.ExtractForceDeployOpt(cmdAPIOpts),
-	//	User:             chatUser.Name,
-	//	DryRun:           commands.ExtractDryrunOpt(cmdAPIOpts),
-	//	Environment:      commands.ExtractEnvironmentOpt(cmdAPIOpts),
-	//	NamespaceAliases: commands.ExtractNSOpt(cmdAPIOpts),
-	//	Messages:         nil,
-	//	Type:             "application",
-	//}
-
-	//resp, err := h.eveAPIClient.Deploy(ctx, deployOpts, cmd.User(), cmd.Channel(), timestamp)
-	//if err != nil && len(err.Error()) > 0 {
-	//	h.chatSvc.DeploymentNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), timestamp)
-	//	return
-	//}
-	//if resp == nil {
-	//	h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, errInvalidApiResp)
-	//	return
-	//}
-	//if len(resp.Messages) > 0 {
-	//	h.chatSvc.UserNotificationThread(ctx, strings.Join(resp.Messages, ","), cmd.User(), cmd.Channel(), timestamp)
-	//	return
-	//}
 	return
 
 }
@@ -74,5 +47,4 @@ func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCo
 		return
 	}
 	h.chatSvc.ShowResultsMessageThread(ctx, envs.ToChatMessage(), cmd.User(), cmd.Channel(), *ts)
-
 }

@@ -20,7 +20,7 @@ func (e Environments) ToChatMessage() string {
 	msg := "```"
 
 	for _, v := range e {
-		msg += "*Name:*" + v.Name + "\n" + "*Description:*" + v.Description + "\n\n"
+		msg += v.Name + ":" + v.Description + "\n\n"
 	}
 
 	msg += "```"
