@@ -40,10 +40,6 @@ func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCo
 	envs, err := h.eveAPIClient.GetEnvironments(ctx)
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
-	}
-
-	if err != nil && len(err.Error()) > 0 || envs == nil {
-		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
 		return
 	}
 	if envs == nil {
@@ -57,14 +53,10 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 	ns, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.APIOptions()[params.EnvironmentName].(string))
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
-	}
-
-	if err != nil && len(err.Error()) > 0 || ns == nil {
-		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
 		return
 	}
 	if ns == nil {
-		h.chatSvc.UserNotificationThread(ctx, "no environments", cmd.User(), cmd.Channel(), *ts)
+		h.chatSvc.UserNotificationThread(ctx, "no namespaces", cmd.User(), cmd.Channel(), *ts)
 		return
 	}
 	h.chatSvc.ShowResultsMessageThread(ctx, ns.ToChatMessage(), cmd.User(), cmd.Channel(), *ts)

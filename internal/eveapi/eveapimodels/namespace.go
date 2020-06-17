@@ -19,8 +19,8 @@ type Namespace struct {
 	ExplicitDeployOnly bool         `json:"explicit_deploy_only"`
 	ClusterID          int          `json:"cluster_id"`
 	Metadata           json.Text    `json:"metadata"`
-	CreatedAt          sql.NullTime `json:"created_at"`
-	UpdatedAt          sql.NullTime `json:"updated_at"`
+	CreatedAt          sql.NullTime `db:"created_at"`
+	UpdatedAt          sql.NullTime `db:"updated_at"`
 }
 
 type Namespaces []Namespace
