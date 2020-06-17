@@ -1,8 +1,6 @@
 package eveapimodels
 
 import (
-	"database/sql"
-
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
 
@@ -10,17 +8,17 @@ import (
 )
 
 type Namespace struct {
-	ID                 int          `json:"id"`
-	Name               string       `json:"name"`
-	Alias              string       `json:"alias"`
-	EnvironmentID      int          `json:"environment_id"`
-	EnvironmentName    string       `json:"environment_name"`
-	RequestedVersion   string       `json:"requested_version"`
-	ExplicitDeployOnly bool         `json:"explicit_deploy_only"`
-	ClusterID          int          `json:"cluster_id"`
-	Metadata           json.Text    `json:"metadata"`
-	CreatedAt          sql.NullTime `db:"created_at"`
-	UpdatedAt          sql.NullTime `db:"updated_at"`
+	ID                 int       `json:"id"`
+	Name               string    `json:"name"`
+	Alias              string    `json:"alias"`
+	EnvironmentID      int       `json:"environment_id"`
+	EnvironmentName    string    `json:"environment_name"`
+	RequestedVersion   string    `json:"requested_version"`
+	ExplicitDeployOnly bool      `json:"explicit_deploy_only"`
+	ClusterID          int       `json:"cluster_id"`
+	Metadata           json.Text `json:"metadata"`
+	CreatedAt          string    `json:"created_at"`
+	UpdatedAt          string    `json:"updated_at"`
 }
 
 type Namespaces []Namespace
