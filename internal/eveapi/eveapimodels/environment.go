@@ -17,12 +17,11 @@ func (e Environments) ToChatMessage() string {
 		return "no environments"
 	}
 
-	msg := "```"
+	msg := ""
 
 	for _, v := range e {
-		msg += v.Name + ":" + v.Description + "\n\n"
+		msg += "*Name:*" + v.Name + "\n" + "*Description:*" + v.Description + "\n\n"
 	}
 
-	msg += "```"
 	return msg
 }
