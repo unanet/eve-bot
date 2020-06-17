@@ -1,9 +1,6 @@
 package eveapimodels
 
 import (
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve/pkg/json"
 )
 
@@ -31,8 +28,7 @@ func (e Namespaces) ToChatMessage() string {
 	msg := ""
 
 	for _, v := range e {
-		log.Logger.Info("WTF:", zap.Any("namespace", e))
-		msg += "*Name:*" + v.Alias + "\n" + "*Version:*" + "_" + v.RequestedVersion + "_" + "\n\n"
+		msg += "*Name:* " + v.Alias + "\n" + "*Version:* " + "_" + v.RequestedVersion + "_" + "\n\n"
 	}
 
 	return msg
