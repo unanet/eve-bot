@@ -3,6 +3,8 @@ package chatservice
 import (
 	"context"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+
 	"github.com/slack-go/slack"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/slackservice"
@@ -25,6 +27,7 @@ type Provider interface {
 	GetUser(ctx context.Context, user string) (*chatmodels.ChatUser, error)
 	PostLinkMessageThread(ctx context.Context, msg string, user string, channel string, ts string)
 	ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string)
+	ShowServicesMessageThread(ctx context.Context, svcs eveapimodels.Services, msg, user, channel, ts string)
 }
 
 func New(st ProviderType, cfg *config.Config) Provider {

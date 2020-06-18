@@ -2,17 +2,18 @@ package handlers
 
 import (
 	"context"
+	"fmt"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+
 	"strings"
 
-	"gitlab.unanet.io/devops/eve/pkg/eve"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 type ShowHandler struct {
@@ -35,6 +36,8 @@ func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, tim
 		h.showNamespaces(ctx, cmd, &timestamp)
 	case resources.ServiceName:
 		h.showServices(ctx, cmd, &timestamp)
+	case resources.MetadataName:
+		h.showMetadata(ctx, cmd, &timestamp)
 	default:
 		h.chatSvc.UserNotificationThread(ctx, "invalid show command", cmd.User(), cmd.Channel(), timestamp)
 	}
@@ -67,11 +70,75 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 }
 
 func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
+	nv, err := h.resolveNamespace(ctx, cmd)
+	if err != nil {
+		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		return
+	}
+	if svcs == nil {
+		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	h.chatSvc.ShowResultsMessageThread(ctx, svcs.ToChatMessage(), cmd.User(), cmd.Channel(), *ts)
+}
 
+func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
+	nv, err := h.resolveNamespace(ctx, cmd)
+	if err != nil {
+		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		return
+	}
+	if svcs == nil {
+		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.User(), cmd.Channel(), *ts)
+		return
+	}
+	var svc eveapimodels.EveService
+	for _, s := range svcs {
+		if strings.ToLower(s.Name) == strings.ToLower(cmd.APIOptions()[params.ServiceName].(string)) {
+			svc = mapToEveService(s)
+			break
+		}
+	}
+	h.chatSvc.ShowResultsMessageThread(ctx, svc.MetadataToChatMessage(), cmd.User(), cmd.Channel(), *ts)
+}
+
+func mapToEveService(s eve.Service) eveapimodels.EveService {
+	return eveapimodels.EveService{
+		ID:              s.ID,
+		NamespaceID:     s.NamespaceID,
+		NamespaceName:   s.NamespaceName,
+		ArtifactID:      s.ArtifactID,
+		ArtifactName:    s.ArtifactName,
+		OverrideVersion: s.OverrideVersion,
+		DeployedVersion: s.DeployedVersion,
+		Metadata:        s.Metadata,
+		CreatedAt:       s.CreatedAt,
+		UpdatedAt:       s.UpdatedAt,
+		Name:            s.Name,
+		StickySessions:  s.StickySessions,
+		Count:           s.Count,
+	}
+}
+
+func (h ShowHandler) resolveNamespace(ctx context.Context, cmd commands.EvebotCommand) (eve.Namespace, error) {
 	var nv eve.Namespace
 
 	// Gotta get the namespaces first, since we are working with the Alias, and not the Name/ID
 	namespaces, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.APIOptions()[params.EnvironmentName].(string))
+
+	if err != nil {
+		return nv, err
+	}
 
 	for _, v := range namespaces {
 		if strings.ToLower(v.Alias) == strings.ToLower(cmd.APIOptions()[params.NamespaceName].(string)) {
@@ -81,18 +148,7 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 	}
 
 	if nv.ID == 0 {
-		h.chatSvc.UserNotificationThread(ctx, "invalid namespace request", cmd.User(), cmd.Channel(), *ts)
-		return
+		return nv, fmt.Errorf("invalid namespace")
 	}
-
-	svc, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
-	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
-		return
-	}
-	if svc == nil {
-		h.chatSvc.UserNotificationThread(ctx, "no namespaces", cmd.User(), cmd.Channel(), *ts)
-		return
-	}
-	h.chatSvc.ShowResultsMessageThread(ctx, svc.ToChatMessage(), cmd.User(), cmd.Channel(), *ts)
+	return nv, nil
 }

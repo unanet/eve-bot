@@ -28,13 +28,13 @@ func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
 			"show {{ resources }}",
 			"show namespaces in {{ environment }}",
 			"show services in {{ namespace }} {{ environment }}",
-			"show metadata for {{ service }}",
+			"show metadata for {{ service }} in {{ namespace }} {{ environment }}",
 		},
 		examples: help.Examples{
 			"show environments",
 			"show namespaces in una-int",
 			"show services in current una-int",
-			"show metadata for unaneta",
+			"show metadata for unaneta in current una-int",
 		},
 		apiOptions:          make(CommandOptions),
 		requiredInputLength: 2,
@@ -120,20 +120,38 @@ func (cmd *ShowCmd) resolveConditionalParams() {
 	switch cmd.apiOptions["resource"] {
 	case resources.EnvironmentName:
 		// show environments
+		if len(cmd.input) != 2 {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid show environment: %v", cmd.input))
+			return
+		}
 		//...doesn't have any additional requirements
 		return
 	case resources.NamespaceName:
 		// show namespaces in {{environment}}
+		if len(cmd.input) != 4 {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid show namespace: %v", cmd.input))
+			return
+		}
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[3]
 		return
 	case resources.ServiceName:
 		// show services in {{namespace}} {{environment}}
+		if len(cmd.input) != 5 {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid show service: %v", cmd.input))
+			return
+		}
 		cmd.apiOptions[params.NamespaceName] = cmd.input[3]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[4]
 		return
 	case resources.MetadataName:
-		// show metadata for unaneta
+		// show metadata for {{ service }} in {{ namespace }} {{ environment }}
+		if len(cmd.input) != 7 {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid show metadata: %v", cmd.input))
+			return
+		}
 		cmd.apiOptions[params.ServiceName] = cmd.input[3]
+		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
+		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
 		return
 	default:
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))

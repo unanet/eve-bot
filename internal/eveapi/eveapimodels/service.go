@@ -1,8 +1,12 @@
 package eveapimodels
 
 import (
+	"encoding/json"
+
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
+
+type EveService eve.Service
 
 type Services []eve.Service
 
@@ -18,4 +22,17 @@ func (e Services) ToChatMessage() string {
 	}
 
 	return msg
+}
+
+func (s EveService) MetadataToChatMessage() string {
+	if s.ID == 0 {
+		return "no services"
+	}
+
+	jsonB, err := json.MarshalIndent(s.Metadata, "", "    ")
+	if err != nil {
+		return "invalid json metadata"
+	}
+
+	return "```" + string(jsonB) + "```"
 }
