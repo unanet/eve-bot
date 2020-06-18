@@ -136,7 +136,7 @@ func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName
 		log.Logger.Error("error preparing eve-api GetNamespacesByEnvironment request", zap.Error(err))
 		return nil, eveerror.Wrap(err)
 	}
-	r.URL.RawQuery = fmt.Sprintf("environmentID=%s", environmentName)
+	r.URL.RawQuery = fmt.Sprintf("environment=%s", environmentName)
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
 		log.Logger.Error("error calling eve-api GetNamespacesByEnvironment", zap.Error(err))
