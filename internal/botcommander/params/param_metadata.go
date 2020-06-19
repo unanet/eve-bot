@@ -34,6 +34,9 @@ func DefaultMetadata() Namespace {
 type MetadataMap map[string]interface{}
 
 func (e MetadataMap) ToString() string {
+	if e == nil || len(e) == 0 {
+		return "no metadata"
+	}
 	jsonB, err := json.MarshalIndent(e, "", "    ")
 	if err != nil {
 		return "invalid json metadata"

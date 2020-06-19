@@ -25,8 +25,8 @@ func (e Services) ToChatMessage() string {
 }
 
 func (s EveService) MetadataToChatMessage() string {
-	if s.ID == 0 {
-		return "no service metadata"
+	if s.ID == 0 || len(s.Metadata) == 0 {
+		return "no metadata"
 	}
 
 	jsonB, err := json.MarshalIndent(s.Metadata, "", "    ")
