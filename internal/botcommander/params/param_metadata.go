@@ -38,5 +38,5 @@ func (e MetadataMap) ToString() string {
 	if err != nil {
 		return "invalid json metadata"
 	}
-	return "```" + string(jsonB) + "```"
+	return string(jsonB)
 }
