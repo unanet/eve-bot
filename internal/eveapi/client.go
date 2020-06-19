@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 
 	"go.uber.org/zap"
@@ -36,6 +38,7 @@ type Client interface {
 	GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error)
 	GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error)
 	GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error)
+	SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error)
 }
 
 type client struct {
@@ -205,5 +208,30 @@ func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptio
 		log.Logger.Debug("an error occurred while trying to call eve-api deploy", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
+}
 
+func (c *client) SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error) {
+	var success params.MetadataMap
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Patch(fmt.Sprintf("services/%v/metadata", id)).BodyJSON(metadata).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api SetServiceMetadata request", zap.Error(err))
+		return nil, err
+	}
+
+	log.Logger.Debug("eve-api SetServiceMetadata req", zap.Any("req", metadata))
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api SetServiceMetadata", zap.Error(err))
+		return nil, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api SetServiceMetadata", zap.String("error_msg", failure.Message))
+		return nil, fmt.Errorf(failure.Message)
+	}
 }

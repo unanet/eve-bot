@@ -23,7 +23,7 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 		channel: channel,
 		user:    user,
 		name:    "set",
-		summary: "The `set` command is used to set resources (environments,namespaces,services,metadata)",
+		summary: "The `set` command is used to set resources values (metadata and version)",
 		usage: help.Usage{
 			"set {{ resources }} for {{ service }} in {{ namespace }} {{ environment }}",
 		},
