@@ -1,6 +1,8 @@
 package params
 
-import "fmt"
+import (
+	"encoding/json"
+)
 
 const (
 	MetadataName = "metadata"
@@ -32,9 +34,9 @@ func DefaultMetadata() Namespace {
 type MetadataMap map[string]interface{}
 
 func (e MetadataMap) ToString() string {
-	msg := ""
-	for i, v := range e {
-		msg += fmt.Sprintf("%s=%s", i, v)
+	jsonB, err := json.MarshalIndent(e, "", "    ")
+	if err != nil {
+		return "invalid json metadata"
 	}
-	return msg
+	return "```" + string(jsonB) + "```"
 }
