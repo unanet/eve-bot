@@ -35,6 +35,7 @@ type Client interface {
 	GetEnvironments(ctx context.Context) (eveapimodels.Environments, error)
 	GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error)
 	GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error)
+	GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error)
 }
 
 type client struct {
@@ -61,6 +62,28 @@ func NewClient(cfg Config) Client {
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 
+}
+
+func (c *client) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error) {
+	var success eveapimodels.EveService
+	var failure eveerror.RestError
+	r, err := c.sling.New().Get(fmt.Sprintf("services/%v", id)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetServiceByID request", zap.Error(err))
+		return success, eveerror.Wrap(err)
+	}
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api GetServiceByID", zap.Error(err))
+		return success, eveerror.Wrap(err)
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetServicesByNamespace", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
 }
 
 func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error) {

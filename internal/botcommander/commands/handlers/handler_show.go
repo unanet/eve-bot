@@ -109,7 +109,13 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 			break
 		}
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, svc.MetadataToChatMessage(), cmd.User(), cmd.Channel(), *ts)
+
+	fullSvc, err := h.eveAPIClient.GetServiceByID(ctx, svc.ID)
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		return
+	}
+	h.chatSvc.ShowResultsMessageThread(ctx, fullSvc.MetadataToChatMessage(), cmd.User(), cmd.Channel(), *ts)
 }
 
 func mapToEveService(s eve.Service) eveapimodels.EveService {
