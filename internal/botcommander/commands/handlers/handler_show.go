@@ -118,24 +118,6 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 	h.chatSvc.ShowResultsMessageThread(ctx, fullSvc.MetadataToChatMessage(), cmd.User(), cmd.Channel(), *ts)
 }
 
-func mapToEveService(s eve.Service) eveapimodels.EveService {
-	return eveapimodels.EveService{
-		ID:              s.ID,
-		NamespaceID:     s.NamespaceID,
-		NamespaceName:   s.NamespaceName,
-		ArtifactID:      s.ArtifactID,
-		ArtifactName:    s.ArtifactName,
-		OverrideVersion: s.OverrideVersion,
-		DeployedVersion: s.DeployedVersion,
-		Metadata:        s.Metadata,
-		CreatedAt:       s.CreatedAt,
-		UpdatedAt:       s.UpdatedAt,
-		Name:            s.Name,
-		StickySessions:  s.StickySessions,
-		Count:           s.Count,
-	}
-}
-
 func (h ShowHandler) resolveNamespace(ctx context.Context, cmd commands.EvebotCommand) (eve.Namespace, error) {
 	var nv eve.Namespace
 

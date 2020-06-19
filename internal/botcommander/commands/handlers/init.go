@@ -7,5 +7,6 @@ var (
 		"deploy":  NewDeployHandler,
 		"migrate": NewMigrateHandler,
 		"show":    NewShowHandler,
+		"set":     NewSetHandler,
 	}
 )

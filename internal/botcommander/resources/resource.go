@@ -24,10 +24,17 @@ type baseResource struct {
 	value       string
 }
 
-var validResources = []Resource{DefaultEnvironment(), DefaultNamespace(), DefaultService(), DefaultMetadata()}
-
 func IsValid(res string) bool {
-	for _, v := range validResources {
+	for _, v := range []Resource{DefaultEnvironment(), DefaultNamespace(), DefaultService(), DefaultMetadata()} {
+		if v.Name() == strings.ToLower(res) {
+			return true
+		}
+	}
+	return false
+}
+
+func IsValidSet(res string) bool {
+	for _, v := range []Resource{DefaultMetadata()} {
 		if v.Name() == strings.ToLower(res) {
 			return true
 		}
