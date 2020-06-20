@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
@@ -122,7 +123,7 @@ func (cmd *DeleteCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.ServiceName] = cmd.input[3]
 		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
-		cmd.apiOptions[params.MetadataName] = cmd.input[7:]
+		cmd.apiOptions[params.MetadataName] = strings.Split(cmd.input[7:][0], ",")
 		return
 	default:
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))
