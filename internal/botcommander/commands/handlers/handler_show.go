@@ -111,7 +111,7 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 			break
 		}
 	}
-
+	log.Logger.Debug("server", zap.Any("svc", svc))
 	fullSvc, err := h.eveAPIClient.GetServiceByID(ctx, svc.ID)
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
