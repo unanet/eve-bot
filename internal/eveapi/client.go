@@ -81,7 +81,7 @@ func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (p
 	log.Logger.Debug("eve-api DeleteServiceMetadata req", zap.Any("metadata_key", m), zap.Int("service", id))
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
-		log.Logger.Error("error calling eve-api SetServiceMetadata", zap.Error(err))
+		log.Logger.Error("error calling eve-api DeleteServiceMetadata", zap.Error(err))
 		return nil, err
 	}
 
