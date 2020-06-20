@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 
@@ -24,6 +27,7 @@ type CommandHandler interface {
 }
 
 func mapToEveService(s eve.Service) eveapimodels.EveService {
+	log.Logger.Debug("mapToEveService", zap.Any("svc", s))
 	return eveapimodels.EveService{
 		ID:              s.ID,
 		NamespaceID:     s.NamespaceID,

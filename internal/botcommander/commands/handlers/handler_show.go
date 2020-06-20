@@ -3,6 +3,9 @@ package handlers
 import (
 	"context"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 
 	"strings"
@@ -92,6 +95,7 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 		return
 	}
 	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
+	log.Logger.Debug("services", zap.Any("svcs", svcs))
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
 		return
