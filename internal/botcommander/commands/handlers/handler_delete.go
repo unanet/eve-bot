@@ -11,19 +11,19 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
 
-type SetHandler struct {
+type DeleteHandler struct {
 	eveAPIClient eveapi.Client
 	chatSvc      chatservice.Provider
 }
 
-func NewSetHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
-	return SetHandler{
+func NewDeleteHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+	return DeleteHandler{
 		eveAPIClient: *eveAPIClient,
 		chatSvc:      *chatSvc,
 	}
 }
 
-func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
+func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
 		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), timestamp)
@@ -46,22 +46,19 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 		}
 	}
 
-	//fullSvc, err := h.eveAPIClient.GetServiceByID(ctx, svc.ID)
-	//if err != nil {
-	//	h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
-	//	return
-	//}
+	var md params.MetadataMap
 
-	metadata := cmd.APIOptions()[params.MetadataName].(params.MetadataMap)
-
-	//h.chatSvc.UserNotificationThread(ctx, metadata.ToString(), cmd.User(), cmd.Channel(), timestamp)
-
-	md, err := h.eveAPIClient.SetServiceMetadata(ctx, metadata, svc.ID)
-	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
-		return
+	for _, m := range cmd.APIOptions()[params.MetadataName].([]string) {
+		md, err = h.eveAPIClient.DeleteServiceMetadata(ctx, m, svc.ID)
+		if err != nil {
+			h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
+			return
+		}
 	}
 
+	if md == nil {
+		h.chatSvc.UserNotificationThread(ctx, "no metadata", cmd.User(), cmd.Channel(), timestamp)
+		return
+	}
 	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.User(), cmd.Channel(), timestamp)
-
 }

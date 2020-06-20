@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 
@@ -13,7 +12,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 type ShowHandler struct {
@@ -70,7 +68,7 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 }
 
 func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
-	nv, err := h.resolveNamespace(ctx, cmd)
+	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
 		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
 		return
@@ -88,7 +86,7 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 }
 
 func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
-	nv, err := h.resolveNamespace(ctx, cmd)
+	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
 		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), *ts)
 		return
@@ -116,27 +114,4 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 		return
 	}
 	h.chatSvc.ShowResultsMessageThread(ctx, fullSvc.MetadataToChatMessage(), cmd.User(), cmd.Channel(), *ts)
-}
-
-func (h ShowHandler) resolveNamespace(ctx context.Context, cmd commands.EvebotCommand) (eve.Namespace, error) {
-	var nv eve.Namespace
-
-	// Gotta get the namespaces first, since we are working with the Alias, and not the Name/ID
-	namespaces, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.APIOptions()[params.EnvironmentName].(string))
-
-	if err != nil {
-		return nv, err
-	}
-
-	for _, v := range namespaces {
-		if strings.ToLower(v.Alias) == strings.ToLower(cmd.APIOptions()[params.NamespaceName].(string)) {
-			nv = v
-			break
-		}
-	}
-
-	if nv.ID == 0 {
-		return nv, fmt.Errorf("invalid namespace")
-	}
-	return nv, nil
 }

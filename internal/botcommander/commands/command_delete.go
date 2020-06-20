@@ -8,68 +8,68 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 )
 
-func NewSetCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultSetCommand(cmdFields, channel, user)
+func NewDeleteCommand(cmdFields []string, channel, user string) EvebotCommand {
+	return defaultDeleteCommand(cmdFields, channel, user)
 }
 
-type SetCmd struct {
+type DeleteCmd struct {
 	baseCommand
 }
 
-func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
-	cmd := SetCmd{baseCommand{
+func defaultDeleteCommand(cmdFields []string, channel, user string) DeleteCmd {
+	cmd := DeleteCmd{baseCommand{
 		input:   cmdFields,
 		channel: channel,
 		user:    user,
-		name:    "set",
-		summary: "The `set` command is used to set resource values (metadata and version)",
+		name:    "delete",
+		summary: "The `delete` command is used to delete resource values (metadata)",
 		usage: help.Usage{
-			"set {{ resources }} for {{ service }} in {{ namespace }} {{ environment }}",
+			"delete {{ resources }} for {{ service }} in {{ namespace }} {{ environment }}",
 		},
 		examples: help.Examples{
-			"set metadata for unaneta in current una-int key=value",
-			"set metadata for unaneta in current una-int key=value key2=value2 keyN=valueN",
+			"delete metadata for unaneta in current una-int key",
+			"delete metadata for unaneta in current una-int key,key2,key3",
 		},
 		apiOptions:          make(CommandOptions),
-		requiredInputLength: 4,
+		requiredInputLength: 7,
 	}}
 	cmd.resolveResource()
 	cmd.resolveConditionalParams()
 	return cmd
 }
 
-func (cmd SetCmd) APIOptions() CommandOptions {
+func (cmd DeleteCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd SetCmd) User() string {
+func (cmd DeleteCmd) User() string {
 	return cmd.user
 }
 
-func (cmd SetCmd) Channel() string {
+func (cmd DeleteCmd) Channel() string {
 	return cmd.channel
 }
 
-func (cmd SetCmd) AckMsg() (string, bool) {
+func (cmd DeleteCmd) AckMsg() (string, bool) {
 	return baseAckMsg(cmd, cmd.input)
 }
 
-func (cmd SetCmd) IsValid() bool {
+func (cmd DeleteCmd) IsValid() bool {
 	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
 		return true
 	}
 	return false
 }
 
-func (cmd SetCmd) ErrMsg() string {
+func (cmd DeleteCmd) ErrMsg() string {
 	return baseErrMsg(cmd.errs)
 }
 
-func (cmd SetCmd) Name() string {
+func (cmd DeleteCmd) Name() string {
 	return cmd.name
 }
 
-func (cmd SetCmd) Help() *help.Help {
+func (cmd DeleteCmd) Help() *help.Help {
 	return help.New(
 		help.HeaderOpt(cmd.summary.String()),
 		help.UsageOpt(cmd.usage.String()),
@@ -77,28 +77,28 @@ func (cmd SetCmd) Help() *help.Help {
 	)
 }
 
-func (cmd SetCmd) IsHelpRequest() bool {
+func (cmd DeleteCmd) IsHelpRequest() bool {
 	return isHelpRequest(cmd.input, cmd.name)
 }
 
-func (cmd *SetCmd) resolveResource() {
+func (cmd *DeleteCmd) resolveResource() {
 	if len(cmd.input) < cmd.requiredInputLength {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command: %v", cmd.input))
+		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command: %v", cmd.input))
 		return
 	}
 
-	if resources.IsValidSet(cmd.input[1]) {
+	if resources.IsValidDelete(cmd.input[1]) {
 		cmd.apiOptions["resource"] = cmd.input[1]
 	} else {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set resource: %v", cmd.input))
+		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete resource: %v", cmd.input))
 		return
 	}
 
 }
 
-func (cmd *SetCmd) resolveConditionalParams() {
+func (cmd *DeleteCmd) resolveConditionalParams() {
 	if len(cmd.input) < cmd.requiredInputLength {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command params: %v", cmd.input))
+		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command params: %v", cmd.input))
 		return
 	}
 
@@ -113,16 +113,16 @@ func (cmd *SetCmd) resolveConditionalParams() {
 
 	switch cmd.apiOptions["resource"] {
 	case resources.MetadataName:
-		// set metadata for unaneta in current una-int key=value key=value key=value
-		// set metadata for {{ service }} in {{ namespace }} {{ environment }} key=value key=value key=value
+		// delete metadata for unaneta in current una-int key,key2,key3
+		// delete metadata for {{ service }} in {{ namespace }} {{ environment }} key,key2,key3
 		if len(cmd.input) < 7 {
-			cmd.errs = append(cmd.errs, fmt.Errorf("invalid set metadata: %v", cmd.input))
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete metadata: %v", cmd.input))
 			return
 		}
 		cmd.apiOptions[params.ServiceName] = cmd.input[3]
 		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
-		cmd.apiOptions[params.MetadataName] = hydrateMetadataMap(cmd.input[7:])
+		cmd.apiOptions[params.MetadataName] = cmd.input[7:]
 		return
 	default:
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))

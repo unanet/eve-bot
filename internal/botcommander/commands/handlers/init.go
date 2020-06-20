@@ -8,5 +8,6 @@ var (
 		"migrate": NewMigrateHandler,
 		"show":    NewShowHandler,
 		"set":     NewSetHandler,
+		"delete":  NewDeleteHandler,
 	}
 )

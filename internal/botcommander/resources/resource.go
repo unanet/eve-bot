@@ -41,3 +41,12 @@ func IsValidSet(res string) bool {
 	}
 	return false
 }
+
+func IsValidDelete(res string) bool {
+	for _, v := range []Resource{DefaultMetadata()} {
+		if v.Name() == strings.ToLower(res) {
+			return true
+		}
+	}
+	return false
+}

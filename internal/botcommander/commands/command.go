@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 
@@ -158,4 +159,18 @@ type baseCommand struct {
 	optionalArgs        args.Args
 	requiredParams      params.Params
 	apiOptions          CommandOptions // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
+}
+
+func hydrateMetadataMap(keyvals []string) params.MetadataMap {
+	result := make(params.MetadataMap, 0)
+	if len(keyvals) == 0 {
+		return nil
+	}
+	for _, s := range keyvals {
+		if strings.Contains(s, "=") {
+			argKV := strings.Split(s, "=")
+			result[argKV[0]] = argKV[1]
+		}
+	}
+	return result
 }

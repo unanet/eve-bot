@@ -31,6 +31,8 @@ func DefaultMetadata() Namespace {
 	}}
 }
 
+type MetadataKeys []string
+
 type MetadataMap map[string]interface{}
 
 func (e MetadataMap) ToString() string {

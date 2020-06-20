@@ -7,6 +7,7 @@ var (
 		"migrate": NewMigrateCommand,
 		"show":    NewShowCommand,
 		"set":     NewSetCommand,
+		"delete":  NewDeleteCommand,
 	}
 )
 

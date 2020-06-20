@@ -39,6 +39,7 @@ type Client interface {
 	GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error)
 	GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error)
 	SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error)
+	DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error)
 }
 
 type client struct {
@@ -65,6 +66,32 @@ func NewClient(cfg Config) Client {
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 
+}
+
+func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error) {
+	var success params.MetadataMap
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Delete(fmt.Sprintf("services/%v/metadata/%s", id, m)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api DeleteServiceMetadata request", zap.Error(err))
+		return nil, err
+	}
+
+	log.Logger.Debug("eve-api DeleteServiceMetadata req", zap.Any("metadata_key", m), zap.Int("service", id))
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api SetServiceMetadata", zap.Error(err))
+		return nil, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api DeleteServiceMetadata", zap.String("error_msg", failure.Message))
+		return nil, fmt.Errorf(failure.Message)
+	}
 }
 
 func (c *client) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error) {
@@ -132,6 +159,7 @@ func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Enviro
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
+
 func (c *client) GetEnvironments(ctx context.Context) (eveapimodels.Environments, error) {
 	var success eveapimodels.Environments
 	var failure eveerror.RestError
