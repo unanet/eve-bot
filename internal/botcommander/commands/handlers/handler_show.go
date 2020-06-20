@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
@@ -104,12 +105,22 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.User(), cmd.Channel(), *ts)
 		return
 	}
+	var requestedSvcName string
+	var valid bool
+	if requestedSvcName, valid = cmd.APIOptions()[params.ServiceName].(string); !valid {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, fmt.Errorf("invalid ServiceName Param"))
+		return
+	}
 	var svc eveapimodels.EveService
 	for _, s := range svcs {
-		if strings.ToLower(s.Name) == strings.ToLower(cmd.APIOptions()[params.ServiceName].(string)) {
+		if strings.ToLower(s.Name) == strings.ToLower(requestedSvcName) {
 			svc = mapToEveService(s)
 			break
 		}
+	}
+	if svc.ID == 0 {
+		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid requested service: %s", requestedSvcName), cmd.User(), cmd.Channel(), *ts)
+		return
 	}
 	log.Logger.Debug("server", zap.Any("svc", svc))
 	fullSvc, err := h.eveAPIClient.GetServiceByID(ctx, svc.ID)
