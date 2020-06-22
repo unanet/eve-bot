@@ -162,6 +162,7 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 	case *slackevents.AppMentionEvent:
 		c.svc.HandleSlackAppMentionEvent(r.Context(), ev)
 	default:
+		log.Logger.Info("slack innerEvent", zap.Any("event", innerEvent))
 		render.Respond(w, r, errors.Wrap(unknownSlackEventError(innerEvent)))
 		return
 	}
