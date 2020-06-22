@@ -148,6 +148,8 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	log.Logger.Info("slack event type", zap.Any("event", slackAPIEvent.Type))
+
 	// We are only handling/listening to the CallbackEvent
 	if slackAPIEvent.Type != slackevents.CallbackEvent {
 		render.Respond(w, r, errors.Wrap(fmt.Errorf("unknown slack API event: %s", slackAPIEvent.Type)))
