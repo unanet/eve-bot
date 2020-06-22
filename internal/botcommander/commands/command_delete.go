@@ -29,6 +29,7 @@ func defaultDeleteCommand(cmdFields []string, channel, user string) DeleteCmd {
 		examples: help.Examples{
 			"delete metadata for unaneta in current una-int key",
 			"delete metadata for unaneta in current una-int key key2 key3 keyN",
+			"delete version for unaneta in current una-int",
 		},
 		apiOptions:          make(CommandOptions),
 		requiredInputLength: 7,
@@ -115,7 +116,7 @@ func (cmd *DeleteCmd) resolveConditionalParams() {
 	case resources.MetadataName:
 		// delete metadata for unaneta in current una-int key,key2,key3
 		// delete metadata for {{ service }} in {{ namespace }} {{ environment }} key,key2,key3
-		if len(cmd.input) < 7 {
+		if len(cmd.input) < 8 {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete metadata: %v", cmd.input))
 			return
 		}
@@ -123,6 +124,16 @@ func (cmd *DeleteCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
 		cmd.apiOptions[params.MetadataName] = cmd.input[7:]
+		return
+	case resources.VersionName:
+		// delete version for unaneta in current una-int
+		if len(cmd.input) < cmd.requiredInputLength {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete version: %v", cmd.input))
+			return
+		}
+		cmd.apiOptions[params.ServiceName] = cmd.input[3]
+		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
+		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
 		return
 	default:
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))

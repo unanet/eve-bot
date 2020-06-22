@@ -29,6 +29,7 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 		examples: help.Examples{
 			"set metadata for unaneta in current una-int key=value",
 			"set metadata for unaneta in current una-int key=value key2=value2 keyN=valueN",
+			"set version for unaneta in current una-int to 20.2",
 		},
 		apiOptions:          make(CommandOptions),
 		requiredInputLength: 4,
