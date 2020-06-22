@@ -157,7 +157,7 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 	}
 	innerEvent := slackAPIEvent.InnerEvent
 	switch ev := innerEvent.Data.(type) {
-	case *slackevents.File:
+	case *slack.FileSharedEvent:
 		log.Logger.Info("File Uploaded", zap.Any("event", ev))
 	case *slackevents.AppMentionEvent:
 		c.svc.HandleSlackAppMentionEvent(r.Context(), ev)
