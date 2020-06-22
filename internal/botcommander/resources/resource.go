@@ -34,7 +34,7 @@ func IsValid(res string) bool {
 }
 
 func IsValidSet(res string) bool {
-	for _, v := range []Resource{DefaultMetadata()} {
+	for _, v := range []Resource{DefaultMetadata(), DefaultVersion()} {
 		if v.Name() == strings.ToLower(res) {
 			return true
 		}
@@ -43,7 +43,7 @@ func IsValidSet(res string) bool {
 }
 
 func IsValidDelete(res string) bool {
-	for _, v := range []Resource{DefaultMetadata()} {
+	for _, v := range []Resource{DefaultMetadata(), DefaultVersion()} {
 		if v.Name() == strings.ToLower(res) {
 			return true
 		}

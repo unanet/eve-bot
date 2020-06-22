@@ -40,6 +40,7 @@ type Client interface {
 	GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error)
 	SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error)
 	DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error)
+	SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error)
 }
 
 type client struct {
@@ -66,6 +67,38 @@ func NewClient(cfg Config) Client {
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 
+}
+
+func (c *client) SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error) {
+	var success eveapimodels.EveService
+	var failure eveerror.RestError
+
+	fullSvc, err := c.GetServiceByID(ctx, id)
+	if err != nil {
+		return success, err
+	}
+
+	// Update the Version
+	fullSvc.OverrideVersion = version
+
+	r, err := c.sling.New().Post(fmt.Sprintf("services/%v", fullSvc.ID)).BodyJSON(fullSvc).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api SetServiceVersion request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api DeleteServiceMetadata", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
 }
 
 func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error) {

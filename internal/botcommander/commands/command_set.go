@@ -113,9 +113,9 @@ func (cmd *SetCmd) resolveConditionalParams() {
 
 	switch cmd.apiOptions["resource"] {
 	case resources.MetadataName:
-		// set metadata for unaneta in current una-int key=value key=value key=value
+		// set metadata for unaneta in current una-int key=value
 		// set metadata for {{ service }} in {{ namespace }} {{ environment }} key=value key=value key=value
-		if len(cmd.input) < 7 {
+		if len(cmd.input) < 8 {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid set metadata: %v", cmd.input))
 			return
 		}
@@ -124,6 +124,16 @@ func (cmd *SetCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
 		cmd.apiOptions[params.MetadataName] = hydrateMetadataMap(cmd.input[7:])
 		return
+	case resources.VersionName:
+		// set version for unaneta in current una-int to 20.2
+		if len(cmd.input) < 9 {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid set version: %v", cmd.input))
+			return
+		}
+		cmd.apiOptions[params.ServiceName] = cmd.input[3]
+		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
+		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
+		cmd.apiOptions[params.VersionName] = cmd.input[8]
 	default:
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))
 		return

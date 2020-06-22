@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 type DeleteHandler struct {
@@ -48,7 +45,7 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, fmt.Errorf("invalid ServiceName Param"))
 		return
 	}
-	log.Logger.Debug("services", zap.Any("svcs", svcs))
+
 	var svc eveapimodels.EveService
 	for _, s := range svcs {
 		if strings.ToLower(s.Name) == strings.ToLower(requestedSvcName) {
@@ -60,7 +57,7 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid requested service: %s", requestedSvcName), cmd.User(), cmd.Channel(), timestamp)
 		return
 	}
-	log.Logger.Debug("service", zap.Any("svc", svc))
+
 	var requestedMetadata []string
 	var validMetadata bool
 	if requestedMetadata, validMetadata = cmd.APIOptions()[params.MetadataName].([]string); !validMetadata {
@@ -68,9 +65,13 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		return
 	}
 
+	if len(requestedMetadata) == 0 {
+		h.chatSvc.UserNotificationThread(ctx, "you must supply 1 or more metadata keys", cmd.User(), cmd.Channel(), timestamp)
+		return
+	}
+
 	var md params.MetadataMap
 	for _, m := range requestedMetadata {
-		log.Logger.Debug("DeleteServiceMetadata", zap.Any("svc", svc), zap.String("metadata_key", m))
 		md, err = h.eveAPIClient.DeleteServiceMetadata(ctx, m, svc.ID)
 		if err != nil {
 			h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
