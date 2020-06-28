@@ -1,5 +1,0 @@
-FROM golang:latest
-
-RUN go get github.com/githubnemo/CompileDaemon
-
-ENTRYPOINT CompileDaemon --build="go build -o eve-bot ./cmd/eve-bot/" --command=./eve-bot
