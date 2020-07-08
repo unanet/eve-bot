@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"regexp"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
@@ -123,7 +124,26 @@ func (cmd *SetCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.ServiceName] = cmd.input[3]
 		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
-		cmd.apiOptions[params.MetadataName] = hydrateMetadataMap(cmd.input[7:])
+		metadataMap := hydrateMetadataMap(cmd.input[7:])
+
+		invalidCharMatcher := regexp.MustCompile(`<http:\/\/|>|<|\/\/|\||https:\/\/`)
+
+		for k, v := range metadataMap {
+			invalidCharKeyMatchIndexes := invalidCharMatcher.FindAllStringIndex(k, -1)
+			if len(invalidCharKeyMatchIndexes) > 0 {
+				cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata key supplied: %v", k))
+				return
+			}
+
+			if strVal, ok := v.(string); ok {
+				invalidCharValueMatchIndexes := invalidCharMatcher.FindAllStringIndex(strVal, -1)
+				if len(invalidCharValueMatchIndexes) > 0 {
+					cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata value supplied: %v", strVal))
+				}
+			}
+		}
+
+		cmd.apiOptions[params.MetadataName] = metadataMap
 		return
 	case resources.VersionName:
 		// set version for unaneta in current una-int to 20.2

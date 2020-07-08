@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
@@ -169,8 +170,60 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 	for _, s := range keyvals {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
-			result[argKV[0]] = argKV[1]
+			key := cleanHttpUrls(cleanHttpsUrls(argKV[0]))
+			value := cleanHttpUrls(cleanHttpsUrls(argKV[1]))
+			result[key] = value
 		}
 	}
 	return result
+}
+
+func cleanHttpUrls(input string) string {
+	httpMatcher := regexp.MustCompile(`<http:\/\/`)
+	httpMatchIndexes := httpMatcher.FindAllStringIndex(input, -1)
+
+	if len(httpMatchIndexes) == 0 {
+		return input
+	}
+
+	part := ""
+	for _, v := range httpMatchIndexes {
+		for i, p := range input[v[1]:] {
+			if string(p) == "|" {
+				f1 := input[0:v[0]]
+				f2 := input[v[1] : i+v[1]]
+				f3 := input[i+len(f2)+1+v[1]+1:]
+				part = cleanHttpUrls(f1 + f2 + f3)
+				break
+			}
+
+		}
+		if len(part) > 0 {
+			break
+		}
+	}
+	return part
+}
+
+func cleanHttpsUrls(input string) string {
+	httpsMatcher := regexp.MustCompile(`<https:\/\/`)
+	httpsMatchIndexes := httpsMatcher.FindAllStringIndex(input, -1)
+
+	if len(httpsMatchIndexes) == 0 {
+		return input
+	}
+
+	part := ""
+	for _, v := range httpsMatchIndexes {
+		for i, p := range input[v[1]:] {
+			if string(p) == "|" {
+				f1 := input[0:v[0]]
+				f2 := input[v[1] : i+v[1]]
+				f3 := input[i+len(f2)+1+v[1]+1:]
+				part = cleanHttpsUrls(f1 + f2 + f3)
+				break
+			}
+		}
+	}
+	return part
 }
