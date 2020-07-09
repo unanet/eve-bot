@@ -41,6 +41,8 @@ type Client interface {
 	SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error)
 	DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error)
 	SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error)
+	SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error)
+	GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error)
 }
 
 type client struct {
@@ -67,6 +69,38 @@ func NewClient(cfg Config) Client {
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 
+}
+
+func (c *client) SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error) {
+	var success eve.Namespace
+	var failure eveerror.RestError
+
+	fullNS, err := c.GetNamespaceByID(ctx, id)
+	if err != nil {
+		return success, err
+	}
+
+	// Update the Version
+	fullNS.RequestedVersion = version
+
+	r, err := c.sling.New().Post(fmt.Sprintf("namespaces/%v", fullNS.ID)).BodyJSON(fullNS).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api SetNamespaceVersion request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api SetNamespaceVersion", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
 }
 
 func (c *client) SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error) {
@@ -294,5 +328,30 @@ func (c *client) SetServiceMetadata(ctx context.Context, metadata params.Metadat
 	default:
 		log.Logger.Debug("an error occurred while trying to call eve-api SetServiceMetadata", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
+	}
+}
+
+func (c *client) GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error) {
+	var success eve.Namespace
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Get(fmt.Sprintf("namespaces/%v", id)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetNamespaceByID request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		log.Logger.Error("error calling eve-api GetNamespaceByID", zap.Error(err))
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespaceByID", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
 	}
 }

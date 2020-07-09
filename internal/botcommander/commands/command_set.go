@@ -26,11 +26,13 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 		summary: "The `set` command is used to set resource values (metadata and version)",
 		usage: help.Usage{
 			"set {{ resources }} for {{ service }} in {{ namespace }} {{ environment }}",
+			"set {{ resources }} in {{ namespace }} {{ environment }}",
 		},
 		examples: help.Examples{
 			"set metadata for unaneta in current una-int key=value",
 			"set metadata for unaneta in current una-int key=value key2=value2 keyN=valueN",
 			"set version for unaneta in current una-int to 20.2",
+			"set version in current una-int to 20.2",
 		},
 		apiOptions:          make(CommandOptions),
 		requiredInputLength: 4,
@@ -125,38 +127,51 @@ func (cmd *SetCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
 		metadataMap := hydrateMetadataMap(cmd.input[7:])
-
-		invalidCharMatcher := regexp.MustCompile(`<http:\/\/|>|<|\/\/|\||https:\/\/`)
-
-		for k, v := range metadataMap {
-			invalidCharKeyMatchIndexes := invalidCharMatcher.FindAllStringIndex(k, -1)
-			if len(invalidCharKeyMatchIndexes) > 0 {
-				cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata key supplied: %v", k))
-				return
-			}
-
-			if strVal, ok := v.(string); ok {
-				invalidCharValueMatchIndexes := invalidCharMatcher.FindAllStringIndex(strVal, -1)
-				if len(invalidCharValueMatchIndexes) > 0 {
-					cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata value supplied: %v", strVal))
-				}
-			}
+		if !!cmd.validMetadataMap(metadataMap) {
+			return
 		}
-
 		cmd.apiOptions[params.MetadataName] = metadataMap
 		return
 	case resources.VersionName:
+		switch len(cmd.input) {
 		// set version for unaneta in current una-int to 20.2
-		if len(cmd.input) < 9 {
+		case 9:
+			cmd.apiOptions[params.ServiceName] = cmd.input[3]
+			cmd.apiOptions[params.NamespaceName] = cmd.input[5]
+			cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
+			cmd.apiOptions[params.VersionName] = cmd.input[8]
+		// set version in current una-int to 20.2
+		case 7:
+			cmd.apiOptions[params.NamespaceName] = cmd.input[3]
+			cmd.apiOptions[params.EnvironmentName] = cmd.input[4]
+			cmd.apiOptions[params.VersionName] = cmd.input[6]
+		default:
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid set version: %v", cmd.input))
 			return
 		}
-		cmd.apiOptions[params.ServiceName] = cmd.input[3]
-		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
-		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
-		cmd.apiOptions[params.VersionName] = cmd.input[8]
+
 	default:
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))
 		return
 	}
+}
+
+func (cmd SetCmd) validMetadataMap(metadataMap params.MetadataMap) bool {
+	invalidCharMatcher := regexp.MustCompile(`<http:\/\/|>|<|\/\/|\||https:\/\/`)
+	for k, v := range metadataMap {
+		invalidCharKeyMatchIndexes := invalidCharMatcher.FindAllStringIndex(k, -1)
+		if len(invalidCharKeyMatchIndexes) > 0 {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata key supplied: %v", k))
+			return false
+		}
+
+		if strVal, ok := v.(string); ok {
+			invalidCharValueMatchIndexes := invalidCharMatcher.FindAllStringIndex(strVal, -1)
+			if len(invalidCharValueMatchIndexes) > 0 {
+				cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata value supplied: %v", strVal))
+				return false
+			}
+		}
+	}
+	return true
 }

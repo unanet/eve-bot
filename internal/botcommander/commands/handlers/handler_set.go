@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
@@ -27,12 +28,13 @@ func NewSetHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) C
 }
 
 func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
+	ns, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
 		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), timestamp)
 		return
 	}
-	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
+
+	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, ns.Name)
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
 		return
@@ -41,28 +43,41 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.User(), cmd.Channel(), timestamp)
 		return
 	}
-	var svc eveapimodels.EveService
-	for _, s := range svcs {
-		if strings.ToLower(s.Name) == strings.ToLower(cmd.APIOptions()[params.ServiceName].(string)) {
-			svc = mapToEveService(s)
-			break
+
+	// Service was supplied (we are setting the resource at the service level)
+	if _, ok := cmd.APIOptions()[params.ServiceName].(string); ok {
+		var svc eveapimodels.EveService
+		for _, s := range svcs {
+			if strings.ToLower(s.Name) == strings.ToLower(cmd.APIOptions()[params.ServiceName].(string)) {
+				svc = mapToEveService(s)
+				break
+			}
+		}
+		if svc.ID == 0 {
+			h.chatSvc.UserNotificationThread(ctx, "invalid service", cmd.User(), cmd.Channel(), timestamp)
+			return
+		}
+
+		switch cmd.APIOptions()["resource"] {
+		case resources.MetadataName:
+			h.setSvcMetadata(ctx, cmd, &timestamp, svc)
+			return
+		case resources.VersionName:
+			h.setSvcVersion(ctx, cmd, &timestamp, svc)
+			return
 		}
 	}
-	if svc.ID == 0 {
-		h.chatSvc.UserNotificationThread(ctx, "invalid service", cmd.User(), cmd.Channel(), timestamp)
-		return
-	}
 
+	// setting the resource at the namespace level
 	switch cmd.APIOptions()["resource"] {
 	case resources.MetadataName:
-		h.setMetadata(ctx, cmd, &timestamp, svc)
+		h.chatSvc.UserNotificationThread(ctx, "cannot set namespace metadata", cmd.User(), cmd.Channel(), timestamp)
 	case resources.VersionName:
-		h.setVersion(ctx, cmd, &timestamp, svc)
+		h.setNamespaceVersion(ctx, cmd, &timestamp, ns)
 	}
-
 }
 
-func (h SetHandler) setMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
+func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var metadataMap params.MetadataMap
 	var metaDataOK bool
 	if metadataMap, metaDataOK = cmd.APIOptions()[params.MetadataName].(params.MetadataMap); !metaDataOK {
@@ -79,7 +94,7 @@ func (h SetHandler) setMetadata(ctx context.Context, cmd commands.EvebotCommand,
 	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.User(), cmd.Channel(), *ts)
 }
 
-func (h SetHandler) setVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
+func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var version string
 	var versionOK bool
 	if version, versionOK = cmd.APIOptions()[params.VersionName].(string); !versionOK {
@@ -92,4 +107,19 @@ func (h SetHandler) setVersion(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version set to %s", updatedSvc.Name, updatedSvc.OverrideVersion), cmd.User(), cmd.Channel(), *ts)
+}
+
+func (h SetHandler) setNamespaceVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, ns eve.Namespace) {
+	var version string
+	var versionOK bool
+	if version, versionOK = cmd.APIOptions()[params.VersionName].(string); !versionOK {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, fmt.Errorf("invalid version"))
+		return
+	}
+	updatedNS, err := h.eveAPIClient.SetNamespaceVersion(ctx, version, ns.ID)
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		return
+	}
+	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version set to %s", updatedNS.Name, updatedNS.RequestedVersion), cmd.User(), cmd.Channel(), *ts)
 }
