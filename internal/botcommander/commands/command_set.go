@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"regexp"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -128,6 +131,7 @@ func (cmd *SetCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
 		metadataMap := hydrateMetadataMap(cmd.input[7:])
 		if !!cmd.validMetadataMap(metadataMap) {
+			log.Logger.Debug("invalid metadata map", zap.Any("metadata_map", metadataMap))
 			return
 		}
 		cmd.apiOptions[params.MetadataName] = metadataMap
@@ -157,10 +161,13 @@ func (cmd *SetCmd) resolveConditionalParams() {
 }
 
 func (cmd SetCmd) validMetadataMap(metadataMap params.MetadataMap) bool {
+	log.Logger.Debug("validate metadata map", zap.Any("metadata", metadataMap))
 	invalidCharMatcher := regexp.MustCompile(`<http:\/\/|>|<|\/\/|\||https:\/\/`)
 	for k, v := range metadataMap {
+		log.Logger.Debug("validate metadata map key val", zap.Any("metadata_key", k), zap.Any("metadata_value", v))
 		invalidCharKeyMatchIndexes := invalidCharMatcher.FindAllStringIndex(k, -1)
 		if len(invalidCharKeyMatchIndexes) > 0 {
+			log.Logger.Debug("invalidCharKeyMatchIndexes")
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata key supplied: %v", k))
 			return false
 		}
@@ -168,6 +175,7 @@ func (cmd SetCmd) validMetadataMap(metadataMap params.MetadataMap) bool {
 		if strVal, ok := v.(string); ok {
 			invalidCharValueMatchIndexes := invalidCharMatcher.FindAllStringIndex(strVal, -1)
 			if len(invalidCharValueMatchIndexes) > 0 {
+				log.Logger.Debug("invalidCharValueMatchIndexes")
 				cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata value supplied: %v", strVal))
 				return false
 			}

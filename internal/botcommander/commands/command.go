@@ -175,6 +175,7 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 			result[key] = value
 		}
 	}
+	log.Logger.Debug("metadata map", zap.Any("metadata", result))
 	return result
 }
 
