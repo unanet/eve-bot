@@ -130,11 +130,12 @@ func (cmd *SetCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
 		metadataMap := hydrateMetadataMap(cmd.input[7:])
-		if !!cmd.validMetadataMap(metadataMap) {
-			log.Logger.Debug("invalid metadata map", zap.Any("metadata_map", metadataMap))
+		if cmd.validMetadataMap(metadataMap) == true {
+			log.Logger.Debug("valid metadata map", zap.Any("metadata_map", metadataMap))
+			cmd.apiOptions[params.MetadataName] = metadataMap
 			return
 		}
-		cmd.apiOptions[params.MetadataName] = metadataMap
+		log.Logger.Debug("invalid metadata map validation", zap.Any("metadata_map", metadataMap))
 		return
 	case resources.VersionName:
 		switch len(cmd.input) {
@@ -163,13 +164,14 @@ func (cmd *SetCmd) resolveConditionalParams() {
 func (cmd SetCmd) validMetadataMap(metadataMap params.MetadataMap) bool {
 	log.Logger.Debug("validate metadata map", zap.Any("metadata", metadataMap))
 	invalidCharMatcher := regexp.MustCompile(`<http:\/\/|>|<|\/\/|\||https:\/\/`)
+	result := true
 	for k, v := range metadataMap {
 		log.Logger.Debug("validate metadata map key val", zap.Any("metadata_key", k), zap.Any("metadata_value", v))
 		invalidCharKeyMatchIndexes := invalidCharMatcher.FindAllStringIndex(k, -1)
 		if len(invalidCharKeyMatchIndexes) > 0 {
 			log.Logger.Debug("invalidCharKeyMatchIndexes")
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata key supplied: %v", k))
-			return false
+			result = false
 		}
 
 		if strVal, ok := v.(string); ok {
@@ -177,9 +179,9 @@ func (cmd SetCmd) validMetadataMap(metadataMap params.MetadataMap) bool {
 			if len(invalidCharValueMatchIndexes) > 0 {
 				log.Logger.Debug("invalidCharValueMatchIndexes")
 				cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata value supplied: %v", strVal))
-				return false
+				result = false
 			}
 		}
 	}
-	return true
+	return result
 }
