@@ -3,9 +3,13 @@ package handlers
 import (
 	"context"
 	"fmt"
+
+	"go.uber.org/zap"
+
 	"strings"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"gitlab.unanet.io/devops/eve/pkg/log"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
@@ -80,7 +84,15 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var metadataMap params.MetadataMap
 	var metaDataOK bool
+	log.Logger.Debug("cmd.Api.Options", zap.Any("api_opts", cmd.APIOptions()))
 	if metadataMap, metaDataOK = cmd.APIOptions()[params.MetadataName].(params.MetadataMap); !metaDataOK {
+
+		if metadataMap == nil {
+			log.Logger.Debug("cmd.Api.Options.metadatamap nil")
+		} else {
+			log.Logger.Debug("cmd.Api.Options.metadatamap nil", zap.Any("metadata_map", metadataMap))
+		}
+
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, fmt.Errorf("invalid metadata map"))
 		return
 	}
