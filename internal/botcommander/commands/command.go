@@ -180,7 +180,7 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 }
 
 func cleanUrls(input string) string {
-	httpMatcher := regexp.MustCompile(`<https:\/\/|<http:\/\/`)
+	httpMatcher := regexp.MustCompile(`<https:\/\/|<http:\/\/|<ftp:\/\/`)
 	httpMatchIndexes := httpMatcher.FindAllStringIndex(input, -1)
 
 	if len(httpMatchIndexes) == 0 {

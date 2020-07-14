@@ -129,13 +129,7 @@ func (cmd *SetCmd) resolveConditionalParams() {
 		cmd.apiOptions[params.ServiceName] = cmd.input[3]
 		cmd.apiOptions[params.NamespaceName] = cmd.input[5]
 		cmd.apiOptions[params.EnvironmentName] = cmd.input[6]
-		metadataMap := hydrateMetadataMap(cmd.input[7:])
-		if cmd.validMetadataMap(metadataMap) == true {
-			log.Logger.Debug("valid metadata map", zap.Any("metadata_map", metadataMap))
-			cmd.apiOptions[params.MetadataName] = metadataMap
-			return
-		}
-		log.Logger.Debug("invalid metadata map validation", zap.Any("metadata_map", metadataMap))
+		cmd.apiOptions[params.MetadataName] = hydrateMetadataMap(cmd.input[7:])
 		return
 	case resources.VersionName:
 		switch len(cmd.input) {
