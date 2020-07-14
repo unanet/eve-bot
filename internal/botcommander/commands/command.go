@@ -180,28 +180,34 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 }
 
 func cleanUrls(input string) string {
-	httpMatcher := regexp.MustCompile(`<https:\/\/|<http:\/\/|<ftp:\/\/`)
-	httpMatchIndexes := httpMatcher.FindAllStringIndex(input, -1)
+	matcher := regexp.MustCompile(`<[a-zA-Z]+:\/\/[a-zA-Z._\-:\d\/|]+>`)
+	matchIndexes := matcher.FindAllStringIndex(input, -1)
+	matchCount := len(matchIndexes)
 
-	if len(httpMatchIndexes) == 0 {
+	if matchCount == 0 {
 		return input
 	}
 
-	part := ""
-	for _, v := range httpMatchIndexes {
-		for i, p := range input[v[1]:] {
-			if string(p) == "|" {
-				f1 := input[0:v[0]]
-				f2 := input[v[1] : i+v[1]]
-				f3 := input[i+len(f2)+1+v[1]+1:]
-				part = cleanUrls(f1 + f2 + f3)
-				break
-			}
+	firstMatchIndex := matchIndexes[0][0]
+	lastMatchIndex := matchIndexes[matchCount-1][1]
 
+	firstPart := input[0:firstMatchIndex]
+	lastPart := input[lastMatchIndex:]
+
+	cleanPart := firstPart
+	for i, v := range matchIndexes {
+		if i > 0 {
+			previousMatchLastIndex := matchIndexes[i-1][1]
+			currentMatchFirstIndex := matchIndexes[i][0]
+			middleMatch := input[previousMatchLastIndex:currentMatchFirstIndex]
+			cleanPart = cleanPart + middleMatch
 		}
-		if len(part) > 0 {
-			break
-		}
+
+		vals := strings.Split(input[v[0]:v[1]], "|")
+		vals[1] = vals[1][:len(vals[1])-len(">")]
+
+		cleanPart = cleanPart + vals[1]
 	}
-	return part
+	cleanPart = cleanPart + lastPart
+	return cleanPart
 }

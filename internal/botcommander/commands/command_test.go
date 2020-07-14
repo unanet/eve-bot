@@ -1,0 +1,67 @@
+package commands
+
+import "testing"
+
+func Test_cleanUrls(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "full complex url parse",
+			args: args{input: "troy_sampson_<ftp://wtfftp.com|wtfftp.com>_http://thisisclean.com_<https://h-ello.there.com|hellothere.com>are_we_there<https://hello.com|hello.com>something_else-goes__-here<ftp://asdf.com|asdf.com>_wtf_are_wedoing"},
+			want: "troy_sampson_wtfftp.com_http://thisisclean.com_hellothere.comare_we_therehello.comsomething_else-goes__-hereasdf.com_wtf_are_wedoing",
+		},
+		{
+			name: "simple single url parse",
+			args: args{input: "<https://www.google.com|www.google.com>"},
+			want: "www.google.com",
+		},
+		{
+			name: "simple single url",
+			args: args{input: "https://www.google.com"},
+			want: "https://www.google.com",
+		},
+		{
+			name: "simple single string",
+			args: args{input: "wtf_are_we_doing"},
+			want: "wtf_are_we_doing",
+		},
+		{
+			name: "ftp url parse",
+			args: args{input: "<ftp://somehost|somehost>"},
+			want: "somehost",
+		},
+		{
+			name: "https and http url parse",
+			args: args{input: "<http://www.somehost.com|somehost.com>_<https://someotherhost.com|www.someotherhost.com>"},
+			want: "somehost.com_www.someotherhost.com",
+		},
+		{
+			name: "https and http and ftp url parse",
+			args: args{input: "here_we_go<ftp://someftphost|someftphost>_<http://www.somehost.com|somehost.com>_<https://someotherhost.com|www.someotherhost.com>"},
+			want: "here_we_gosomeftphost_somehost.com_www.someotherhost.com",
+		},
+		{
+			name: "any url parse",
+			args: args{input: "postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current_here_we_go<ftp://someftphost|someftphost>_<http://www.somehost.com|somehost.com>_<https://someotherhost.com|www.someotherhost.com>"},
+			want: "postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current_here_we_gosomeftphost_somehost.com_www.someotherhost.com",
+		},
+		{
+			name: "postgres url parse",
+			args: args{input: "<postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current|unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current>"},
+			want: "unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := cleanUrls(tt.args.input); got != tt.want {
+				t.Errorf("cleanUrls() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
