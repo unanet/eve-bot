@@ -34,20 +34,25 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 	}
 
 	cmdFields := msgFields[1:]
+	var cleanCmdFields []string
+
+	for _, i := range cmdFields {
+		cleanCmdFields = append(cleanCmdFields, commands.CleanUrls(i))
+	}
 
 	// make sure after you create a new command,
 	// you add the New func to the map so that it is picked up here
-	newCmdFuncInterface := commands.CommandInitializerMap[cmdFields[0]]
+	newCmdFuncInterface := commands.CommandInitializerMap[cleanCmdFields[0]]
 
 	// Make sure the New Command func follows the standard New Command signature
 	// =======> func NewCmd(input []string, channel, user string) EvebotCommand { }
 	if newCmdFuncInterface != nil {
 		if newCmdFuncVal, ok := newCmdFuncInterface.(func([]string, string, string) commands.EvebotCommand); ok {
-			return newCmdFuncVal(cmdFields, channel, user)
+			return newCmdFuncVal(cleanCmdFields, channel, user)
 		}
 		// this is bad - we will want to be alerted on this error
-		log.Logger.Error("invalid new command initializer func", zap.String("input", cmdFields[0]))
+		log.Logger.Error("invalid new command initializer func", zap.String("input", cleanCmdFields[0]))
 	}
 
-	return commands.NewInvalidCommand(cmdFields, channel, user)
+	return commands.NewInvalidCommand(cleanCmdFields, channel, user)
 }

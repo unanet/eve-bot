@@ -86,9 +86,9 @@ func ExtractDatabaseArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefin
 		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
 			log.Logger.Debug("ExtractDatabaseArtifactsOpt databases artifactDefs", zap.Any("artifactDefs", artifactDefs))
 			return artifactDefs
-		} else {
-			return nil
 		}
+		return nil
+
 	}
 	return nil
 }
@@ -97,9 +97,9 @@ func ExtractServiceArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefini
 	if val, ok := opts[args.ServicesName]; ok {
 		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
 			return artifactDefs
-		} else {
-			return nil
 		}
+		return nil
+
 	}
 	return nil
 }
@@ -108,9 +108,8 @@ func ExtractForceDeployOpt(opts CommandOptions) bool {
 	if val, ok := opts[args.ForceDeployName]; ok {
 		if forceDepVal, ok := val.(bool); ok {
 			return forceDepVal
-		} else {
-			return false
 		}
+		return false
 	}
 	return false
 }
@@ -119,9 +118,9 @@ func ExtractDryrunOpt(opts CommandOptions) bool {
 	if val, ok := opts[args.DryrunName]; ok {
 		if dryRunVal, ok := val.(bool); ok {
 			return dryRunVal
-		} else {
-			return false
 		}
+		return false
+
 	}
 	return false
 }
@@ -130,9 +129,9 @@ func ExtractEnvironmentOpt(opts CommandOptions) string {
 	if val, ok := opts[params.EnvironmentName]; ok {
 		if envVal, ok := val.(string); ok {
 			return envVal
-		} else {
-			return ""
 		}
+		return ""
+
 	}
 	return ""
 }
@@ -141,9 +140,9 @@ func ExtractNSOpt(opts CommandOptions) eveapimodels.StringList {
 	if val, ok := opts[params.NamespaceName]; ok {
 		if nsVal, ok := val.(string); ok {
 			return eveapimodels.StringList{nsVal}
-		} else {
-			return nil
 		}
+		return nil
+
 	}
 	return nil
 }
@@ -170,8 +169,8 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 	for _, s := range keyvals {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
-			key := cleanUrls(argKV[0])
-			value := cleanUrls(argKV[1])
+			key := CleanUrls(argKV[0])
+			value := CleanUrls(argKV[1])
 			result[key] = value
 		}
 	}
@@ -179,7 +178,7 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 	return result
 }
 
-func cleanUrls(input string) string {
+func CleanUrls(input string) string {
 	matcher := regexp.MustCompile(`<[a-zA-Z]+:\/\/[a-zA-Z._\-:\d\/|]+>`)
 	matchIndexes := matcher.FindAllStringIndex(input, -1)
 	matchCount := len(matchIndexes)

@@ -22,6 +22,9 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 	invalidDeployCmdLen2 := "@evebot deploy current"
 	deployCmdHelp := "@evebot deploy"
 	deployCmdHelp2 := "@evebot deploy help"
+	setMetaDataCmd := "@evebot set metadata for unaneta in current una-int una-qa unanet_unanet_unanet.org_access.dataManager.people.default_to_all=false"
+	setMetaDataCmdInput := "@evebot set metadata for unaneta in current una-int una-qa unanet_unanet_<https://unanet.org|unanet.org>_access.dataManager.people.default_to_all=false"
+	setMetaDataCmdCleanInput := "@evebot set metadata for unaneta in current una-int una-qa unanet_unanet_unanet.org_access.dataManager.people.default_to_all=false"
 
 	type args struct {
 		input, channel, user string
@@ -32,6 +35,18 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 		args args
 		want commands.EvebotCommand
 	}{
+		{
+			name: "valid set metadata clean urls",
+			ebr:  &EvebotResolver{},
+			args: args{input: setMetaDataCmdInput, channel: channel, user: user},
+			want: commands.NewSetCommand(strings.Fields(setMetaDataCmdCleanInput)[1:], channel, user),
+		},
+		{
+			name: "valid set metadata",
+			ebr:  &EvebotResolver{},
+			args: args{input: setMetaDataCmd, channel: channel, user: user},
+			want: commands.NewSetCommand(strings.Fields(setMetaDataCmd)[1:], channel, user),
+		},
 		{
 			name: "valid basic deploy command",
 			ebr:  &EvebotResolver{},
