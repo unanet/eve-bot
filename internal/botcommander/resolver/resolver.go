@@ -34,11 +34,16 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 	}
 
 	cmdFields := msgFields[1:]
-	var cleanCmdFields []string
+	cleanCmdFields := []string{}
 
 	for _, i := range cmdFields {
-		cleanCmdFields = append(cleanCmdFields, commands.CleanUrls(i))
+		log.Logger.Debug("Resolve cmd input - cleanURL fragments,", zap.String("val", i))
+		cleanedI := commands.CleanUrls(i)
+		log.Logger.Debug("Resolve cmd input - cleanURL cleaned value", zap.String("val", cleanedI))
+		cleanCmdFields = append(cleanCmdFields, cleanedI)
 	}
+
+	log.Logger.Debug("Resolve cmd input - cleanCmdFields", zap.Any("cleanCmdFields", cleanCmdFields))
 
 	// make sure after you create a new command,
 	// you add the New func to the map so that it is picked up here

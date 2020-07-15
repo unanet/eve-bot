@@ -12,6 +12,16 @@ func Test_cleanUrls(t *testing.T) {
 		want string
 	}{
 		{
+			name: "single url",
+			args: args{input: "https://unaneta.qa-latest.unanet.io/platform"},
+			want: "https://unaneta.qa-latest.unanet.io/platform",
+		},
+		{
+			name: "single linked url",
+			args: args{input: "<https://unaneta.qa-latest.unanet.io/platform|unaneta.qa-latest.unanet.io/platform>"},
+			want: "unaneta.qa-latest.unanet.io/platform",
+		},
+		{
 			name: "full complex url parse",
 			args: args{input: "troy_sampson_<ftp://wtfftp.com|wtfftp.com>_http://thisisclean.com_<https://h-ello.there.com|hellothere.com>are_we_there<https://hello.com|hello.com>something_else-goes__-here<ftp://asdf.com|asdf.com>_wtf_are_wedoing"},
 			want: "troy_sampson_wtfftp.com_http://thisisclean.com_hellothere.comare_we_therehello.comsomething_else-goes__-hereasdf.com_wtf_are_wedoing",
