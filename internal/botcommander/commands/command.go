@@ -202,10 +202,18 @@ func CleanUrls(input string) string {
 			cleanPart = cleanPart + middleMatch
 		}
 
-		vals := strings.Split(input[v[0]:v[1]], "|")
-		vals[1] = vals[1][:len(vals[1])-len(">")]
+		matchedVal := input[v[0]:v[1]]
+		cleanVal := ""
 
-		cleanPart = cleanPart + vals[1]
+		if strings.Contains(matchedVal, "|") {
+			vals := strings.Split(matchedVal, "|")
+			cleanVal = vals[1][:len(vals[1])-len(">")]
+		} else {
+			cleanVal = strings.ReplaceAll(matchedVal, "<", "")
+			cleanVal = strings.ReplaceAll(cleanVal, ">", "")
+		}
+
+		cleanPart = cleanPart + cleanVal
 	}
 	cleanPart = cleanPart + lastPart
 	return cleanPart

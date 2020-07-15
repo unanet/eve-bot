@@ -12,6 +12,11 @@ func Test_cleanUrls(t *testing.T) {
 		want string
 	}{
 		{
+			name: "single url- no pipe",
+			args: args{input: "<https://unaneta.qa-latest.unanet.io/platform>"},
+			want: "https://unaneta.qa-latest.unanet.io/platform",
+		},
+		{
 			name: "single url",
 			args: args{input: "https://unaneta.qa-latest.unanet.io/platform"},
 			want: "https://unaneta.qa-latest.unanet.io/platform",
