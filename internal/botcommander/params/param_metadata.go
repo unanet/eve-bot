@@ -24,8 +24,8 @@ func (e Metadata) Value() string {
 	return e.value
 }
 
-func DefaultMetadata() Namespace {
-	return Namespace{baseParam{
+func DefaultMetadata() Metadata {
+	return Metadata{baseParam{
 		name:        MetadataName,
 		description: "the metadata for a service",
 	}}

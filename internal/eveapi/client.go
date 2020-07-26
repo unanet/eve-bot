@@ -31,6 +31,11 @@ type Config struct {
 	EveapiCallbackUrl string        `split_words:"true" required:"true"`
 }
 
+type genericResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 type Client interface {
 	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
 	GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error)
@@ -43,6 +48,7 @@ type Client interface {
 	SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error)
 	SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error)
 	GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error)
+	Release(ctx context.Context, payload eve.Release) (genericResponse, error)
 }
 
 type client struct {
@@ -68,7 +74,30 @@ func NewClient(cfg Config) Client {
 			Add("User-Agent", "eve-bot").
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
+}
 
+func (c *client) Release(ctx context.Context, payload eve.Release) (genericResponse, error) {
+	var success genericResponse
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Post(fmt.Sprintf("release")).BodyJSON(payload).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api Release request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api SetNamespaceVersion", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
 }
 
 func (c *client) SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error) {

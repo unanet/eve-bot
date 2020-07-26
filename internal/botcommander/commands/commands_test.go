@@ -2,7 +2,7 @@ package commands
 
 import "testing"
 
-func Test_cleanUrls(t *testing.T) {
+func Test_CleanUrls(t *testing.T) {
 	type args struct {
 		input string
 	}

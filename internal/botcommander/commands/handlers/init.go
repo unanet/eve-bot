@@ -9,5 +9,6 @@ var (
 		"show":    NewShowHandler,
 		"set":     NewSetHandler,
 		"delete":  NewDeleteHandler,
+		"release": NewReleaseHandler,
 	}
 )
