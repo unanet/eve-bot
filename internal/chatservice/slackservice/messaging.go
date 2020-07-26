@@ -31,7 +31,3 @@ func userNotificationMessage(user, msg string) string {
 func userDeploymentNotificationMessage(user, msg string) string {
 	return fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", user, msgDeploymentErrNotification, msg)
 }
-
-func userResultsMessage(user, msg string) string {
-	return fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n", user, msgResultsNotification, msg)
-}
