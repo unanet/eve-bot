@@ -4,11 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
 )

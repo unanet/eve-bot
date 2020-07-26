@@ -3,12 +3,6 @@ package handlers
 import (
 	"context"
 	"fmt"
-
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-
 	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
@@ -16,6 +10,9 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
 )
 
 type ShowHandler struct {
