@@ -42,7 +42,7 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	msg := fmt.Sprintf("successfully released %s:%s from %s to %s", payload.Artifact, payload.Version, payload.FromFeed, payload.ToFeed)
+	msg := fmt.Sprintf("successfully released %s:%s from %s to %s", resp.Artifact, resp.Version, resp.FromFeed, resp.ToFeed)
 
 	log.Logger.Debug("release response", zap.String("message", resp.Message))
 	h.chatSvc.UserNotificationThread(ctx, msg, cmd.User(), cmd.Channel(), timestamp)
