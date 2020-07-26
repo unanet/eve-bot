@@ -42,22 +42,8 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	log.Logger.Debug("release response", zap.String("message", resp.Message))
-	h.chatSvc.UserNotificationThread(ctx, message(payload), cmd.User(), cmd.Channel(), timestamp)
-}
+	msg := fmt.Sprintf("successfully released %s:%s from %s to %s", payload.Artifact, payload.Version, payload.FromFeed, payload.ToFeed)
 
-func message(payload eve.Release) string {
-	if len(payload.Version) > 0 && len(payload.ToFeed) > 0 {
-		return fmt.Sprintf("successfully released `%s:%s` from `%s` to `%s`", payload.Artifact, payload.Version, payload.FromFeed, payload.ToFeed)
-	}
-	if len(payload.Version) == 0 && len(payload.ToFeed) == 0 {
-		return fmt.Sprintf("successfully released `%s` from `%s`", payload.Artifact, payload.FromFeed)
-	}
-	if len(payload.Version) > 0 && len(payload.ToFeed) == 0 {
-		return fmt.Sprintf("successfully released `%s:%s` from `%s`", payload.Artifact, payload.Version, payload.FromFeed)
-	}
-	if len(payload.Version) == 0 && len(payload.ToFeed) > 0 {
-		return fmt.Sprintf("successfully released `%s` from `%s` to %s", payload.Artifact, payload.FromFeed, payload.ToFeed)
-	}
-	return fmt.Sprintf("successfully released `%s` from `%s`", payload.Artifact, payload.FromFeed)
+	log.Logger.Debug("release response", zap.String("message", resp.Message))
+	h.chatSvc.UserNotificationThread(ctx, msg, cmd.User(), cmd.Channel(), timestamp)
 }

@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-
 	"github.com/slack-go/slack"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -96,32 +94,6 @@ func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user s
 	threadOpt := slack.MsgOptionTS(ts)
 	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, linkOpt, threadOpt)
 	sp.handleDevOpsErrorNotification(ctx, err)
-}
-
-func (sp Provider) ShowServicesMessageThread(ctx context.Context, svcs eveapimodels.Services, msg, user, channel, ts string) {
-	//headerSectionBlock := sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgResultsNotification))
-	//
-	//msgOptBlocks := slack.MsgOptionBlocks()
-	//for _, v := range svcs {
-	//	svcFields := []slack.TextBlockObject{}
-	//	fieldNameVersion := slack.TextBlockObject{
-	//		Type: slack.MarkdownType,
-	//		Text: fmt.Sprintf("`%s`:_%s_", v.Name, v.DeployedVersion),
-	//	}
-	//	fieldArtifactName := slack.TextBlockObject{
-	//		Type: slack.MarkdownType,
-	//		Text: fmt.Sprintf("(*%s*)", v.ArtifactName),
-	//	}
-	//	svcFields := append(svcFields, fieldNameVersion, fieldArtifactName)
-	//	msgOptBlocks
-	//}
-	//
-	//bodyOpt := slack.NewSectionBlock(&slack.TextBlockObject{
-	//	Type:     slack.MarkdownType,
-	//	Text:     msg,
-	//	Emoji:    false,
-	//	Verbatim: false,
-	//}, nil, nil)
 }
 
 func (sp Provider) ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {

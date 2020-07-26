@@ -31,11 +31,6 @@ type Config struct {
 	EveapiCallbackUrl string        `split_words:"true" required:"true"`
 }
 
-type genericResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
 type Client interface {
 	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
 	GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error)
@@ -48,7 +43,7 @@ type Client interface {
 	SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error)
 	SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error)
 	GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error)
-	Release(ctx context.Context, payload eve.Release) (genericResponse, error)
+	Release(ctx context.Context, payload eve.Release) (eve.Release, error)
 }
 
 type client struct {
@@ -76,8 +71,8 @@ func NewClient(cfg Config) Client {
 	}
 }
 
-func (c *client) Release(ctx context.Context, payload eve.Release) (genericResponse, error) {
-	var success genericResponse
+func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release, error) {
+	var success eve.Release
 	var failure eveerror.RestError
 
 	r, err := c.sling.New().Post(fmt.Sprintf("release")).BodyJSON(payload).Request()
