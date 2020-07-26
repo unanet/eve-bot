@@ -97,10 +97,19 @@ func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user s
 }
 
 func (sp Provider) ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
-	log.Logger.Debug("show ShowResultsMessageThread", zap.String("user", user), zap.String("message", msg))
-
 	msgOptionBlocks := slack.MsgOptionBlocks(
 		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgResultsNotification)),
+		slack.NewDividerBlock(),
+		sectionBlockOpt(msg),
+	)
+	threadOpt := slack.MsgOptionTS(ts)
+	_, _, err := sp.client.PostMessageContext(ctx, channel, msgOptionBlocks, threadOpt)
+	sp.handleDevOpsErrorNotification(ctx, err)
+}
+
+func (sp Provider) ReleaseResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
+	msgOptionBlocks := slack.MsgOptionBlocks(
+		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgReleaseNotification)),
 		slack.NewDividerBlock(),
 		sectionBlockOpt(msg),
 	)

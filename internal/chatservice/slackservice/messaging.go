@@ -9,6 +9,7 @@ const (
 	msgDeploymentErrNotification = "I detected some deployment *errors:*"
 	msgLogLinks                  = "Here are the latest logs..."
 	msgResultsNotification       = "Here are your results..."
+	msgReleaseNotification       = "Successfully released...."
 )
 
 const (

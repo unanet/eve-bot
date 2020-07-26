@@ -39,7 +39,7 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 	}
 
 	log.Logger.Debug("release response", zap.String("message", resp.Message))
-	h.chatSvc.ShowResultsMessageThread(ctx, toChatMessage(resp), cmd.User(), cmd.Channel(), timestamp)
+	h.chatSvc.ReleaseResultsMessageThread(ctx, toChatMessage(resp), cmd.User(), cmd.Channel(), timestamp)
 }
 
 func toChatMessage(resp eve.Release) string {
