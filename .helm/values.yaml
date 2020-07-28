@@ -1,0 +1,9 @@
+eveLogLevel: "debug"
+eveServiceName: "eve-bot"
+eveAPIBaseURL: "http://eve-api-v1:3000"
+eveAPICallbackURL: "http://eve-bot-v1:3000/eve-callback"
+eveSlackOAuthAccessToken: ""
+eveSlackSigningSecret: ""
+eveSlackUserOAuthAccessToken: ""
+eveSlackVerificationToken: ""
+

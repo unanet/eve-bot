@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eve-bot-v1
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: eve-bot-v1
+  replicas: 2
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+      labels:
+        app: eve-bot-v1
+    spec:
+      securityContext:
+        runAsUser: 9001
+        runAsGroup: 9001
+        fsGroup: 65534
+      containers:
+        - name: eve-bot-v1
+          image: {{ .Values.image }}
+          imagePullPolicy: Always
+          env:
+            - name: EVE_LOG_LEVEL
+              value: {{ .Values.eveLogLevel }}
+            - name: EVE_SERVICE_NAME
+              value: {{ .Values.eveServiceName }}
+            - name: EVEBOT_EVEAPI_BASE_URL
+              value: {{ .Values.eveAPIBaseURL }}
+            - name: EVEBOT_EVEAPI_CALLBACK_URL
+              value: {{ .Values.eveAPICallbackURL }}
+            - name: EVEBOT_SLACK_OAUTH_ACCESS_TOKEN
+              value: {{ .Values.eveSlackOAuthAccessToken }}
+            - name: EVEBOT_SLACK_SIGNING_SECRET
+              value: {{ .Values.eveSlackSigningSecret }}
+            - name: EVEBOT_SLACK_USER_OAUTH_ACCESS_TOKEN
+              value: {{ .Values.eveSlackUserOAuthAccessToken }}
+            - name: EVEBOT_SLACK_VERIFICATION_TOKEN
+              value: {{ .Values.eveSlackVerificationToken }}
+          ports:
+            - containerPort: 3000
+              name: api
+            - containerPort: 3001
+              name: metrics
+      imagePullSecrets:
+        - name: docker-cfg
+
+
+
+
+
