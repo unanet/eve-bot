@@ -1,7 +1,6 @@
 stages:
   - test
   - dist
-  - deploy
   - scan
 
 Dist:
@@ -21,15 +20,6 @@ Test:
     - linux
   except:
     - tags
-
-Deploy:
-  stage: deploy
-  script:
-    - make deploy
-  tags:
-    - linux
-  only:
-    - master
 
 Sonar Scan:
   stage: scan
