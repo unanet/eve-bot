@@ -29,6 +29,22 @@ func (cbs *CallbackState) cleanUser() {
 
 func (cbs *CallbackState) nothingToDeployResponse() string {
 	msg := fmt.Sprintf("\n<%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
+
+	details := ""
+	if (cbs.Payload.Namespace != nil) && len(cbs.Payload.Namespace.Alias) > 0 {
+		details = fmt.Sprintf("Namespace: `%s`\n", cbs.Payload.Namespace.Alias)
+	}
+
+	if len(cbs.Payload.EnvironmentAlias) > 0 {
+		details = details + fmt.Sprintf("Environment: `%s`\n", cbs.Payload.EnvironmentAlias)
+	}
+
+	if (cbs.Payload.Namespace != nil) && len(cbs.Payload.Namespace.ClusterName) > 0 {
+		details = details + fmt.Sprintf("Cluster: `%s`\n", cbs.Payload.Namespace.ClusterName)
+	}
+
+	msg = msg + details
+
 	if len(cbs.Payload.Messages) > 0 {
 		return msg + HeaderMsg("Messages") + "\n```" + APIMessages(cbs.Payload.Messages) + "```"
 	}
