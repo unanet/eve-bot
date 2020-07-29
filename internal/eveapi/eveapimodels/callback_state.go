@@ -32,18 +32,20 @@ func (cbs *CallbackState) nothingToDeployResponse() string {
 
 	details := ""
 	if (cbs.Payload.Namespace != nil) && len(cbs.Payload.Namespace.Alias) > 0 {
-		details = fmt.Sprintf("Namespace: `%s`\n", cbs.Payload.Namespace.Alias)
+		details = fmt.Sprintf("Namespace: %s\n", cbs.Payload.Namespace.Alias)
 	}
 
 	if len(cbs.Payload.EnvironmentAlias) > 0 {
-		details = details + fmt.Sprintf("Environment: `%s`\n", cbs.Payload.EnvironmentAlias)
+		details = details + fmt.Sprintf("Environment: %s\n", cbs.Payload.EnvironmentAlias)
 	}
 
 	if (cbs.Payload.Namespace != nil) && len(cbs.Payload.Namespace.ClusterName) > 0 {
-		details = details + fmt.Sprintf("Cluster: `%s`\n", cbs.Payload.Namespace.ClusterName)
+		details = details + fmt.Sprintf("Cluster: %s\n", cbs.Payload.Namespace.ClusterName)
 	}
 
-	msg = msg + details
+	if len(details) > 0 {
+		msg = msg + "```" + details + "```"
+	}
 
 	if len(cbs.Payload.Messages) > 0 {
 		return msg + HeaderMsg("Messages") + "\n```" + APIMessages(cbs.Payload.Messages) + "```"
