@@ -48,6 +48,10 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 	return cmd
 }
 
+func (cmd MigrateCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
+}
+
 func (cmd MigrateCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }

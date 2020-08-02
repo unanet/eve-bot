@@ -16,6 +16,7 @@ const (
 )
 
 type Provider interface {
+	GetChannelInfo(channelID string) (chatmodels.Channel, error)
 	PostMessage(ctx context.Context, msg, channel string) (timestamp string)
 	PostMessageThread(ctx context.Context, msg, channel, ts string) (timestamp string)
 	ErrorNotification(ctx context.Context, user, channel string, err error)

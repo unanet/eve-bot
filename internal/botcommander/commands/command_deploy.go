@@ -46,6 +46,10 @@ func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 	return cmd
 }
 
+func (cmd DeployCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
+}
+
 func (cmd DeployCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }

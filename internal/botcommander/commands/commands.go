@@ -2,14 +2,24 @@ package commands
 
 import (
 	"fmt"
+
+	"gitlab.unanet.io/devops/eve/pkg/log"
+
 	"regexp"
 	"strings"
+
+	"go.uber.org/zap"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
+
+// chatChannelInfo func
+type chatChannelInfo func(string) (chatmodels.Channel, error)
 
 var CommandInitializerMap = map[string]interface{}{
 	"help":    NewHelpCommand,
@@ -49,6 +59,7 @@ type EvebotCommand interface {
 	AckMsg() (string, bool)
 	ErrMsg() string
 	APIOptions() CommandOptions
+	IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool
 }
 
 func ExtractServiceArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefinitions {
@@ -226,4 +237,41 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 		}
 	}
 	return result
+}
+
+func validChannelAuthCheck(channel string, channelMap map[string]interface{}, fn chatChannelInfo) bool {
+	incomingChannelInfo, err := fn(channel)
+	if err != nil {
+		log.Logger.Error("failed to get channel info", zap.Error(err))
+		return false
+	}
+
+	// Coming from an Elevated/Approved Channel
+	// let them pass
+	if _, ok := channelMap[incomingChannelInfo.Name]; ok {
+		return true
+	}
+	return false
+}
+
+func lowerEnvAuthCheck(options CommandOptions) bool {
+	if options == nil {
+		return false
+	}
+
+	var env string
+	var ok bool
+	if env, ok = options[params.EnvironmentName].(string); ok == false {
+		log.Logger.Warn("environment not set")
+		return false
+	}
+
+	// Let's see if they are performing an action to something in the lower environments (int,qa,dev)
+	// Most actions can be taken against resources in the lower environments
+	// the only action that can't is the `release` command
+	switch {
+	case strings.Contains(env, "int"), strings.Contains(env, "qa"), strings.Contains(env, "dev"):
+		return true
+	}
+	return false
 }

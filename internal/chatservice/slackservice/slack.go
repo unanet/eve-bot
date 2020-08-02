@@ -25,6 +25,19 @@ func (sp Provider) handleDevOpsErrorNotification(ctx context.Context, err error)
 	}
 }
 
+func (sp Provider) GetChannelInfo(channelID string) (chatmodels.Channel, error) {
+	slackChannel, err := sp.client.GetConversationInfoContext(context.TODO(), channelID, false)
+	if err != nil {
+		log.Logger.Error("failed to get channel info", zap.Error(err))
+	}
+
+	return chatmodels.Channel{
+		ID:   slackChannel.ID,
+		Name: slackChannel.Name,
+	}, err
+
+}
+
 func (sp Provider) DeploymentNotificationThread(ctx context.Context, msg, user, channel, ts string) {
 	log.Logger.Debug("deployment notification", zap.String("user", user), zap.String("message", msg))
 	_, _, err := sp.client.PostMessageContext(ctx, channel, slack.MsgOptionText(userDeploymentNotificationMessage(user, msg), false), slack.MsgOptionTS(ts))

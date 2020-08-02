@@ -41,11 +41,11 @@ export EVEBOT_SLACK_OAUTH_TOKEN=`vault kv get --format=json kv/devops/evebot | j
 
 New secrets should be generated through the Slack UI, and then pushed up to Vault.
 
-[Slack OAuth Tokens](https://api.slack.com/apps/A011B3L27P1/oauth)
+[Slack OAuth Tokens](https://api.slack.com/apps/A011XS68C2J/oauth)
 
-[Slack Event Subscriptions](https://api.slack.com/apps/A011B3L27P1/event-subscriptions)
+[Slack Event Subscriptions](https://api.slack.com/apps/A011XS68C2J/event-subscriptions)
 
-[Slack App Creds](https://api.slack.com/apps/A011B3L27P1/general?)
+[Slack App Creds](https://api.slack.com/apps/A011XS68C2J/general?)
 
 ### Local Dev
 

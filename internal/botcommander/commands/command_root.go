@@ -25,6 +25,10 @@ func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	}}
 }
 
+func (cmd RootCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool {
+	return true
+}
+
 func (cmd RootCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }

@@ -31,6 +31,10 @@ func defaultHelpCommand(cmdFields []string, channel, user string) HelpCmd {
 	}}
 }
 
+func (cmd HelpCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool {
+	return true
+}
+
 func (cmd HelpCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
