@@ -10,6 +10,7 @@ ENV VAULT_K8S_MOUNT kubernetes
 ENV EVEBOT_EVEAPI_BASE_URL http://eve-api-v1:3000
 ENV EVEBOT_EVEAPI_CALLBACK_URL http://eve-bot-v1:3000/eve-callback
 ENV EVEBOT_SLACK_CHANNELS_AUTH my-evebot,evebot-tests,hydra,admin-ci
+ENV EVEBOT_SLACK_AUTH_ENABLED true
 
 ADD ./bin/eve-bot /app/eve-bot
 WORKDIR /app

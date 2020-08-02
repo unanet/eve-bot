@@ -30,9 +30,14 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// Resolve the input and return a Command object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
-	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo) == false {
-		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Channel(), ev.ThreadTimeStamp)
-		return
+	// SlackAuthEnabled is like a "feature flag"
+	// set to true and we will check auth
+	// set to false and we will skip the auth check
+	if p.Cfg.SlackAuthEnabled {
+		if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo) == false {
+			_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Channel(), ev.ThreadTimeStamp)
+			return
+		}
 	}
 
 	// Hydrate the Acknowledgement Message and whether or not we should continue...
