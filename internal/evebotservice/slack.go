@@ -29,6 +29,12 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackevents.AppMentionEvent) {
 	// Resolve the input and return a Command object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
+
+	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo) == false {
+		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Channel(), ev.ThreadTimeStamp)
+		return
+	}
+
 	// Hydrate the Acknowledgement Message and whether or not we should continue...
 	ackMsg, cont := cmd.AckMsg()
 	// Send the AckMsg and get the Timestamp back so we can thread it later on...

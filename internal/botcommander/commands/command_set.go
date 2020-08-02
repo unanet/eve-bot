@@ -42,6 +42,10 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 	return cmd
 }
 
+func (cmd SetCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
+}
+
 func (cmd SetCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }

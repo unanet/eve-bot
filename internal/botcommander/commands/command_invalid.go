@@ -31,6 +31,10 @@ func defaultInvalidCommand(cmdFields []string, channel, user string) InvalidCmd 
 	}}
 }
 
+func (cmd InvalidCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool {
+	return true
+}
+
 func (cmd InvalidCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }

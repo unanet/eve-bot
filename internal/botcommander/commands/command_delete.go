@@ -39,6 +39,10 @@ func defaultDeleteCommand(cmdFields []string, channel, user string) DeleteCmd {
 	return cmd
 }
 
+func (cmd DeleteCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
+}
+
 func (cmd DeleteCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
