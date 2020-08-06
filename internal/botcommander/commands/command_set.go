@@ -2,25 +2,20 @@ package commands
 
 import (
 	"fmt"
-	"regexp"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 )
 
-func NewSetCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultSetCommand(cmdFields, channel, user)
-}
-
 type SetCmd struct {
 	baseCommand
 }
 
-func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
+func NewSetCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := SetCmd{baseCommand{
 		input:       cmdFields,
-		chatDetails: ChatDetails{User: user, Channel: channel},
+		chatDetails: ChatInfo{User: user, Channel: channel},
 		name:        "set",
 		summary:     "The `set` command is used to set resource values (metadata and version)",
 		usage: help.Usage{
@@ -36,12 +31,21 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 		apiOptions:  make(CommandOptions),
 		inputBounds: InputLengthBounds{Min: 7, Max: -1},
 	}}
-	cmd.resolveResource()
-	cmd.resolveConditionalParams()
+	cmd.resolveDynamicOptions()
 	return cmd
 }
 
-func (cmd SetCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+func (cmd SetCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       cmd.ValidInputLength(),
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd SetCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
 }
 
@@ -49,24 +53,8 @@ func (cmd SetCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd SetCmd) ChatInfo() ChatDetails {
+func (cmd SetCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd SetCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd SetCmd) IsValid() bool {
-	return cmd.ValidInputLength()
-}
-
-func (cmd SetCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd SetCmd) Name() string {
-	return cmd.name
 }
 
 func (cmd SetCmd) Help() *help.Help {
@@ -77,13 +65,9 @@ func (cmd SetCmd) Help() *help.Help {
 	)
 }
 
-func (cmd SetCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
-}
-
-func (cmd *SetCmd) resolveResource() {
+func (cmd *SetCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command: %v", cmd.input))
+		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command params: %v", cmd.input))
 		return
 	}
 
@@ -94,20 +78,12 @@ func (cmd *SetCmd) resolveResource() {
 		return
 	}
 
-}
-
-func (cmd *SetCmd) resolveConditionalParams() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command params: %v", cmd.input))
+	if cmd.apiOptions["resource"] == nil {
+		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
 		return
 	}
 
 	if len(cmd.errs) > 0 {
-		return
-	}
-
-	if cmd.apiOptions["resource"] == nil {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
 		return
 	}
 
@@ -146,25 +122,4 @@ func (cmd *SetCmd) resolveConditionalParams() {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))
 		return
 	}
-}
-
-func (cmd SetCmd) validMetadataMap(metadataMap params.MetadataMap) bool {
-	invalidCharMatcher := regexp.MustCompile(`<http://|>|<|//|\||https://`)
-	result := true
-	for k, v := range metadataMap {
-		invalidCharKeyMatchIndexes := invalidCharMatcher.FindAllStringIndex(k, -1)
-		if len(invalidCharKeyMatchIndexes) > 0 {
-			cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata key supplied: %v", k))
-			result = false
-		}
-
-		if strVal, ok := v.(string); ok {
-			invalidCharValueMatchIndexes := invalidCharMatcher.FindAllStringIndex(strVal, -1)
-			if len(invalidCharValueMatchIndexes) > 0 {
-				cmd.errs = append(cmd.errs, fmt.Errorf("invalid metadata value supplied: %v", strVal))
-				result = false
-			}
-		}
-	}
-	return result
 }

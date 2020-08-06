@@ -9,18 +9,9 @@ import (
 )
 
 func NewReleaseCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultReleaseCommand(cmdFields, channel, user)
-}
-
-type ReleaseCmd struct {
-	baseCommand
-}
-
-// @evebot release unanet-analytics:20.2 from int to prod
-func defaultReleaseCommand(cmdFields []string, channel, user string) ReleaseCmd {
 	cmd := ReleaseCmd{baseCommand{
 		input:       cmdFields,
-		chatDetails: ChatDetails{User: user, Channel: channel},
+		chatDetails: ChatInfo{User: user, Channel: channel},
 		name:        "release",
 		summary:     "The `release` command is used to release artifacts from/to feeds",
 		usage: help.Usage{
@@ -36,11 +27,25 @@ func defaultReleaseCommand(cmdFields []string, channel, user string) ReleaseCmd 
 		apiOptions:  make(CommandOptions),
 		inputBounds: InputLengthBounds{Min: 4, Max: 6},
 	}}
-	cmd.resolveValues()
+	cmd.resolveDynamicOptions()
 	return cmd
 }
 
-func (cmd ReleaseCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+type ReleaseCmd struct {
+	baseCommand
+}
+
+func (cmd ReleaseCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       cmd.ValidInputLength(),
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd ReleaseCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn)
 }
 
@@ -48,20 +53,8 @@ func (cmd ReleaseCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd ReleaseCmd) ChatInfo() ChatDetails {
+func (cmd ReleaseCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd ReleaseCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd ReleaseCmd) IsValid() bool {
-	return cmd.ValidInputLength()
-}
-
-func (cmd ReleaseCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
 }
 
 func (cmd ReleaseCmd) Name() string {
@@ -76,11 +69,7 @@ func (cmd ReleaseCmd) Help() *help.Help {
 	)
 }
 
-func (cmd ReleaseCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
-}
-
-func (cmd *ReleaseCmd) resolveValues() {
+func (cmd *ReleaseCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid release command: %v", cmd.input))
 		return

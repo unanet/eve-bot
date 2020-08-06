@@ -8,18 +8,14 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
-func NewInvalidCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultInvalidCommand(cmdFields, channel, user)
-}
-
 type InvalidCmd struct {
 	baseCommand
 }
 
-func defaultInvalidCommand(cmdFields []string, channel, user string) InvalidCmd {
+func NewInvalidCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return InvalidCmd{baseCommand{
 		input:          cmdFields,
-		chatDetails:    ChatDetails{User: user, Channel: channel},
+		chatDetails:    ChatInfo{User: user, Channel: channel},
 		name:           "",
 		summary:        help.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmdFields)),
 		usage:          help.Usage{},
@@ -27,10 +23,21 @@ func defaultInvalidCommand(cmdFields []string, channel, user string) InvalidCmd 
 		optionalArgs:   args.Args{},
 		requiredParams: params.Params{},
 		apiOptions:     make(CommandOptions),
+		inputBounds:    InputLengthBounds{Min: 1, Max: -1},
 	}}
 }
 
-func (cmd InvalidCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool {
+func (cmd InvalidCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       cmd.ValidInputLength(),
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd InvalidCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
@@ -38,24 +45,8 @@ func (cmd InvalidCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd InvalidCmd) ChatInfo() ChatDetails {
+func (cmd InvalidCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd InvalidCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd InvalidCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd InvalidCmd) IsValid() bool {
-	return false
-}
-
-func (cmd InvalidCmd) Name() string {
-	return cmd.name
 }
 
 func (cmd InvalidCmd) Help() *help.Help {
@@ -64,9 +55,9 @@ func (cmd InvalidCmd) Help() *help.Help {
 	var nonHelpCmdExamples = help.Examples{}
 
 	for _, v := range nonHelpCmd() {
-		if v.Name() != "help" {
-			nonHelpCmds = nonHelpCmds + "\n" + v.Name()
-			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Name()+" help")
+		if v.Details().Name != "help" {
+			nonHelpCmds = nonHelpCmds + "\n" + v.Details().Name
+			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Details().Name+" help")
 		}
 	}
 
@@ -76,8 +67,4 @@ func (cmd InvalidCmd) Help() *help.Help {
 		help.ExamplesOpt(nonHelpCmdExamples.String()),
 	)
 
-}
-
-func (cmd InvalidCmd) IsHelpRequest() bool {
-	return true
 }

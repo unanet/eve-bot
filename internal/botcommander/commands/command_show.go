@@ -8,19 +8,14 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 )
 
-func NewShowCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultShowCommand(cmdFields, channel, user)
-}
-
 type ShowCmd struct {
 	baseCommand
 }
 
-// @evebot show current in qa
-func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
+func NewShowCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := ShowCmd{baseCommand{
 		input:       cmdFields,
-		chatDetails: ChatDetails{User: user, Channel: channel},
+		chatDetails: ChatInfo{User: user, Channel: channel},
 		name:        "show",
 		summary:     "The `show` command is used to show resources (environments,namespaces,services,metadata)",
 		usage: help.Usage{
@@ -38,12 +33,21 @@ func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
 		apiOptions:  make(CommandOptions),
 		inputBounds: InputLengthBounds{Min: 2, Max: 7},
 	}}
-	cmd.resolveResource()
-	cmd.resolveConditionalParams()
+	cmd.resolveDynamicOptions()
 	return cmd
 }
 
-func (cmd ShowCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool {
+func (cmd ShowCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       cmd.ValidInputLength(),
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd ShowCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
@@ -51,24 +55,8 @@ func (cmd ShowCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd ShowCmd) ChatInfo() ChatDetails {
+func (cmd ShowCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd ShowCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd ShowCmd) IsValid() bool {
-	return cmd.ValidInputLength()
-}
-
-func (cmd ShowCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd ShowCmd) Name() string {
-	return cmd.name
 }
 
 func (cmd ShowCmd) Help() *help.Help {
@@ -79,11 +67,7 @@ func (cmd ShowCmd) Help() *help.Help {
 	)
 }
 
-func (cmd ShowCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
-}
-
-func (cmd *ShowCmd) resolveResource() {
+func (cmd *ShowCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid show command: %v", cmd.input))
 		return
@@ -96,20 +80,12 @@ func (cmd *ShowCmd) resolveResource() {
 		return
 	}
 
-}
-
-func (cmd *ShowCmd) resolveConditionalParams() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid show command params: %v", cmd.input))
+	if cmd.apiOptions["resource"] == nil {
+		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
 		return
 	}
 
 	if len(cmd.errs) > 0 {
-		return
-	}
-
-	if cmd.apiOptions["resource"] == nil {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
 		return
 	}
 
@@ -153,4 +129,5 @@ func (cmd *ShowCmd) resolveConditionalParams() {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.apiOptions["resource"]))
 		return
 	}
+
 }

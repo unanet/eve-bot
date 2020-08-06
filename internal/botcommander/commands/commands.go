@@ -3,23 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
-
-	"regexp"
-	"strings"
-
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
-
-// chatChannelInfo func
-type chatChannelInfo func(string) (chatmodels.Channel, error)
 
 var CommandInitializerMap = map[string]interface{}{
 	"help":    NewHelpCommand,
@@ -31,8 +20,15 @@ var CommandInitializerMap = map[string]interface{}{
 	"release": NewReleaseCommand,
 }
 
+type chatChannelInfoFn func(string) (chatmodels.Channel, error)
+
 type CommandOptions map[string]interface{}
 
+/*
+
+ ------------- Command Input Validation ---------------------
+
+*/
 type InputLengthBounds struct {
 	Min, Max int
 }
@@ -58,14 +54,20 @@ func (ic InputCommand) Length() int {
 	return len(ic)
 }
 
-type ChatDetails struct {
+type ChatInfo struct {
 	User, Channel string
 }
 
+/*
+ ------------- Base Command ---------------------
+This is the root/abstract/base (i.e. shared/common) struct that all commands use
+Ideally
+
+*/
 type baseCommand struct {
 	input          InputCommand
 	inputBounds    InputLengthBounds
-	chatDetails    ChatDetails
+	chatDetails    ChatInfo
 	name           string
 	valid          bool
 	errs           []error
@@ -89,231 +91,59 @@ func (bc *baseCommand) ValidMaxInputLength() bool {
 	return bc.inputBounds.ValidMax(bc.input)
 }
 
+func (bc *baseCommand) BaseErrMsg() ErrMsgFn {
+	return func() string {
+		msg := ""
+		if len(bc.errs) > 0 {
+			for _, v := range bc.errs {
+				if len(msg) == 0 {
+					msg = v.Error()
+				} else {
+					msg = msg + "\n" + v.Error()
+				}
+			}
+		}
+		return msg
+	}
+}
+
+func baseAckMsg(cmd EvebotCommand, cmdInput []string) ChatAckMsgFn {
+	if cmd.Details().IsHelpRequest {
+		return ackMsg(fmt.Sprintf("<@%s>...\n\n%s", cmd.ChatInfo().User, cmd.Help().String()), false)
+	}
+	if cmd.Details().IsValid == false {
+		return ackMsg(fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", cmd.ChatInfo().User, cmdInput, cmd.Details().Name), false)
+	}
+	if len(cmd.Details().ErrMsgFn()) > 0 {
+		return ackMsg(fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", cmd.ChatInfo().User, cmd.Details().ErrMsgFn()), false)
+	}
+	// Happy Path
+	return ackMsg(fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", cmd.ChatInfo().User, cmd.Details().Name), true)
+}
+
+/*
+
+ ------------- Command Details ---------------------
+
+*/
+
+type ErrMsgFn func() string
+
+type CommandDetails struct {
+	Name                   string
+	IsValid, IsHelpRequest bool
+	ErrMsgFn               ErrMsgFn
+	AckMsgFn               ChatAckMsgFn
+}
+
+type ChatAckMsgFn func() (string, bool)
+
 // EvebotCommand interface
 // each evebot command needs to implement this interface
 type EvebotCommand interface {
-	Name() string
+	Details() CommandDetails
 	Help() *help.Help
-	ChatInfo() ChatDetails
-	IsValid() bool
-	IsHelpRequest() bool
-	AckMsg() (string, bool)
-	ErrMsg() string
+	ChatInfo() ChatInfo
 	APIOptions() CommandOptions
-	IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool
-}
-
-func ExtractServiceArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefinitions {
-	if val, ok := opts[args.ServicesName]; ok {
-		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
-			return artifactDefs
-		}
-		return nil
-
-	}
-	return nil
-}
-
-func ExtractDatabaseArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefinitions {
-	if val, ok := opts[args.DatabasesName]; ok {
-		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
-			return artifactDefs
-		}
-		return nil
-
-	}
-	return nil
-}
-
-func ExtractForceDeployOpt(opts CommandOptions) bool {
-	if val, ok := opts[args.ForceDeployName]; ok {
-		if forceDepVal, ok := val.(bool); ok {
-			return forceDepVal
-		}
-		return false
-	}
-	return false
-}
-
-func ExtractDryrunOpt(opts CommandOptions) bool {
-	if val, ok := opts[args.DryrunName]; ok {
-		if dryRunVal, ok := val.(bool); ok {
-			return dryRunVal
-		}
-		return false
-	}
-	return false
-}
-
-func ExtractEnvironmentOpt(opts CommandOptions) string {
-	if val, ok := opts[params.EnvironmentName]; ok {
-		if envVal, ok := val.(string); ok {
-			return envVal
-		}
-		return ""
-	}
-	return ""
-}
-
-func ExtractNSOpt(opts CommandOptions) eveapimodels.StringList {
-	if val, ok := opts[params.NamespaceName]; ok {
-		if nsVal, ok := val.(string); ok {
-			return eveapimodels.StringList{nsVal}
-		}
-		return nil
-	}
-	return nil
-}
-
-func CleanUrls(input string) string {
-	matcher := regexp.MustCompile(`<[a-zA-Z]+://[a-zA-Z._\-:\d/|]+>`)
-	matchIndexes := matcher.FindAllStringIndex(input, -1)
-	matchCount := len(matchIndexes)
-
-	if matchCount == 0 {
-		return input
-	}
-
-	firstMatchIndex := matchIndexes[0][0]
-	lastMatchIndex := matchIndexes[matchCount-1][1]
-
-	firstPart := input[0:firstMatchIndex]
-	lastPart := input[lastMatchIndex:]
-
-	cleanPart := firstPart
-	for i, v := range matchIndexes {
-		if i > 0 {
-			previousMatchLastIndex := matchIndexes[i-1][1]
-			currentMatchFirstIndex := matchIndexes[i][0]
-			middleMatch := input[previousMatchLastIndex:currentMatchFirstIndex]
-			cleanPart = cleanPart + middleMatch
-		}
-
-		matchedVal := input[v[0]:v[1]]
-		cleanVal := ""
-
-		if strings.Contains(matchedVal, "|") {
-			vals := strings.Split(matchedVal, "|")
-			cleanVal = vals[1][:len(vals[1])-len(">")]
-		} else {
-			cleanVal = strings.ReplaceAll(matchedVal, "<", "")
-			cleanVal = strings.ReplaceAll(cleanVal, ">", "")
-		}
-
-		cleanPart = cleanPart + cleanVal
-	}
-	return cleanPart + lastPart
-}
-
-func nonHelpCmd() []EvebotCommand {
-	var cmds []EvebotCommand
-
-	for k, v := range CommandInitializerMap {
-		if k != "help" {
-			cmds = append(cmds, v.(func([]string, string, string) EvebotCommand)([]string{}, "", ""))
-		}
-	}
-	return cmds
-}
-
-//
-// @evebot 				(show toplevel evebot help/welcome message)
-// @evebot help 		(show toplevel help with full command list and help usage)
-// @evebot cmd			(show specific command help)
-// @evebot cmd help		(show specific command help)
-// @evebot help cmd		(show specific sub/command help)
-func isHelpRequest(inputCmd []string, cmdName string) bool {
-	if len(inputCmd) == 0 || inputCmd[0] == "help" || inputCmd[len(inputCmd)-1] == "help" || (len(inputCmd) == 1 && inputCmd[0] == cmdName) {
-		return true
-	}
-	return false
-}
-
-func baseIsValid(input []string) bool {
-	if input == nil || len(input) == 0 {
-		return false
-	}
-	return true
-}
-
-func baseAckMsg(cmd EvebotCommand, cmdInput []string) (msg string, cont bool) {
-	if cmd.IsHelpRequest() {
-		return fmt.Sprintf("<@%s>...\n\n%s", cmd.ChatInfo().User, cmd.Help().String()), false
-	}
-	if cmd.IsValid() == false {
-		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", cmd.ChatInfo().User, cmdInput, cmd.Name()), false
-	}
-	if len(cmd.ErrMsg()) > 0 {
-		return fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", cmd.ChatInfo().User, cmd.ErrMsg()), false
-	}
-	// Happy Path
-	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", cmd.ChatInfo().User, cmd.Name()), true
-}
-
-func baseErrMsg(errs []error) string {
-	msg := ""
-	if len(errs) > 0 {
-		for _, v := range errs {
-			if len(msg) == 0 {
-				msg = v.Error()
-			} else {
-				msg = msg + "\n" + v.Error()
-			}
-		}
-	}
-	return msg
-}
-
-func hydrateMetadataMap(keyvals []string) params.MetadataMap {
-	result := make(params.MetadataMap, 0)
-	if len(keyvals) == 0 {
-		return nil
-	}
-	for _, s := range keyvals {
-		if strings.Contains(s, "=") {
-			argKV := strings.Split(s, "=")
-			key := CleanUrls(argKV[0])
-			value := CleanUrls(argKV[1])
-			result[key] = value
-		}
-	}
-	return result
-}
-
-func validChannelAuthCheck(channel string, channelMap map[string]interface{}, fn chatChannelInfo) bool {
-	incomingChannelInfo, err := fn(channel)
-	if err != nil {
-		log.Logger.Error("failed to get channel info", zap.Error(err))
-		return false
-	}
-	log.Logger.Debug("auth channel check", zap.String("id", incomingChannelInfo.ID), zap.String("name", incomingChannelInfo.Name))
-
-	// Coming from an Elevated/Approved Channel
-	// let them pass
-	if _, ok := channelMap[incomingChannelInfo.Name]; ok {
-		return true
-	}
-	return false
-}
-
-func lowerEnvAuthCheck(options CommandOptions) bool {
-	if options == nil {
-		return false
-	}
-
-	var env string
-	var ok bool
-	if env, ok = options[params.EnvironmentName].(string); ok == false {
-		log.Logger.Warn("environment not set")
-		return false
-	}
-
-	// Let's see if they are performing an action to something in the lower environments (int,qa,dev)
-	// Most actions can be taken against resources in the lower environments
-	// the only action that can't is the `release` command
-	switch {
-	case strings.Contains(env, "int"), strings.Contains(env, "qa"), strings.Contains(env, "dev"):
-		return true
-	}
-	return false
+	IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn) bool
 }

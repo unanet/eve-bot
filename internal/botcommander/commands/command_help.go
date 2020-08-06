@@ -6,31 +6,39 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
-func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultHelpCommand(cmdFields, channel, user)
-}
-
 type HelpCmd struct {
 	baseCommand
 }
 
-func defaultHelpCommand(cmdFields []string, channel, user string) HelpCmd {
+func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return HelpCmd{baseCommand{
 		input:       cmdFields,
-		chatDetails: ChatDetails{User: user, Channel: channel},
+		chatDetails: ChatInfo{User: user, Channel: channel},
 		name:        "help",
 		summary:     "Try running one of the commands below",
 		usage: help.Usage{
+			"help",
 			"{{ command }} help",
 		},
 		examples:       help.Examples{},
 		optionalArgs:   args.Args{},
 		requiredParams: params.Params{},
 		apiOptions:     make(CommandOptions),
+		inputBounds:    InputLengthBounds{Min: 1, Max: -1},
 	}}
 }
 
-func (cmd HelpCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool {
+func (cmd HelpCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       cmd.ValidInputLength(),
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd HelpCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
@@ -38,27 +46,8 @@ func (cmd HelpCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd HelpCmd) ChatInfo() ChatDetails {
+func (cmd HelpCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd HelpCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd HelpCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd HelpCmd) IsValid() bool {
-	if len(cmd.errs) > 0 {
-		return false
-	}
-	return baseIsValid(cmd.input)
-}
-
-func (cmd HelpCmd) Name() string {
-	return cmd.name
 }
 
 func (cmd HelpCmd) Help() *help.Help {
@@ -66,9 +55,9 @@ func (cmd HelpCmd) Help() *help.Help {
 	var nonHelpCmdExamples = help.Examples{}
 
 	for _, v := range nonHelpCmd() {
-		if v.Name() != cmd.name {
-			nonHelpCmds = nonHelpCmds + "\n" + v.Name()
-			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Name()+" help")
+		if v.Details().Name != cmd.name {
+			nonHelpCmds = nonHelpCmds + "\n" + v.Details().Name
+			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Details().Name+" help")
 		}
 	}
 
@@ -79,8 +68,4 @@ func (cmd HelpCmd) Help() *help.Help {
 		help.ArgsOpt(cmd.optionalArgs.String()),
 		help.ExamplesOpt(nonHelpCmdExamples.String()),
 	)
-}
-
-func (cmd HelpCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
 }

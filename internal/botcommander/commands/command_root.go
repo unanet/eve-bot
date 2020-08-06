@@ -13,7 +13,7 @@ type RootCmd struct {
 func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	return RootCmd{baseCommand{
 		input:          cmdFields,
-		chatDetails:    ChatDetails{User: user, Channel: channel},
+		chatDetails:    ChatInfo{User: user, Channel: channel},
 		name:           "",
 		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
 		usage:          help.Usage{},
@@ -24,7 +24,17 @@ func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	}}
 }
 
-func (cmd RootCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfo) bool {
+func (cmd RootCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       true,
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd RootCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn) bool {
 	return true
 }
 
@@ -32,35 +42,10 @@ func (cmd RootCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd RootCmd) ChatInfo() ChatDetails {
+func (cmd RootCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd RootCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd RootCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd RootCmd) IsValid() bool {
-	return true
-}
-
-func (cmd RootCmd) Initialize(input []string) EvebotCommand {
-	cmd.input = input
-	return cmd
-}
-
-func (cmd RootCmd) Name() string {
-	return cmd.name
 }
 
 func (cmd RootCmd) Help() *help.Help {
 	return help.New(help.HeaderOpt(cmd.summary.String()))
-}
-
-func (cmd RootCmd) IsHelpRequest() bool {
-	return true
 }

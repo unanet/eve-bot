@@ -8,18 +8,14 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 )
 
-func NewDeleteCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultDeleteCommand(cmdFields, channel, user)
-}
-
 type DeleteCmd struct {
 	baseCommand
 }
 
-func defaultDeleteCommand(cmdFields []string, channel, user string) DeleteCmd {
+func NewDeleteCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := DeleteCmd{baseCommand{
 		input:       cmdFields,
-		chatDetails: ChatDetails{User: user, Channel: channel},
+		chatDetails: ChatInfo{User: user, Channel: channel},
 		name:        "delete",
 		summary:     "The `delete` command is used to delete resource values (metadata)",
 		usage: help.Usage{
@@ -33,12 +29,21 @@ func defaultDeleteCommand(cmdFields []string, channel, user string) DeleteCmd {
 		apiOptions:  make(CommandOptions),
 		inputBounds: InputLengthBounds{Min: 7, Max: -1},
 	}}
-	cmd.resolveResource()
-	cmd.resolveConditionalParams()
+	cmd.resolveDynamicOptions()
 	return cmd
 }
 
-func (cmd DeleteCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+func (cmd DeleteCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       cmd.ValidInputLength(),
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd DeleteCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
 }
 
@@ -46,24 +51,8 @@ func (cmd DeleteCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd DeleteCmd) ChatInfo() ChatDetails {
+func (cmd DeleteCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd DeleteCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd DeleteCmd) IsValid() bool {
-	return cmd.ValidInputLength()
-}
-
-func (cmd DeleteCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd DeleteCmd) Name() string {
-	return cmd.name
 }
 
 func (cmd DeleteCmd) Help() *help.Help {
@@ -74,11 +63,7 @@ func (cmd DeleteCmd) Help() *help.Help {
 	)
 }
 
-func (cmd DeleteCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
-}
-
-func (cmd *DeleteCmd) resolveResource() {
+func (cmd *DeleteCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command: %v", cmd.input))
 		return
@@ -88,23 +73,13 @@ func (cmd *DeleteCmd) resolveResource() {
 		cmd.apiOptions["resource"] = cmd.input[1]
 	} else {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete resource: %v", cmd.input))
-		return
-	}
-
-}
-
-func (cmd *DeleteCmd) resolveConditionalParams() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command params: %v", cmd.input))
-		return
-	}
-
-	if len(cmd.errs) > 0 {
-		return
 	}
 
 	if cmd.apiOptions["resource"] == nil {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
+	}
+
+	if len(cmd.errs) > 0 {
 		return
 	}
 

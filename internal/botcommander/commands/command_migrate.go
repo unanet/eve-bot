@@ -10,18 +10,9 @@ import (
 )
 
 func NewMigrateCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return defaultMigrateCommand(cmdFields, channel, user)
-}
-
-type MigrateCmd struct {
-	baseCommand
-}
-
-// @evebot migrate current in qa
-func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd {
 	cmd := MigrateCmd{baseCommand{
 		input:       cmdFields,
-		chatDetails: ChatDetails{User: user, Channel: channel},
+		chatDetails: ChatInfo{User: user, Channel: channel},
 		name:        "migrate",
 		summary:     "The `migrate` command is used to migrate databases by *namespace* and *environment*",
 		usage: help.Usage{
@@ -42,12 +33,25 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 		apiOptions:     make(CommandOptions),
 		inputBounds:    InputLengthBounds{Min: 4, Max: 7},
 	}}
-	cmd.resolveParams()
-	cmd.resolveArgs()
+	cmd.resolveDynamicOptions()
 	return cmd
 }
 
-func (cmd MigrateCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
+type MigrateCmd struct {
+	baseCommand
+}
+
+func (cmd MigrateCmd) Details() CommandDetails {
+	return CommandDetails{
+		Name:          cmd.name,
+		IsValid:       cmd.ValidInputLength(),
+		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
+		AckMsgFn:      baseAckMsg(cmd, cmd.input),
+		ErrMsgFn:      cmd.BaseErrMsg(),
+	}
+}
+
+func (cmd MigrateCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
 }
 
@@ -55,24 +59,8 @@ func (cmd MigrateCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd MigrateCmd) ChatInfo() ChatDetails {
+func (cmd MigrateCmd) ChatInfo() ChatInfo {
 	return cmd.chatDetails
-}
-
-func (cmd MigrateCmd) AckMsg() (string, bool) {
-	return baseAckMsg(cmd, cmd.input)
-}
-
-func (cmd MigrateCmd) IsValid() bool {
-	return cmd.ValidInputLength()
-}
-
-func (cmd MigrateCmd) ErrMsg() string {
-	return baseErrMsg(cmd.errs)
-}
-
-func (cmd MigrateCmd) Name() string {
-	return cmd.name
 }
 
 func (cmd MigrateCmd) Help() *help.Help {
@@ -84,25 +72,14 @@ func (cmd MigrateCmd) Help() *help.Help {
 	)
 }
 
-func (cmd MigrateCmd) IsHelpRequest() bool {
-	return isHelpRequest(cmd.input, cmd.name)
-}
-
-func (cmd *MigrateCmd) resolveParams() {
+func (cmd MigrateCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return
 	}
 	cmd.apiOptions[params.NamespaceName] = cmd.input[1]
 	cmd.apiOptions[params.EnvironmentName] = cmd.input[3]
-}
 
-func (cmd *MigrateCmd) resolveArgs() {
-	// haven't calculated the args and no need since they weren't supplied
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command args: %v", cmd.input))
-		return
-	}
 	for _, s := range cmd.input[3:] {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")

@@ -33,7 +33,7 @@ func NewExecutor(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Execu
 
 func (h *EvebotCommandExecutor) Execute(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	log.Logger.Debug("command handler execute", zap.Any("cmd_type", reflect.TypeOf(cmd)))
-	cmdHandlerFunc := handlers.CommandHandlerMap[cmd.Name()]
+	cmdHandlerFunc := handlers.CommandHandlerMap[cmd.Details().Name]
 	if cmdHandlerFunc == nil {
 		h.invalidCommandHandlerErr(ctx, "nil handler", cmd.ChatInfo().Channel, timestamp)
 		return
