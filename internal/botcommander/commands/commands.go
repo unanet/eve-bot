@@ -33,9 +33,38 @@ var CommandInitializerMap = map[string]interface{}{
 
 type CommandOptions map[string]interface{}
 
+type InputLengthBounds struct {
+	Min, Max int
+}
+
+func (ilb *InputLengthBounds) ValidMax(input []string) bool {
+	if ilb.Max <= 0 {
+		return true
+	}
+	return len(input) <= ilb.Max
+}
+
+func (ilb *InputLengthBounds) ValidMin(input []string) bool {
+	return len(input) >= ilb.Min
+}
+
+func (ilb *InputLengthBounds) Valid(input []string) bool {
+	return ilb.ValidMax(input) && ilb.ValidMin(input)
+}
+
+type InputCommand []string
+
+func (ic InputCommand) Length() int {
+	return len(ic)
+}
+
+type ChatDetails struct {
+	UserName, Channel string
+}
+
 type baseCommand struct {
-	input               []string
-	requiredInputLength int
+	input               InputCommand
+	inputBounds         InputLengthBounds
 	name, channel, user string
 	valid               bool
 	errs                []error
@@ -45,6 +74,18 @@ type baseCommand struct {
 	optionalArgs        args.Args
 	requiredParams      params.Params
 	apiOptions          CommandOptions // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
+}
+
+func (bc *baseCommand) ValidInputLength() bool {
+	return bc.inputBounds.Valid(bc.input)
+}
+
+func (bc *baseCommand) ValidMinInputLength() bool {
+	return bc.inputBounds.ValidMin(bc.input)
+}
+
+func (bc *baseCommand) ValidMaxInputLength() bool {
+	return bc.inputBounds.ValidMax(bc.input)
 }
 
 // EvebotCommand interface
@@ -125,7 +166,7 @@ func ExtractNSOpt(opts CommandOptions) eveapimodels.StringList {
 }
 
 func CleanUrls(input string) string {
-	matcher := regexp.MustCompile(`<[a-zA-Z]+:\/\/[a-zA-Z._\-:\d\/|]+>`)
+	matcher := regexp.MustCompile(`<[a-zA-Z]+://[a-zA-Z._\-:\d/|]+>`)
 	matchIndexes := matcher.FindAllStringIndex(input, -1)
 	matchCount := len(matchIndexes)
 

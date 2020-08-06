@@ -36,8 +36,8 @@ func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
 			"show services in current una-int",
 			"show metadata for unaneta in current una-int",
 		},
-		apiOptions:          make(CommandOptions),
-		requiredInputLength: 2,
+		apiOptions:  make(CommandOptions),
+		inputBounds: InputLengthBounds{Min: 2, Max: 7},
 	}}
 	cmd.resolveResource()
 	cmd.resolveConditionalParams()
@@ -65,10 +65,7 @@ func (cmd ShowCmd) AckMsg() (string, bool) {
 }
 
 func (cmd ShowCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
-		return true
-	}
-	return false
+	return cmd.ValidInputLength()
 }
 
 func (cmd ShowCmd) ErrMsg() string {
@@ -92,7 +89,7 @@ func (cmd ShowCmd) IsHelpRequest() bool {
 }
 
 func (cmd *ShowCmd) resolveResource() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid show command: %v", cmd.input))
 		return
 	}
@@ -107,7 +104,7 @@ func (cmd *ShowCmd) resolveResource() {
 }
 
 func (cmd *ShowCmd) resolveConditionalParams() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid show command params: %v", cmd.input))
 		return
 	}

@@ -34,8 +34,8 @@ func defaultReleaseCommand(cmdFields []string, channel, user string) ReleaseCmd 
 			"release unanet-analytics:20.2.5 from int to prod",
 			"release unanet-analytics:20.2.5.43 from prod to int",
 		},
-		apiOptions:          make(CommandOptions),
-		requiredInputLength: 4,
+		apiOptions:  make(CommandOptions),
+		inputBounds: InputLengthBounds{Min: 4, Max: 6},
 	}}
 	cmd.resolveValues()
 	return cmd
@@ -62,10 +62,7 @@ func (cmd ReleaseCmd) AckMsg() (string, bool) {
 }
 
 func (cmd ReleaseCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
-		return true
-	}
-	return false
+	return cmd.ValidInputLength()
 }
 
 func (cmd ReleaseCmd) ErrMsg() string {
@@ -89,7 +86,7 @@ func (cmd ReleaseCmd) IsHelpRequest() bool {
 }
 
 func (cmd *ReleaseCmd) resolveValues() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid release command: %v", cmd.input))
 		return
 	}
@@ -105,16 +102,14 @@ func (cmd *ReleaseCmd) resolveValues() {
 
 	cmd.apiOptions[params.FromFeedName] = cmd.input[3]
 
-	if len(cmd.input) == cmd.requiredInputLength {
+	switch len(cmd.input) {
+	case cmd.inputBounds.Min:
 		cmd.apiOptions[params.ToFeedName] = ""
 		return
-	}
-
-	if len(cmd.input) != 6 {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid release command: %v", cmd.input))
+	case cmd.inputBounds.Max:
+		cmd.apiOptions[params.ToFeedName] = cmd.input[5]
 		return
 	}
 
-	cmd.apiOptions[params.ToFeedName] = cmd.input[5]
 	return
 }

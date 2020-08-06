@@ -36,10 +36,10 @@ func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 			"deploy current in una-int services=unanetbi,unaneta dryrun=true force=true",
 			"deploy current in una-int services=unanetbi:20.2,unaneta",
 		},
-		optionalArgs:        args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultServicesArg()},
-		requiredParams:      params.Params{params.DefaultNamespace(), params.DefaultEnvironment()},
-		apiOptions:          make(CommandOptions),
-		requiredInputLength: 4,
+		optionalArgs:   args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultServicesArg()},
+		requiredParams: params.Params{params.DefaultNamespace(), params.DefaultEnvironment()},
+		apiOptions:     make(CommandOptions),
+		inputBounds:    InputLengthBounds{Min: 4, Max: 7},
 	}}
 	cmd.resolveParams()
 	cmd.resolveArgs()
@@ -67,10 +67,7 @@ func (cmd DeployCmd) AckMsg() (string, bool) {
 }
 
 func (cmd DeployCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
-		return true
-	}
-	return false
+	return cmd.ValidInputLength()
 }
 
 func (cmd DeployCmd) ErrMsg() string {
@@ -97,7 +94,7 @@ func (cmd DeployCmd) IsHelpRequest() bool {
 // resolveParams attempts to resolve the input params
 // be sure and use a pointer receiver here since we are modifying the receiver object
 func (cmd *DeployCmd) resolveParams() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("resolve cmd params err invalid input: %v", cmd.input))
 		return
 	}
@@ -108,7 +105,7 @@ func (cmd *DeployCmd) resolveParams() {
 // resolveArgs attempts to resolve the input argument
 // be sure and use a pointer receiver here since we are modifying the receiver object
 func (cmd *DeployCmd) resolveArgs() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("resolve cmd args err invalid input: %v", cmd.input))
 		return
 	}

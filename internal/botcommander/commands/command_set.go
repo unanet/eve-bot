@@ -25,8 +25,8 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 		name:    "set",
 		summary: "The `set` command is used to set resource values (metadata and version)",
 		usage: help.Usage{
-			"set {{ resources }} for {{ service }} in {{ namespace }} {{ environment }}",
-			"set {{ resources }} in {{ namespace }} {{ environment }}",
+			"set {{ resources }} for {{ service }} in {{ namespace }} {{ environment }} {{key=value}}",
+			"set {{ resources }} in {{ namespace }} {{ environment }} to {{value}}",
 		},
 		examples: help.Examples{
 			"set metadata for unaneta in current una-int key=value",
@@ -34,8 +34,8 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 			"set version for unaneta in current una-int to 20.2",
 			"set version in current una-int to 20.2",
 		},
-		apiOptions:          make(CommandOptions),
-		requiredInputLength: 4,
+		apiOptions:  make(CommandOptions),
+		inputBounds: InputLengthBounds{Min: 7, Max: -1},
 	}}
 	cmd.resolveResource()
 	cmd.resolveConditionalParams()
@@ -63,10 +63,7 @@ func (cmd SetCmd) AckMsg() (string, bool) {
 }
 
 func (cmd SetCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
-		return true
-	}
-	return false
+	return cmd.ValidInputLength()
 }
 
 func (cmd SetCmd) ErrMsg() string {
@@ -90,7 +87,7 @@ func (cmd SetCmd) IsHelpRequest() bool {
 }
 
 func (cmd *SetCmd) resolveResource() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command: %v", cmd.input))
 		return
 	}
@@ -105,7 +102,7 @@ func (cmd *SetCmd) resolveResource() {
 }
 
 func (cmd *SetCmd) resolveConditionalParams() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command params: %v", cmd.input))
 		return
 	}
@@ -157,7 +154,7 @@ func (cmd *SetCmd) resolveConditionalParams() {
 }
 
 func (cmd SetCmd) validMetadataMap(metadataMap params.MetadataMap) bool {
-	invalidCharMatcher := regexp.MustCompile(`<http:\/\/|>|<|\/\/|\||https:\/\/`)
+	invalidCharMatcher := regexp.MustCompile(`<http://|>|<|//|\||https://`)
 	result := true
 	for k, v := range metadataMap {
 		invalidCharKeyMatchIndexes := invalidCharMatcher.FindAllStringIndex(k, -1)

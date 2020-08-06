@@ -31,8 +31,8 @@ func defaultDeleteCommand(cmdFields []string, channel, user string) DeleteCmd {
 			"delete metadata for unaneta in current una-int key key2 key3 keyN",
 			"delete version for unaneta in current una-int",
 		},
-		apiOptions:          make(CommandOptions),
-		requiredInputLength: 7,
+		apiOptions:  make(CommandOptions),
+		inputBounds: InputLengthBounds{Min: 7, Max: -1},
 	}}
 	cmd.resolveResource()
 	cmd.resolveConditionalParams()
@@ -60,10 +60,7 @@ func (cmd DeleteCmd) AckMsg() (string, bool) {
 }
 
 func (cmd DeleteCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
-		return true
-	}
-	return false
+	return cmd.ValidInputLength()
 }
 
 func (cmd DeleteCmd) ErrMsg() string {
@@ -87,7 +84,7 @@ func (cmd DeleteCmd) IsHelpRequest() bool {
 }
 
 func (cmd *DeleteCmd) resolveResource() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command: %v", cmd.input))
 		return
 	}
@@ -102,7 +99,7 @@ func (cmd *DeleteCmd) resolveResource() {
 }
 
 func (cmd *DeleteCmd) resolveConditionalParams() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command params: %v", cmd.input))
 		return
 	}
@@ -120,7 +117,7 @@ func (cmd *DeleteCmd) resolveConditionalParams() {
 	case resources.MetadataName:
 		// delete metadata for unaneta in current una-int key,key2,key3
 		// delete metadata for {{ service }} in {{ namespace }} {{ environment }} key,key2,key3
-		if len(cmd.input) < 8 {
+		if cmd.ValidInputLength() == false {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete metadata: %v", cmd.input))
 			return
 		}
@@ -131,7 +128,7 @@ func (cmd *DeleteCmd) resolveConditionalParams() {
 		return
 	case resources.VersionName:
 		// delete version for unaneta in current una-int
-		if len(cmd.input) < cmd.requiredInputLength {
+		if cmd.ValidInputLength() == false {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete version: %v", cmd.input))
 			return
 		}

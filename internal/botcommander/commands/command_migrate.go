@@ -38,10 +38,10 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 			"migrate current in una-int databases=unanetd:20.2 dryrun=true force=true",
 			"migrate current in una-int databases=unanetbi,unaneta dryrun=true force=true",
 		},
-		optionalArgs:        args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultDatabasesArg()},
-		requiredParams:      params.Params{params.DefaultNamespace(), params.DefaultEnvironment()},
-		apiOptions:          make(CommandOptions),
-		requiredInputLength: 4,
+		optionalArgs:   args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultDatabasesArg()},
+		requiredParams: params.Params{params.DefaultNamespace(), params.DefaultEnvironment()},
+		apiOptions:     make(CommandOptions),
+		inputBounds:    InputLengthBounds{Min: 4, Max: 7},
 	}}
 	cmd.resolveParams()
 	cmd.resolveArgs()
@@ -69,10 +69,7 @@ func (cmd MigrateCmd) AckMsg() (string, bool) {
 }
 
 func (cmd MigrateCmd) IsValid() bool {
-	if baseIsValid(cmd.input) && len(cmd.input) >= cmd.requiredInputLength {
-		return true
-	}
-	return false
+	return cmd.ValidInputLength()
 }
 
 func (cmd MigrateCmd) ErrMsg() string {
@@ -97,7 +94,7 @@ func (cmd MigrateCmd) IsHelpRequest() bool {
 }
 
 func (cmd *MigrateCmd) resolveParams() {
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return
 	}
@@ -107,7 +104,7 @@ func (cmd *MigrateCmd) resolveParams() {
 
 func (cmd *MigrateCmd) resolveArgs() {
 	// haven't calculated the args and no need since they weren't supplied
-	if len(cmd.input) < cmd.requiredInputLength {
+	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command args: %v", cmd.input))
 		return
 	}
