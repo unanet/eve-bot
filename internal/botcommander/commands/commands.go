@@ -245,6 +245,7 @@ func validChannelAuthCheck(channel string, channelMap map[string]interface{}, fn
 		log.Logger.Error("failed to get channel info", zap.Error(err))
 		return false
 	}
+	log.Logger.Debug("auth channel check", zap.String("id", incomingChannelInfo.ID), zap.String("name", incomingChannelInfo.Name))
 
 	// Coming from an Elevated/Approved Channel
 	// let them pass

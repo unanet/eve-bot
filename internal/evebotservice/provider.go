@@ -35,6 +35,7 @@ func New(
 
 	chanMap := make(map[string]interface{})
 	for _, c := range strings.Split(cfg.SlackChannelsAuth, ",") {
+		log.Logger.Debug("auth channel map", zap.String("name", c))
 		chanMap[c] = true
 	}
 
