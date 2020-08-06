@@ -16,11 +16,10 @@ type HelpCmd struct {
 
 func defaultHelpCommand(cmdFields []string, channel, user string) HelpCmd {
 	return HelpCmd{baseCommand{
-		input:   cmdFields,
-		channel: channel,
-		user:    user,
-		name:    "help",
-		summary: "Try running one of the commands below",
+		input:       cmdFields,
+		chatDetails: ChatDetails{User: user, Channel: channel},
+		name:        "help",
+		summary:     "Try running one of the commands below",
 		usage: help.Usage{
 			"{{ command }} help",
 		},
@@ -39,12 +38,8 @@ func (cmd HelpCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd HelpCmd) User() string {
-	return cmd.user
-}
-
-func (cmd HelpCmd) Channel() string {
-	return cmd.channel
+func (cmd HelpCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd HelpCmd) AckMsg() (string, bool) {

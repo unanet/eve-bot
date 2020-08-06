@@ -59,21 +59,22 @@ func (ic InputCommand) Length() int {
 }
 
 type ChatDetails struct {
-	UserName, Channel string
+	User, Channel string
 }
 
 type baseCommand struct {
-	input               InputCommand
-	inputBounds         InputLengthBounds
-	name, channel, user string
-	valid               bool
-	errs                []error
-	summary             help.Summary
-	usage               help.Usage
-	examples            help.Examples
-	optionalArgs        args.Args
-	requiredParams      params.Params
-	apiOptions          CommandOptions // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
+	input          InputCommand
+	inputBounds    InputLengthBounds
+	chatDetails    ChatDetails
+	name           string
+	valid          bool
+	errs           []error
+	summary        help.Summary
+	usage          help.Usage
+	examples       help.Examples
+	optionalArgs   args.Args
+	requiredParams params.Params
+	apiOptions     CommandOptions // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
 }
 
 func (bc *baseCommand) ValidInputLength() bool {
@@ -93,8 +94,7 @@ func (bc *baseCommand) ValidMaxInputLength() bool {
 type EvebotCommand interface {
 	Name() string
 	Help() *help.Help
-	User() string
-	Channel() string
+	ChatInfo() ChatDetails
 	IsValid() bool
 	IsHelpRequest() bool
 	AckMsg() (string, bool)
@@ -238,16 +238,16 @@ func baseIsValid(input []string) bool {
 
 func baseAckMsg(cmd EvebotCommand, cmdInput []string) (msg string, cont bool) {
 	if cmd.IsHelpRequest() {
-		return fmt.Sprintf("<@%s>...\n\n%s", cmd.User(), cmd.Help().String()), false
+		return fmt.Sprintf("<@%s>...\n\n%s", cmd.ChatInfo().User, cmd.Help().String()), false
 	}
 	if cmd.IsValid() == false {
-		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", cmd.User(), cmdInput, cmd.Name()), false
+		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", cmd.ChatInfo().User, cmdInput, cmd.Name()), false
 	}
 	if len(cmd.ErrMsg()) > 0 {
-		return fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", cmd.User(), cmd.ErrMsg()), false
+		return fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", cmd.ChatInfo().User, cmd.ErrMsg()), false
 	}
 	// Happy Path
-	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", cmd.User(), cmd.Name()), true
+	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", cmd.ChatInfo().User, cmd.Name()), true
 }
 
 func baseErrMsg(errs []error) string {

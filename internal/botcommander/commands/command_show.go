@@ -19,11 +19,10 @@ type ShowCmd struct {
 // @evebot show current in qa
 func defaultShowCommand(cmdFields []string, channel, user string) ShowCmd {
 	cmd := ShowCmd{baseCommand{
-		input:   cmdFields,
-		channel: channel,
-		user:    user,
-		name:    "show",
-		summary: "The `show` command is used to show resources (environments,namespaces,services,metadata)",
+		input:       cmdFields,
+		chatDetails: ChatDetails{User: user, Channel: channel},
+		name:        "show",
+		summary:     "The `show` command is used to show resources (environments,namespaces,services,metadata)",
 		usage: help.Usage{
 			"show {{ resources }}",
 			"show namespaces in {{ environment }}",
@@ -52,12 +51,8 @@ func (cmd ShowCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd ShowCmd) User() string {
-	return cmd.user
-}
-
-func (cmd ShowCmd) Channel() string {
-	return cmd.channel
+func (cmd ShowCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd ShowCmd) AckMsg() (string, bool) {

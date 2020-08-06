@@ -28,22 +28,22 @@ func NewDeleteHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider
 func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
-		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp, err)
 		return
 	}
 	if svcs == nil {
-		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 	var requestedSvcName string
 	var validSvc bool
 	if requestedSvcName, validSvc = cmd.APIOptions()[params.ServiceName].(string); !validSvc {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, fmt.Errorf("invalid ServiceName Param"))
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp, fmt.Errorf("invalid ServiceName Param"))
 		return
 	}
 
@@ -55,7 +55,7 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		}
 	}
 	if svc.ID == 0 {
-		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid requested service: %s", requestedSvcName), cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid requested service: %s", requestedSvcName), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 
@@ -71,11 +71,11 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 	var requestedMetadata []string
 	var validMetadata bool
 	if requestedMetadata, validMetadata = cmd.APIOptions()[params.MetadataName].([]string); !validMetadata {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, fmt.Errorf("invalid MetadataName Param"))
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid MetadataName Param"))
 		return
 	}
 	if len(requestedMetadata) == 0 {
-		h.chatSvc.UserNotificationThread(ctx, "you must supply 1 or more metadata keys", cmd.User(), cmd.Channel(), *ts)
+		h.chatSvc.UserNotificationThread(ctx, "you must supply 1 or more metadata keys", cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts)
 		return
 	}
 	var md params.MetadataMap
@@ -83,22 +83,22 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 	for _, m := range requestedMetadata {
 		md, err = h.eveAPIClient.DeleteServiceMetadata(ctx, m, svc.ID)
 		if err != nil {
-			h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+			h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, err)
 			return
 		}
 	}
 	if md == nil {
-		h.chatSvc.UserNotificationThread(ctx, "no metadata", cmd.User(), cmd.Channel(), *ts)
+		h.chatSvc.UserNotificationThread(ctx, "no metadata", cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts)
 		return
 	}
-	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.User(), cmd.Channel(), *ts)
+	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts)
 }
 
 func (h DeleteHandler) deleteVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	updatedSvc, err := h.eveAPIClient.SetServiceVersion(ctx, "", svc.ID)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, err)
 		return
 	}
-	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version deleted", updatedSvc.Name), cmd.User(), cmd.Channel(), *ts)
+	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version deleted", updatedSvc.Name), cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts)
 }

@@ -34,12 +34,12 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		ToFeed:   cmd.APIOptions()[params.ToFeedName].(string),
 	})
 	if err != nil {
-		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed release: %s", err.Error()), cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed release: %s", err.Error()), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 
 	log.Logger.Debug("release response", zap.String("message", resp.Message))
-	h.chatSvc.ReleaseResultsMessageThread(ctx, toChatMessage(resp), cmd.User(), cmd.Channel(), timestamp)
+	h.chatSvc.ReleaseResultsMessageThread(ctx, toChatMessage(resp), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 }
 
 func toChatMessage(resp eve.Release) string {

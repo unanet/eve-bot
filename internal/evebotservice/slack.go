@@ -35,7 +35,7 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// set to false and we will skip the auth check
 	if p.Cfg.SlackAuthEnabled {
 		if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo) == false {
-			_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Channel(), ev.ThreadTimeStamp)
+			_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.ChatInfo().Channel, ev.ThreadTimeStamp)
 			return
 		}
 	}
@@ -43,7 +43,7 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// Hydrate the Acknowledgement Message and whether or not we should continue...
 	ackMsg, cont := cmd.AckMsg()
 	// Send the AckMsg and get the Timestamp back so we can thread it later on...
-	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Channel(), ev.ThreadTimeStamp)
+	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.ChatInfo().Channel, ev.ThreadTimeStamp)
 	// If the AckMessage needs to continue (no errors)...
 	if cont {
 		log.Logger.Debug("execute command handler", zap.Any("cmd_type", reflect.TypeOf(cmd)))

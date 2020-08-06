@@ -20,11 +20,10 @@ type MigrateCmd struct {
 // @evebot migrate current in qa
 func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd {
 	cmd := MigrateCmd{baseCommand{
-		input:   cmdFields,
-		channel: channel,
-		user:    user,
-		name:    "migrate",
-		summary: "The `migrate` command is used to migrate databases by *namespace* and *environment*",
+		input:       cmdFields,
+		chatDetails: ChatDetails{User: user, Channel: channel},
+		name:        "migrate",
+		summary:     "The `migrate` command is used to migrate databases by *namespace* and *environment*",
 		usage: help.Usage{
 			"migrate {{ namespace }} in {{ environment }}",
 			"migrate {{ namespace }} in {{ environment }} databases={{ database_type }}",
@@ -49,19 +48,15 @@ func defaultMigrateCommand(cmdFields []string, channel, user string) MigrateCmd 
 }
 
 func (cmd MigrateCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
-	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
+	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
 }
 
 func (cmd MigrateCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd MigrateCmd) User() string {
-	return cmd.user
-}
-
-func (cmd MigrateCmd) Channel() string {
-	return cmd.channel
+func (cmd MigrateCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd MigrateCmd) AckMsg() (string, bool) {

@@ -19,8 +19,7 @@ type InvalidCmd struct {
 func defaultInvalidCommand(cmdFields []string, channel, user string) InvalidCmd {
 	return InvalidCmd{baseCommand{
 		input:          cmdFields,
-		channel:        channel,
-		user:           user,
+		chatDetails:    ChatDetails{User: user, Channel: channel},
 		name:           "",
 		summary:        help.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmdFields)),
 		usage:          help.Usage{},
@@ -39,12 +38,8 @@ func (cmd InvalidCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd InvalidCmd) User() string {
-	return cmd.user
-}
-
-func (cmd InvalidCmd) Channel() string {
-	return cmd.channel
+func (cmd InvalidCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd InvalidCmd) ErrMsg() string {

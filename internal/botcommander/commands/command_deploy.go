@@ -19,11 +19,10 @@ type DeployCmd struct {
 
 func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 	cmd := DeployCmd{baseCommand{
-		input:   cmdFields,
-		channel: channel,
-		user:    user,
-		name:    "deploy",
-		summary: "The `deploy` command is used to deploy services to a specific *namespace* and *environment*",
+		input:       cmdFields,
+		chatDetails: ChatDetails{User: user, Channel: channel},
+		name:        "deploy",
+		summary:     "The `deploy` command is used to deploy services to a specific *namespace* and *environment*",
 		usage: help.Usage{
 			"deploy {{ namespace }} in {{ environment }}",
 			"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version }}",
@@ -47,19 +46,15 @@ func defaultDeployCommand(cmdFields []string, channel, user string) DeployCmd {
 }
 
 func (cmd DeployCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
-	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
+	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
 }
 
 func (cmd DeployCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd DeployCmd) User() string {
-	return cmd.user
-}
-
-func (cmd DeployCmd) Channel() string {
-	return cmd.channel
+func (cmd DeployCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd DeployCmd) AckMsg() (string, bool) {

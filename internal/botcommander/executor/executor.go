@@ -35,14 +35,14 @@ func (h *EvebotCommandExecutor) Execute(ctx context.Context, cmd commands.Evebot
 	log.Logger.Debug("command handler execute", zap.Any("cmd_type", reflect.TypeOf(cmd)))
 	cmdHandlerFunc := handlers.CommandHandlerMap[cmd.Name()]
 	if cmdHandlerFunc == nil {
-		h.invalidCommandHandlerErr(ctx, "nil handler", cmd.Channel(), timestamp)
+		h.invalidCommandHandlerErr(ctx, "nil handler", cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 	if cmdHandlerFuncVal, ok := cmdHandlerFunc.(func(*eveapi.Client, *chatservice.Provider) handlers.CommandHandler); ok {
 		cmdHandlerFuncVal(&h.eveAPIClient, &h.chatSvc).Handle(ctx, cmd, timestamp)
 		return
 	}
-	h.invalidCommandHandlerErr(ctx, "failed command type cast", cmd.Channel(), timestamp)
+	h.invalidCommandHandlerErr(ctx, "failed command type cast", cmd.ChatInfo().Channel, timestamp)
 }
 
 func cleanSlackMsg(msg string) string {

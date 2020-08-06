@@ -13,8 +13,7 @@ type RootCmd struct {
 func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	return RootCmd{baseCommand{
 		input:          cmdFields,
-		channel:        channel,
-		user:           user,
+		chatDetails:    ChatDetails{User: user, Channel: channel},
 		name:           "",
 		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
 		usage:          help.Usage{},
@@ -33,12 +32,8 @@ func (cmd RootCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd RootCmd) User() string {
-	return cmd.user
-}
-
-func (cmd RootCmd) Channel() string {
-	return cmd.channel
+func (cmd RootCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd RootCmd) ErrMsg() string {

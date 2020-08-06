@@ -19,11 +19,10 @@ type SetCmd struct {
 
 func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 	cmd := SetCmd{baseCommand{
-		input:   cmdFields,
-		channel: channel,
-		user:    user,
-		name:    "set",
-		summary: "The `set` command is used to set resource values (metadata and version)",
+		input:       cmdFields,
+		chatDetails: ChatDetails{User: user, Channel: channel},
+		name:        "set",
+		summary:     "The `set` command is used to set resource values (metadata and version)",
 		usage: help.Usage{
 			"set {{ resources }} for {{ service }} in {{ namespace }} {{ environment }} {{key=value}}",
 			"set {{ resources }} in {{ namespace }} {{ environment }} to {{value}}",
@@ -43,19 +42,15 @@ func defaultSetCommand(cmdFields []string, channel, user string) SetCmd {
 }
 
 func (cmd SetCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
-	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
+	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.apiOptions)
 }
 
 func (cmd SetCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd SetCmd) User() string {
-	return cmd.user
-}
-
-func (cmd SetCmd) Channel() string {
-	return cmd.channel
+func (cmd SetCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd SetCmd) AckMsg() (string, bool) {

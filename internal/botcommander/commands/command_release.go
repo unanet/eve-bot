@@ -19,11 +19,10 @@ type ReleaseCmd struct {
 // @evebot release unanet-analytics:20.2 from int to prod
 func defaultReleaseCommand(cmdFields []string, channel, user string) ReleaseCmd {
 	cmd := ReleaseCmd{baseCommand{
-		input:   cmdFields,
-		channel: channel,
-		user:    user,
-		name:    "release",
-		summary: "The `release` command is used to release artifacts from/to feeds",
+		input:       cmdFields,
+		chatDetails: ChatDetails{User: user, Channel: channel},
+		name:        "release",
+		summary:     "The `release` command is used to release artifacts from/to feeds",
 		usage: help.Usage{
 			"release {{ artifact }}:{{ optional_version }} from {{ required_feed }}",
 			"release {{ artifact }}:{{ optional_version }} from {{ required_feed }} to {{ optional_feed }}",
@@ -42,19 +41,15 @@ func defaultReleaseCommand(cmdFields []string, channel, user string) ReleaseCmd 
 }
 
 func (cmd ReleaseCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfo) bool {
-	return validChannelAuthCheck(cmd.channel, allowedChannelMap, fn)
+	return validChannelAuthCheck(cmd.chatDetails.Channel, allowedChannelMap, fn)
 }
 
 func (cmd ReleaseCmd) APIOptions() CommandOptions {
 	return cmd.apiOptions
 }
 
-func (cmd ReleaseCmd) User() string {
-	return cmd.user
-}
-
-func (cmd ReleaseCmd) Channel() string {
-	return cmd.channel
+func (cmd ReleaseCmd) ChatInfo() ChatDetails {
+	return cmd.chatDetails
 }
 
 func (cmd ReleaseCmd) AckMsg() (string, bool) {

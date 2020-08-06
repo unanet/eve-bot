@@ -34,17 +34,17 @@ func NewSetHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) C
 func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	ns, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
-		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 
 	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, ns.Name)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp, err)
 		return
 	}
 	if svcs == nil {
-		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 			}
 		}
 		if svc.ID == 0 {
-			h.chatSvc.UserNotificationThread(ctx, "invalid service", cmd.User(), cmd.Channel(), timestamp)
+			h.chatSvc.UserNotificationThread(ctx, "invalid service", cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 			return
 		}
 
@@ -75,7 +75,7 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 	// setting the resource at the namespace level
 	switch cmd.APIOptions()["resource"] {
 	case resources.MetadataName:
-		h.chatSvc.UserNotificationThread(ctx, "cannot set namespace metadata", cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, "cannot set namespace metadata", cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 	case resources.VersionName:
 		h.setNamespaceVersion(ctx, cmd, &timestamp, ns)
 	}
@@ -93,45 +93,45 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 			log.Logger.Debug("cmd.Api.Options.metadatamap nil", zap.Any("metadata_map", metadataMap))
 		}
 
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, fmt.Errorf("invalid metadata map"))
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid metadata map"))
 		return
 	}
 
 	md, err := h.eveAPIClient.SetServiceMetadata(ctx, metadataMap, svc.ID)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, err)
 		return
 	}
 
-	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.User(), cmd.Channel(), *ts)
+	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts)
 }
 
 func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var version string
 	var versionOK bool
 	if version, versionOK = cmd.APIOptions()[params.VersionName].(string); !versionOK {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, fmt.Errorf("invalid version"))
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid version"))
 		return
 	}
 	updatedSvc, err := h.eveAPIClient.SetServiceVersion(ctx, version, svc.ID)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, err)
 		return
 	}
-	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version set to %s", updatedSvc.Name, updatedSvc.OverrideVersion), cmd.User(), cmd.Channel(), *ts)
+	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version set to %s", updatedSvc.Name, updatedSvc.OverrideVersion), cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts)
 }
 
 func (h SetHandler) setNamespaceVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, ns eve.Namespace) {
 	var version string
 	var versionOK bool
 	if version, versionOK = cmd.APIOptions()[params.VersionName].(string); !versionOK {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, fmt.Errorf("invalid version"))
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid version"))
 		return
 	}
 	updatedNS, err := h.eveAPIClient.SetNamespaceVersion(ctx, version, ns.ID)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), *ts, err)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, err)
 		return
 	}
-	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version set to %s", updatedNS.Name, updatedNS.RequestedVersion), cmd.User(), cmd.Channel(), *ts)
+	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version set to %s", updatedNS.Name, updatedNS.RequestedVersion), cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts)
 }

@@ -23,9 +23,9 @@ func NewDeployHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider
 }
 
 func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	chatUser, err := h.chatSvc.GetUser(ctx, cmd.User())
+	chatUser, err := h.chatSvc.GetUser(ctx, cmd.ChatInfo().User)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, err)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp, err)
 		return
 	}
 
@@ -42,16 +42,16 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		Type:             "application",
 	}
 
-	resp, err := h.eveAPIClient.Deploy(ctx, deployOpts, cmd.User(), cmd.Channel(), timestamp)
+	resp, err := h.eveAPIClient.Deploy(ctx, deployOpts, cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 	if err != nil && len(err.Error()) > 0 {
-		h.chatSvc.DeploymentNotificationThread(ctx, err.Error(), cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.DeploymentNotificationThread(ctx, err.Error(), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 		return
 	}
 	if resp == nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.User(), cmd.Channel(), timestamp, errInvalidApiResp)
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp, errInvalidApiResp)
 		return
 	}
 	if len(resp.Messages) > 0 {
-		h.chatSvc.UserNotificationThread(ctx, strings.Join(resp.Messages, ","), cmd.User(), cmd.Channel(), timestamp)
+		h.chatSvc.UserNotificationThread(ctx, strings.Join(resp.Messages, ","), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 	}
 }
