@@ -111,36 +111,6 @@ func CleanUrls(input string) string {
 	return cleanPart + lastPart
 }
 
-func nonHelpCmd() []EvebotCommand {
-	var cmds []EvebotCommand
-
-	for k, v := range CommandInitializerMap {
-		if k != "help" {
-			cmds = append(cmds, v.(func([]string, string, string) EvebotCommand)([]string{}, "", ""))
-		}
-	}
-	return cmds
-}
-
-//
-// @evebot 				(show toplevel evebot help/welcome message)
-// @evebot help 		(show toplevel help with full command list and help usage)
-// @evebot cmd			(show specific command help)
-// @evebot cmd help		(show specific command help)
-// @evebot help cmd		(show specific sub/command help)
-func isHelpRequest(inputCmd []string, cmdName string) bool {
-	if len(inputCmd) == 0 || inputCmd[0] == "help" || inputCmd[len(inputCmd)-1] == "help" || (len(inputCmd) == 1 && inputCmd[0] == cmdName) {
-		return true
-	}
-	return false
-}
-
-func ackMsg(msg string, valid bool) ChatAckMsgFn {
-	return func() (string, bool) {
-		return msg, valid
-	}
-}
-
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 	result := make(params.MetadataMap, 0)
 	if len(keyvals) == 0 {

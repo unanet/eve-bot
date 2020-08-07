@@ -29,7 +29,7 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		return
 	}
 
-	cmdAPIOpts := cmd.APIOptions()
+	cmdAPIOpts := cmd.DynamicOptions()
 
 	deployOpts := eveapimodels.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractServiceArtifactsOpt(cmdAPIOpts),

@@ -10,42 +10,34 @@ type RootCmd struct {
 	baseCommand
 }
 
+const (
+	rootCmdHelpSummary = help.Summary("Welcome to `@evebot`! To get started, run:\n```@evebot help```")
+)
+
 func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
-	return RootCmd{baseCommand{
-		input:          cmdFields,
-		chatDetails:    ChatInfo{User: user, Channel: channel},
-		name:           "",
-		summary:        "Welcome to `@evebot`! To get started, run:\n```@evebot help```",
-		usage:          help.Usage{},
-		examples:       help.Examples{},
-		optionalArgs:   args.Args{},
-		requiredParams: params.Params{},
-		apiOptions:     make(CommandOptions),
+	cmd := RootCmd{baseCommand{
+		input:      cmdFields,
+		info:       ChatInfo{User: user, Channel: channel, CommandName: ""},
+		arguments:  args.Args{},
+		parameters: params.Params{},
+		opts:       make(CommandOptions),
+		bounds:     InputLengthBounds{Min: 0, Max: -1},
 	}}
+	return cmd
 }
 
-func (cmd RootCmd) Details() CommandDetails {
-	return CommandDetails{
-		Name:          cmd.name,
-		IsValid:       true,
-		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
-		AckMsgFn:      baseAckMsg(cmd, cmd.input),
-		ErrMsgFn:      cmd.BaseErrMsg(),
-	}
+func (cmd RootCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(help.HeaderOpt(rootCmdHelpSummary.String())).String())
 }
 
-func (cmd RootCmd) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn) bool {
+func (cmd RootCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
-func (cmd RootCmd) APIOptions() CommandOptions {
-	return cmd.apiOptions
+func (cmd RootCmd) DynamicOptions() CommandOptions {
+	return cmd.opts
 }
 
 func (cmd RootCmd) ChatInfo() ChatInfo {
-	return cmd.chatDetails
-}
-
-func (cmd RootCmd) Help() *help.Help {
-	return help.New(help.HeaderOpt(cmd.summary.String()))
+	return cmd.info
 }

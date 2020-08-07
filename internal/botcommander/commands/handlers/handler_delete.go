@@ -42,7 +42,7 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 	}
 	var requestedSvcName string
 	var validSvc bool
-	if requestedSvcName, validSvc = cmd.APIOptions()[params.ServiceName].(string); !validSvc {
+	if requestedSvcName, validSvc = cmd.DynamicOptions()[params.ServiceName].(string); !validSvc {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp, fmt.Errorf("invalid ServiceName Param"))
 		return
 	}
@@ -59,7 +59,7 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		return
 	}
 
-	switch cmd.APIOptions()["resource"] {
+	switch cmd.DynamicOptions()["resource"] {
 	case resources.MetadataName:
 		h.deleteMetadata(ctx, cmd, &timestamp, svc)
 	case resources.VersionName:
@@ -70,7 +70,7 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var requestedMetadata []string
 	var validMetadata bool
-	if requestedMetadata, validMetadata = cmd.APIOptions()[params.MetadataName].([]string); !validMetadata {
+	if requestedMetadata, validMetadata = cmd.DynamicOptions()[params.MetadataName].([]string); !validMetadata {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid MetadataName Param"))
 		return
 	}

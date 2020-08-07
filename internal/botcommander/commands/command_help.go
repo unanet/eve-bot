@@ -10,62 +10,51 @@ type HelpCmd struct {
 	baseCommand
 }
 
+const (
+	helpCmdName = "help"
+)
+
+var (
+	helpCmdHelpSummary = help.Summary("Try running one of the commands below")
+	helpCmdHelpUsage   = help.Usage{
+		"help",
+		"{{ command }} help",
+	}
+)
+
 func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
-	return HelpCmd{baseCommand{
-		input:       cmdFields,
-		chatDetails: ChatInfo{User: user, Channel: channel},
-		name:        "help",
-		summary:     "Try running one of the commands below",
-		usage: help.Usage{
-			"help",
-			"{{ command }} help",
-		},
-		examples:       help.Examples{},
-		optionalArgs:   args.Args{},
-		requiredParams: params.Params{},
-		apiOptions:     make(CommandOptions),
-		inputBounds:    InputLengthBounds{Min: 1, Max: -1},
+	cmd := HelpCmd{baseCommand{
+		input:      cmdFields,
+		info:       ChatInfo{User: user, Channel: channel, CommandName: helpCmdName},
+		arguments:  args.Args{},
+		parameters: params.Params{},
+		opts:       make(CommandOptions),
+		bounds:     InputLengthBounds{Min: 1, Max: -1},
 	}}
+	return cmd
 }
 
-func (cmd HelpCmd) Details() CommandDetails {
-	return CommandDetails{
-		Name:          cmd.name,
-		IsValid:       cmd.ValidInputLength(),
-		IsHelpRequest: isHelpRequest(cmd.input, cmd.name),
-		AckMsgFn:      baseAckMsg(cmd, cmd.input),
-		ErrMsgFn:      cmd.BaseErrMsg(),
-	}
+func (cmd HelpCmd) AckMsg() (string, bool) {
+
+	helpMsg := help.New(
+		help.HeaderOpt(helpCmdHelpSummary.String()),
+		help.CommandsOpt(NonHelpCmds),
+		help.UsageOpt(helpCmdHelpUsage.String()),
+		help.ArgsOpt(cmd.arguments.String()),
+		help.ExamplesOpt(NonHelpCommandExamples.String()),
+	).String()
+
+	return cmd.BaseAckMsg(helpMsg)
 }
 
 func (cmd HelpCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
-func (cmd HelpCmd) APIOptions() CommandOptions {
-	return cmd.apiOptions
+func (cmd HelpCmd) DynamicOptions() CommandOptions {
+	return cmd.opts
 }
 
 func (cmd HelpCmd) ChatInfo() ChatInfo {
-	return cmd.chatDetails
-}
-
-func (cmd HelpCmd) Help() *help.Help {
-	var nonHelpCmds string
-	var nonHelpCmdExamples = help.Examples{}
-
-	for _, v := range nonHelpCmd() {
-		if v.Details().Name != cmd.name {
-			nonHelpCmds = nonHelpCmds + "\n" + v.Details().Name
-			nonHelpCmdExamples = append(nonHelpCmdExamples, v.Details().Name+" help")
-		}
-	}
-
-	return help.New(
-		help.HeaderOpt(cmd.summary.String()),
-		help.CommandsOpt(nonHelpCmds),
-		help.UsageOpt(cmd.usage.String()),
-		help.ArgsOpt(cmd.optionalArgs.String()),
-		help.ExamplesOpt(nonHelpCmdExamples.String()),
-	)
+	return cmd.info
 }

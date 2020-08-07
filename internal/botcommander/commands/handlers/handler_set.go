@@ -49,10 +49,10 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 	}
 
 	// Service was supplied (we are setting the resource at the service level)
-	if _, ok := cmd.APIOptions()[params.ServiceName].(string); ok {
+	if _, ok := cmd.DynamicOptions()[params.ServiceName].(string); ok {
 		var svc eveapimodels.EveService
 		for _, s := range svcs {
-			if strings.ToLower(s.Name) == strings.ToLower(cmd.APIOptions()[params.ServiceName].(string)) {
+			if strings.ToLower(s.Name) == strings.ToLower(cmd.DynamicOptions()[params.ServiceName].(string)) {
 				svc = mapToEveService(s)
 				break
 			}
@@ -62,7 +62,7 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 			return
 		}
 
-		switch cmd.APIOptions()["resource"] {
+		switch cmd.DynamicOptions()["resource"] {
 		case resources.MetadataName:
 			h.setSvcMetadata(ctx, cmd, &timestamp, svc)
 			return
@@ -73,7 +73,7 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 	}
 
 	// setting the resource at the namespace level
-	switch cmd.APIOptions()["resource"] {
+	switch cmd.DynamicOptions()["resource"] {
 	case resources.MetadataName:
 		h.chatSvc.UserNotificationThread(ctx, "cannot set namespace metadata", cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
 	case resources.VersionName:
@@ -84,8 +84,8 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var metadataMap params.MetadataMap
 	var metaDataOK bool
-	log.Logger.Debug("cmd.Api.Options", zap.Any("api_opts", cmd.APIOptions()))
-	if metadataMap, metaDataOK = cmd.APIOptions()[params.MetadataName].(params.MetadataMap); !metaDataOK {
+	log.Logger.Debug("cmd.Api.Options", zap.Any("api_opts", cmd.DynamicOptions()))
+	if metadataMap, metaDataOK = cmd.DynamicOptions()[params.MetadataName].(params.MetadataMap); !metaDataOK {
 
 		if metadataMap == nil {
 			log.Logger.Debug("cmd.Api.Options.metadatamap nil")
@@ -109,7 +109,7 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var version string
 	var versionOK bool
-	if version, versionOK = cmd.APIOptions()[params.VersionName].(string); !versionOK {
+	if version, versionOK = cmd.DynamicOptions()[params.VersionName].(string); !versionOK {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid version"))
 		return
 	}
@@ -124,7 +124,7 @@ func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotComman
 func (h SetHandler) setNamespaceVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, ns eve.Namespace) {
 	var version string
 	var versionOK bool
-	if version, versionOK = cmd.APIOptions()[params.VersionName].(string); !versionOK {
+	if version, versionOK = cmd.DynamicOptions()[params.VersionName].(string); !versionOK {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid version"))
 		return
 	}

@@ -11,8 +11,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
 )
 
 var (
@@ -24,7 +22,6 @@ type CommandHandler interface {
 }
 
 func mapToEveService(s eve.Service) eveapimodels.EveService {
-	log.Logger.Debug("mapToEveService", zap.Any("svc", s))
 	return eveapimodels.EveService{
 		ID:              s.ID,
 		NamespaceID:     s.NamespaceID,
@@ -45,15 +42,16 @@ func mapToEveService(s eve.Service) eveapimodels.EveService {
 func resolveNamespace(ctx context.Context, api eveapi.Client, cmd commands.EvebotCommand) (eve.Namespace, error) {
 	var nv eve.Namespace
 
-	// Gotta get the namespaces first, since we are working with the Alias, and not the Name/ID
-	namespaces, err := api.GetNamespacesByEnvironment(ctx, cmd.APIOptions()[params.EnvironmentName].(string))
+	dynamicOpts := cmd.DynamicOptions()
 
+	// Gotta get the namespaces first, since we are working with the Alias, and not the Name/ID
+	namespaces, err := api.GetNamespacesByEnvironment(ctx, dynamicOpts[params.EnvironmentName].(string))
 	if err != nil {
 		return nv, err
 	}
 
 	for _, v := range namespaces {
-		if strings.ToLower(v.Alias) == strings.ToLower(cmd.APIOptions()[params.NamespaceName].(string)) {
+		if strings.ToLower(v.Alias) == strings.ToLower(dynamicOpts[params.NamespaceName].(string)) {
 			nv = v
 			break
 		}

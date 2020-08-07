@@ -28,7 +28,7 @@ func NewShowHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) 
 }
 
 func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	switch cmd.APIOptions()["resource"] {
+	switch cmd.DynamicOptions()["resource"] {
 	case resources.EnvironmentName:
 		h.showEnvironments(ctx, cmd, &timestamp)
 	case resources.NamespaceName:
@@ -56,7 +56,7 @@ func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCo
 }
 
 func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
-	ns, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.APIOptions()[params.EnvironmentName].(string))
+	ns, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.DynamicOptions()[params.EnvironmentName].(string))
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, err)
 		return
@@ -104,7 +104,7 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 	}
 	var requestedSvcName string
 	var valid bool
-	if requestedSvcName, valid = cmd.APIOptions()[params.ServiceName].(string); !valid {
+	if requestedSvcName, valid = cmd.DynamicOptions()[params.ServiceName].(string); !valid {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.ChatInfo().User, cmd.ChatInfo().Channel, *ts, fmt.Errorf("invalid ServiceName Param"))
 		return
 	}

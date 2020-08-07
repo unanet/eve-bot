@@ -33,9 +33,9 @@ func (h Help) String() string {
 	return msg
 }
 
-type HelpOption func(*Help)
+type Option func(*Help)
 
-func New(opts ...HelpOption) *Help {
+func New(opts ...Option) *Help {
 	h := &Help{}
 	for _, opt := range opts {
 		opt(h)
@@ -43,37 +43,31 @@ func New(opts ...HelpOption) *Help {
 	return h
 }
 
-func HeaderOpt(header string) HelpOption {
+func HeaderOpt(header string) Option {
 	return func(h *Help) {
 		h.Header = header
 	}
 }
 
-func SummaryOpt(summary string) HelpOption {
-	return func(h *Help) {
-		h.Summary = summary
-	}
-}
-
-func UsageOpt(usage string) HelpOption {
+func UsageOpt(usage string) Option {
 	return func(h *Help) {
 		h.Usage = usage
 	}
 }
 
-func ArgsOpt(args string) HelpOption {
+func ArgsOpt(args string) Option {
 	return func(h *Help) {
 		h.Args = args
 	}
 }
 
-func ExamplesOpt(examples string) HelpOption {
+func ExamplesOpt(examples string) Option {
 	return func(h *Help) {
 		h.Examples = examples
 	}
 }
 
-func CommandsOpt(commands string) HelpOption {
+func CommandsOpt(commands string) Option {
 	return func(h *Help) {
 		h.Commands = commands
 	}

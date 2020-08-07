@@ -3,22 +3,10 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 )
-
-var CommandInitializerMap = map[string]interface{}{
-	"help":    NewHelpCommand,
-	"deploy":  NewDeployCommand,
-	"migrate": NewMigrateCommand,
-	"show":    NewShowCommand,
-	"set":     NewSetCommand,
-	"delete":  NewDeleteCommand,
-	"release": NewReleaseCommand,
-}
 
 type chatChannelInfoFn func(string) (chatmodels.Channel, error)
 
@@ -55,95 +43,75 @@ func (ic InputCommand) Length() int {
 }
 
 type ChatInfo struct {
-	User, Channel string
+	User, Channel, CommandName string
 }
 
 /*
  ------------- Base Command ---------------------
-This is the root/abstract/base (i.e. shared/common) struct that all commands use
-Ideally
-
+This is the root/abstract/base (i.e. shared/common) struct that all commands share
 */
 type baseCommand struct {
-	input          InputCommand
-	inputBounds    InputLengthBounds
-	chatDetails    ChatInfo
-	name           string
-	valid          bool
-	errs           []error
-	summary        help.Summary
-	usage          help.Usage
-	examples       help.Examples
-	optionalArgs   args.Args
-	requiredParams params.Params
-	apiOptions     CommandOptions // when we resolve the optionalArgs and requiredParams we hydrate this map for fast lookup
+	input      InputCommand
+	bounds     InputLengthBounds
+	info       ChatInfo
+	valid      bool
+	errs       []error
+	arguments  args.Args
+	parameters params.Params
+	opts       CommandOptions // when we resolve the arguments and parameters we hydrate this map for fast lookup
+}
+
+func (bc *baseCommand) IsHelpRequest() bool {
+	if len(bc.input) == 0 || bc.input[0] == "help" || bc.input[len(bc.input)-1] == "help" || (len(bc.input) == 1 && bc.input[0] == bc.info.CommandName) {
+		return true
+	}
+	return false
 }
 
 func (bc *baseCommand) ValidInputLength() bool {
-	return bc.inputBounds.Valid(bc.input)
+	return bc.bounds.Valid(bc.input)
 }
 
 func (bc *baseCommand) ValidMinInputLength() bool {
-	return bc.inputBounds.ValidMin(bc.input)
+	return bc.bounds.ValidMin(bc.input)
 }
 
 func (bc *baseCommand) ValidMaxInputLength() bool {
-	return bc.inputBounds.ValidMax(bc.input)
+	return bc.bounds.ValidMax(bc.input)
 }
 
-func (bc *baseCommand) BaseErrMsg() ErrMsgFn {
-	return func() string {
-		msg := ""
-		if len(bc.errs) > 0 {
-			for _, v := range bc.errs {
-				if len(msg) == 0 {
-					msg = v.Error()
-				} else {
-					msg = msg + "\n" + v.Error()
-				}
+func (bc *baseCommand) BaseErrMsg() string {
+	msg := ""
+	if len(bc.errs) > 0 {
+		for _, v := range bc.errs {
+			if len(msg) == 0 {
+				msg = v.Error()
+			} else {
+				msg = msg + "\n" + v.Error()
 			}
 		}
-		return msg
 	}
+	return msg
 }
 
-func baseAckMsg(cmd EvebotCommand, cmdInput []string) ChatAckMsgFn {
-	if cmd.Details().IsHelpRequest {
-		return ackMsg(fmt.Sprintf("<@%s>...\n\n%s", cmd.ChatInfo().User, cmd.Help().String()), false)
+func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
+	if bc.IsHelpRequest() {
+		return fmt.Sprintf("<@%s>...\n\n%s", bc.info.User, cmdHelp), false
 	}
-	if cmd.Details().IsValid == false {
-		return ackMsg(fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", cmd.ChatInfo().User, cmdInput, cmd.Details().Name), false)
+	if bc.ValidInputLength() == false {
+		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", bc.info.User, bc.input, bc.info.CommandName), false
 	}
-	if len(cmd.Details().ErrMsgFn()) > 0 {
-		return ackMsg(fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", cmd.ChatInfo().User, cmd.Details().ErrMsgFn()), false)
+	if len(bc.BaseErrMsg()) > 0 {
+		return fmt.Sprintf("Whoops <@%s>! I detected some command *errors:*\n\n ```%v```", bc.info.User, bc.BaseErrMsg()), false
 	}
 	// Happy Path
-	return ackMsg(fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", cmd.ChatInfo().User, cmd.Details().Name), true)
+	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", bc.info.User, bc.info.CommandName), true
 }
 
-/*
-
- ------------- Command Details ---------------------
-
-*/
-
-type ErrMsgFn func() string
-
-type CommandDetails struct {
-	Name                   string
-	IsValid, IsHelpRequest bool
-	ErrMsgFn               ErrMsgFn
-	AckMsgFn               ChatAckMsgFn
-}
-
-type ChatAckMsgFn func() (string, bool)
-
-// EvebotCommand interface
-// each evebot command needs to implement this interface
+// EvebotCommand interface (each evebot command needs to implement this interface)
 type EvebotCommand interface {
-	Details() CommandDetails
-	Help() *help.Help
 	ChatInfo() ChatInfo
-	APIOptions() CommandOptions
+	DynamicOptions() CommandOptions
+	AckMsg() (string, bool)
 	IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn) bool
 }

@@ -31,7 +31,7 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	cmdAPIOpts := cmd.APIOptions()
+	cmdAPIOpts := cmd.DynamicOptions()
 
 	dbArtifacts := commands.ExtractDatabaseArtifactsOpt(cmdAPIOpts)
 

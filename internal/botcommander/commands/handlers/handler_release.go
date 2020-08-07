@@ -27,11 +27,14 @@ func NewReleaseHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provide
 }
 
 func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
+
+	dynamicOpts := cmd.DynamicOptions()
+
 	resp, err := h.eveAPIClient.Release(ctx, eve.Release{
-		Artifact: cmd.APIOptions()[params.ArtifactName].(string),
-		Version:  cmd.APIOptions()[params.ArtifactVersionName].(string),
-		FromFeed: cmd.APIOptions()[params.FromFeedName].(string),
-		ToFeed:   cmd.APIOptions()[params.ToFeedName].(string),
+		Artifact: dynamicOpts[params.ArtifactName].(string),
+		Version:  dynamicOpts[params.ArtifactVersionName].(string),
+		FromFeed: dynamicOpts[params.FromFeedName].(string),
+		ToFeed:   dynamicOpts[params.ToFeedName].(string),
 	})
 	if err != nil {
 		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed release: %s", err.Error()), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
