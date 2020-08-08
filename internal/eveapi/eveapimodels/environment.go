@@ -4,8 +4,10 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
+// Environments data structure
 type Environments []eve.Environment
 
+// ToChatMessage converts environments to a chat message
 func (e Environments) ToChatMessage() string {
 	if e == nil || len(e) == 0 {
 		return "no environments"

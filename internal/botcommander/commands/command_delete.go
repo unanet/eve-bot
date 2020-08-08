@@ -8,11 +8,12 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 )
 
-type DeleteCmd struct {
+type deleteCmd struct {
 	baseCommand
 }
 
 const (
+	// DeleteCmdName used as key/id for the delete command
 	DeleteCmdName = "delete"
 )
 
@@ -28,8 +29,9 @@ var (
 	}
 )
 
+// NewDeleteCommand creates a New DeleteCmd that implements the EvebotCommand interface
 func NewDeleteCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := DeleteCmd{baseCommand{
+	cmd := deleteCmd{baseCommand{
 		input:  cmdFields,
 		info:   ChatInfo{User: user, Channel: channel, CommandName: DeleteCmdName},
 		opts:   make(CommandOptions),
@@ -39,30 +41,31 @@ func NewDeleteCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd DeleteCmd) AckMsg() (string, bool) {
-
-	helpMsg := help.New(
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd deleteCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(deleteCmdHelpSummary.String()),
 		help.UsageOpt(deleteCmdHelpUsage.String()),
 		help.ExamplesOpt(deleteCmdHelpExample.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd DeleteCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd deleteCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
-func (cmd DeleteCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd deleteCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd DeleteCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd deleteCmd) Info() ChatInfo {
 	return cmd.info
 }
 
-func (cmd *DeleteCmd) resolveDynamicOptions() {
+func (cmd *deleteCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command: %v", cmd.input))
 		return
@@ -72,10 +75,12 @@ func (cmd *DeleteCmd) resolveDynamicOptions() {
 		cmd.opts["resource"] = cmd.input[1]
 	} else {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete resource: %v", cmd.input))
+		return
 	}
 
 	if cmd.opts["resource"] == nil {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
+		return
 	}
 
 	if len(cmd.errs) > 0 {

@@ -8,11 +8,12 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
-type ReleaseCmd struct {
+type releaseCmd struct {
 	baseCommand
 }
 
 const (
+	// ReleaseCmdName is the ID/Key for the ReleaseCmd
 	ReleaseCmdName = "release"
 )
 
@@ -30,8 +31,9 @@ var (
 	}
 )
 
+// NewReleaseCommand creates a New ReleaseCmd that implements the EvebotCommand interface
 func NewReleaseCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := ReleaseCmd{baseCommand{
+	cmd := releaseCmd{baseCommand{
 		input:  cmdFields,
 		info:   ChatInfo{User: user, Channel: channel, CommandName: ReleaseCmdName},
 		opts:   make(CommandOptions),
@@ -41,30 +43,31 @@ func NewReleaseCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd ReleaseCmd) AckMsg() (string, bool) {
-
-	helpMsg := help.New(
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd releaseCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(releaseCmdHelpSummary.String()),
 		help.UsageOpt(releaseCmdHelpUsage.String()),
 		help.ExamplesOpt(releaseCmdHelpExample.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd ReleaseCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd releaseCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn)
 }
 
-func (cmd ReleaseCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd releaseCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd ReleaseCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd releaseCmd) Info() ChatInfo {
 	return cmd.info
 }
 
-func (cmd *ReleaseCmd) resolveDynamicOptions() {
+func (cmd *releaseCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid release command: %v", cmd.input))
 		return

@@ -1,5 +1,6 @@
 package eveapimodels
 
+// ArtifactDefinition data structure
 type ArtifactDefinition struct {
 	ID               int    `json:"id"`
 	Name             string `json:"name"`
@@ -12,4 +13,5 @@ type ArtifactDefinition struct {
 	Matched          bool   `json:"-"`
 }
 
+// ArtifactDefinitions slice on artifact definitions
 type ArtifactDefinitions []*ArtifactDefinition

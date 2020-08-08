@@ -9,7 +9,12 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
+type migrateCmd struct {
+	baseCommand
+}
+
 const (
+	// MigrateCmdName is the ID/Key for the Migrate Command
 	MigrateCmdName = "migrate"
 )
 
@@ -30,8 +35,9 @@ var (
 	}
 )
 
+// NewMigrateCommand creates a New MigrateCmd that implements the EvebotCommand interface
 func NewMigrateCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := MigrateCmd{baseCommand{
+	cmd := migrateCmd{baseCommand{
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: MigrateCmdName},
 		arguments:  args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultDatabasesArg()},
@@ -43,34 +49,32 @@ func NewMigrateCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-type MigrateCmd struct {
-	baseCommand
-}
-
-func (cmd MigrateCmd) AckMsg() (string, bool) {
-	helpMsg := help.New(
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd migrateCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(migrateCmdHelpSummary.String()),
 		help.UsageOpt(migrateCmdHelpUsage.String()),
 		help.ArgsOpt(cmd.arguments.String()),
 		help.ExamplesOpt(migrateCmdHelpExample.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd MigrateCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd migrateCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
-func (cmd MigrateCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd migrateCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd MigrateCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd migrateCmd) Info() ChatInfo {
 	return cmd.info
 }
 
-func (cmd MigrateCmd) resolveDynamicOptions() {
+func (cmd migrateCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
 		return

@@ -6,7 +6,7 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
-type HelpCmd struct {
+type helpCmd struct {
 	baseCommand
 }
 
@@ -22,8 +22,9 @@ var (
 	}
 )
 
+// NewHelpCommand creates a New HelpCmd that implements the EvebotCommand interface
 func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := HelpCmd{baseCommand{
+	cmd := helpCmd{baseCommand{
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: helpCmdName},
 		arguments:  args.Args{},
@@ -34,27 +35,28 @@ func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd HelpCmd) AckMsg() (string, bool) {
-
-	helpMsg := help.New(
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd helpCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(helpCmdHelpSummary.String()),
 		help.CommandsOpt(NonHelpCmds),
 		help.UsageOpt(helpCmdHelpUsage.String()),
 		help.ArgsOpt(cmd.arguments.String()),
 		help.ExamplesOpt(NonHelpCommandExamples.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd HelpCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd helpCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
-func (cmd HelpCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd helpCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd HelpCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd helpCmd) Info() ChatInfo {
 	return cmd.info
 }

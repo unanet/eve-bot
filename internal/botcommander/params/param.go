@@ -1,13 +1,16 @@
 package params
 
+// Param is the parameter interface
 type Param interface {
 	Name() string
 	Description() string
 	Value() string
 }
 
+// Params is a slice of params
 type Params []Param
 
+// String satisfies the interface
 func (p Params) String() string {
 	var msg string
 	for _, v := range p {
@@ -22,10 +25,12 @@ type baseParam struct {
 	value       string
 }
 
+// ConditionalParam is the interface for conditional parameters
 type ConditionalParam interface {
 	Name() string
 	Description() string
 	Value() string
 }
 
+// ConditionalParams is a slice of Conditional Params
 type ConditionalParams []ConditionalParam

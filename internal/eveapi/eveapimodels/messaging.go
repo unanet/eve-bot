@@ -10,23 +10,23 @@ import (
 func serviceLabel(svc *eve.DeployService) string {
 	if svc.ArtifactName == svc.ServiceName {
 		return fmt.Sprintf("\n%s:%s", svc.ServiceName, svc.AvailableVersion)
-	} else {
-		return fmt.Sprintf("\n%s (%s):%s", svc.ServiceName, svc.ArtifactName, svc.AvailableVersion)
 	}
+	return fmt.Sprintf("\n%s (%s):%s", svc.ServiceName, svc.ArtifactName, svc.AvailableVersion)
 }
 
 func migrationLabel(mig *eve.DeployMigration) string {
 	if mig.ArtifactName == mig.DatabaseName {
 		return fmt.Sprintf("\n%s:%s", mig.DatabaseName, mig.AvailableVersion)
-	} else {
-		return fmt.Sprintf("\n%s (%s):%s", mig.DatabaseName, mig.ArtifactName, mig.AvailableVersion)
 	}
+	return fmt.Sprintf("\n%s (%s):%s", mig.DatabaseName, mig.ArtifactName, mig.AvailableVersion)
 }
 
+// HeaderMsg formats a header msg
 func HeaderMsg(val string) string {
 	return fmt.Sprintf("\n*%s*", strings.Title(strings.ToLower(val)))
 }
 
+// ServicesResultBlock converts deploy services to a string
 func ServicesResultBlock(svcs eve.DeployServices) string {
 	result := ""
 
@@ -45,6 +45,7 @@ func ServicesResultBlock(svcs eve.DeployServices) string {
 	return result
 }
 
+// MigrationResultBlock converts deploy migrations to a string
 func MigrationResultBlock(migs eve.DeployMigrations) string {
 	result := ""
 
@@ -63,6 +64,7 @@ func MigrationResultBlock(migs eve.DeployMigrations) string {
 	return result
 }
 
+// APIMessages converts a slice of strings into a string message
 func APIMessages(msgs []string) string {
 	infoMsgs := ""
 	for _, msg := range msgs {
@@ -78,6 +80,7 @@ func APIMessages(msgs []string) string {
 	return infoMsgs
 }
 
+// EnvironmentNamespaceMsg formats an Environment Namespace chat message
 func EnvironmentNamespaceMsg(deploymentResponsePayload *eve.NSDeploymentPlan) string {
 	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s\nCluster: %s```", deploymentResponsePayload.Namespace.Alias, deploymentResponsePayload.EnvironmentName, deploymentResponsePayload.Namespace.ClusterName)
 }

@@ -1,5 +1,6 @@
 package help
 
+// Help data structure
 type Help struct {
 	Summary  string
 	Usage    string
@@ -9,7 +10,7 @@ type Help struct {
 	Header   string
 }
 
-// Evebot Command Help
+// String Evebot Command Help
 func (h Help) String() string {
 	var msg string
 	if len(h.Header) > 0 {
@@ -33,8 +34,10 @@ func (h Help) String() string {
 	return msg
 }
 
+// Option type for dynamic opts
 type Option func(*Help)
 
+// New creates a new Help structure
 func New(opts ...Option) *Help {
 	h := &Help{}
 	for _, opt := range opts {
@@ -43,30 +46,35 @@ func New(opts ...Option) *Help {
 	return h
 }
 
+// HeaderOpt is a header option
 func HeaderOpt(header string) Option {
 	return func(h *Help) {
 		h.Header = header
 	}
 }
 
+// UsageOpt is a header option
 func UsageOpt(usage string) Option {
 	return func(h *Help) {
 		h.Usage = usage
 	}
 }
 
+// ArgsOpt is a header option
 func ArgsOpt(args string) Option {
 	return func(h *Help) {
 		h.Args = args
 	}
 }
 
+// ExamplesOpt is a header option
 func ExamplesOpt(examples string) Option {
 	return func(h *Help) {
 		h.Examples = examples
 	}
 }
 
+// CommandsOpt is a header option
 func CommandsOpt(commands string) Option {
 	return func(h *Help) {
 		h.Commands = commands

@@ -5,8 +5,7 @@ import (
 )
 
 var (
-	// Deploy and Migrate share the same command
-	// the api honors the same request/response signature for both
+	// CommandHandlerMap maps command to handlers
 	CommandHandlerMap = map[string]interface{}{
 		commands.DeployCmdName:  NewDeployHandler,
 		commands.MigrateCmdName: NewMigrateHandler,

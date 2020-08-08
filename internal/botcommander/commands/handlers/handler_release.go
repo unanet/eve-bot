@@ -4,21 +4,20 @@ import (
 	"context"
 	"fmt"
 
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
+// ReleaseHandler is the handler for the ReleaseCmd
 type ReleaseHandler struct {
 	eveAPIClient eveapi.Client
 	chatSvc      chatservice.Provider
 }
 
+// NewReleaseHandler creates a ReleaseHandler
 func NewReleaseHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
 	return ReleaseHandler{
 		eveAPIClient: *eveAPIClient,
@@ -26,9 +25,10 @@ func NewReleaseHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provide
 	}
 }
 
+// Handle handles the ReleaseCmd
 func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 
-	dynamicOpts := cmd.DynamicOptions()
+	dynamicOpts := cmd.Options()
 
 	resp, err := h.eveAPIClient.Release(ctx, eve.Release{
 		Artifact: dynamicOpts[params.ArtifactName].(string),
@@ -37,12 +37,11 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		ToFeed:   dynamicOpts[params.ToFeedName].(string),
 	})
 	if err != nil {
-		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed release: %s", err.Error()), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
+		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed release: %s", err.Error()), cmd.Info().User, cmd.Info().Channel, timestamp)
 		return
 	}
 
-	log.Logger.Debug("release response", zap.String("message", resp.Message))
-	h.chatSvc.ReleaseResultsMessageThread(ctx, toChatMessage(resp), cmd.ChatInfo().User, cmd.ChatInfo().Channel, timestamp)
+	h.chatSvc.ReleaseResultsMessageThread(ctx, toChatMessage(resp), cmd.Info().User, cmd.Info().Channel, timestamp)
 }
 
 func toChatMessage(resp eve.Release) string {

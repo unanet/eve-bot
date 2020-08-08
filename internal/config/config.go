@@ -35,6 +35,7 @@ type Config struct {
 	EveAPIConfig
 }
 
+// Load loads the config reading it from the environment
 func Load() Config {
 	mutex.Lock()
 	defer mutex.Unlock()

@@ -17,5 +17,6 @@ require (
 	gitlab.unanet.io/devops/eve v0.0.0-20200726211020-47695b9a662d
 	go.uber.org/zap v1.15.0
 	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
+	golang.org/x/tools v0.0.0-20200807224323-c05a0f5be48b // indirect
 	google.golang.org/protobuf v1.24.0 // indirect
 )

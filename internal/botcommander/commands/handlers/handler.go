@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	errInvalidApiResp = errors.New("invalid api response")
+	errInvalidAPIResp = errors.New("invalid api response")
 )
 
+// CommandHandler is the interface that Handles EvebotCommands
 type CommandHandler interface {
 	Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string)
 }
@@ -42,7 +43,7 @@ func mapToEveService(s eve.Service) eveapimodels.EveService {
 func resolveNamespace(ctx context.Context, api eveapi.Client, cmd commands.EvebotCommand) (eve.Namespace, error) {
 	var nv eve.Namespace
 
-	dynamicOpts := cmd.DynamicOptions()
+	dynamicOpts := cmd.Options()
 
 	// Gotta get the namespaces first, since we are working with the Alias, and not the Name/ID
 	namespaces, err := api.GetNamespacesByEnvironment(ctx, dynamicOpts[params.EnvironmentName].(string))

@@ -10,10 +10,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// Provider is the Slack provider which wraps the slack the client
 type Provider struct {
 	client *slack.Client
 }
 
+// New returns a new Slack provider
 func New(c *slack.Client) Provider {
 	return Provider{client: c}
 }
@@ -25,8 +27,9 @@ func (sp Provider) handleDevOpsErrorNotification(ctx context.Context, err error)
 	}
 }
 
-func (sp Provider) GetChannelInfo(channelID string) (chatmodels.Channel, error) {
-	slackChannel, err := sp.client.GetConversationInfoContext(context.TODO(), channelID, false)
+// GetChannelInfo returns the slack channel info
+func (sp Provider) GetChannelInfo(ctx context.Context, channelID string) (chatmodels.Channel, error) {
+	slackChannel, err := sp.client.GetConversationInfoContext(ctx, channelID, false)
 	if err != nil {
 		log.Logger.Error("failed to get channel info", zap.Error(err))
 	}
@@ -38,18 +41,19 @@ func (sp Provider) GetChannelInfo(channelID string) (chatmodels.Channel, error) 
 
 }
 
+// DeploymentNotificationThread notifies the thread of the deployment results
 func (sp Provider) DeploymentNotificationThread(ctx context.Context, msg, user, channel, ts string) {
-	log.Logger.Debug("deployment notification", zap.String("user", user), zap.String("message", msg))
 	_, _, err := sp.client.PostMessageContext(ctx, channel, slack.MsgOptionText(userDeploymentNotificationMessage(user, msg), false), slack.MsgOptionTS(ts))
 	sp.handleDevOpsErrorNotification(ctx, err)
 }
 
+// UserNotificationThread notifies the user in a threaded message
 func (sp Provider) UserNotificationThread(ctx context.Context, msg, user, channel, ts string) {
-	log.Logger.Debug("user notification", zap.String("user", user), zap.String("message", msg))
 	_, _, err := sp.client.PostMessageContext(ctx, channel, slack.MsgOptionText(userNotificationMessage(user, msg), false), slack.MsgOptionTS(ts))
 	sp.handleDevOpsErrorNotification(ctx, err)
 }
 
+// ErrorNotification is a general error notification
 func (sp Provider) ErrorNotification(ctx context.Context, user, channel string, err error) {
 	log.Logger.Error("slack error notification", zap.Error(err))
 	var msg string
@@ -62,6 +66,7 @@ func (sp Provider) ErrorNotification(ctx context.Context, user, channel string, 
 	sp.handleDevOpsErrorNotification(ctx, nerr)
 }
 
+// ErrorNotificationThread is a threaded error notification
 func (sp Provider) ErrorNotificationThread(ctx context.Context, user, channel, ts string, err error) {
 	log.Logger.Error("slack error notification thread", zap.Error(err))
 	var msg string
@@ -74,18 +79,21 @@ func (sp Provider) ErrorNotificationThread(ctx context.Context, user, channel, t
 	sp.handleDevOpsErrorNotification(ctx, nerr)
 }
 
+// PostMessageThread sends a threaded message
 func (sp Provider) PostMessageThread(ctx context.Context, msg, channel, ts string) (timestamp string) {
 	_, respTimestamp, err := sp.client.PostMessageContext(ctx, channel, slack.MsgOptionText(msg, false), slack.MsgOptionTS(ts))
 	sp.handleDevOpsErrorNotification(ctx, err)
 	return respTimestamp
 }
 
+// PostMessage sends a chat message
 func (sp Provider) PostMessage(ctx context.Context, msg, channel string) (timestamp string) {
 	_, respTS, err := sp.client.PostMessageContext(ctx, channel, slack.MsgOptionText(msg, false))
 	sp.handleDevOpsErrorNotification(ctx, err)
 	return respTS
 }
 
+// GetUser returns user info
 func (sp Provider) GetUser(ctx context.Context, user string) (*chatmodels.ChatUser, error) {
 	slackUser, err := sp.client.GetUserInfoContext(ctx, user)
 	sp.handleDevOpsErrorNotification(ctx, err)
@@ -95,6 +103,7 @@ func (sp Provider) GetUser(ctx context.Context, user string) (*chatmodels.ChatUs
 	return mapSlackUser(slackUser), nil
 }
 
+// PostLinkMessageThread sends a threaded message with links
 func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user string, channel string, ts string) {
 
 	msgOptionBlocks := slack.MsgOptionBlocks(
@@ -109,6 +118,7 @@ func (sp Provider) PostLinkMessageThread(ctx context.Context, url string, user s
 	sp.handleDevOpsErrorNotification(ctx, err)
 }
 
+// ShowResultsMessageThread sends a threaded results message
 func (sp Provider) ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
 	msgOptionBlocks := slack.MsgOptionBlocks(
 		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgResultsNotification)),
@@ -120,6 +130,7 @@ func (sp Provider) ShowResultsMessageThread(ctx context.Context, msg, user, chan
 	sp.handleDevOpsErrorNotification(ctx, err)
 }
 
+// ReleaseResultsMessageThread sens the release results as a threaded message
 func (sp Provider) ReleaseResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
 	msgOptionBlocks := slack.MsgOptionBlocks(
 		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgReleaseNotification)),

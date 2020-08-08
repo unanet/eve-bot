@@ -9,14 +9,17 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 )
 
+// ProviderType data structure
 type ProviderType string
 
 const (
+	// Slack provider type
 	Slack ProviderType = "slack"
 )
 
+// Provider represents a Chat Provider Interface
 type Provider interface {
-	GetChannelInfo(channelID string) (chatmodels.Channel, error)
+	GetChannelInfo(ctx context.Context, channelID string) (chatmodels.Channel, error)
 	PostMessage(ctx context.Context, msg, channel string) (timestamp string)
 	PostMessageThread(ctx context.Context, msg, channel, ts string) (timestamp string)
 	ErrorNotification(ctx context.Context, user, channel string, err error)
@@ -29,6 +32,7 @@ type Provider interface {
 	ReleaseResultsMessageThread(ctx context.Context, msg, user, channel, ts string)
 }
 
+// New returns a chat provider than implements the interface
 func New(st ProviderType, cfg *config.Config) Provider {
 	switch st {
 	case Slack:

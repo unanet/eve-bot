@@ -8,18 +8,18 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 )
 
-type ShowCmd struct {
+type showCmd struct {
 	baseCommand
 }
 
 const (
+	// ShowCmdName id/key
 	ShowCmdName = "show"
 )
 
 var (
 	showCmdHelpSummary = help.Summary("The `show` command is used to show resources (environments,namespaces,services,metadata)")
-
-	showCmdHelpUsage = help.Usage{
+	showCmdHelpUsage   = help.Usage{
 		"show {{ resources }}",
 		"show namespaces in {{ environment }}",
 		"show services in {{ namespace }} {{ environment }}",
@@ -33,8 +33,9 @@ var (
 	}
 )
 
+// NewShowCommand creates a New ShowCmd that implements the EvebotCommand interface
 func NewShowCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := ShowCmd{baseCommand{
+	cmd := showCmd{baseCommand{
 		input:  cmdFields,
 		info:   ChatInfo{User: user, Channel: channel, CommandName: ShowCmdName},
 		opts:   make(CommandOptions),
@@ -44,30 +45,31 @@ func NewShowCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd ShowCmd) AckMsg() (string, bool) {
-
-	helpMsg := help.New(
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd showCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(showCmdHelpSummary.String()),
 		help.UsageOpt(showCmdHelpUsage.String()),
 		help.ExamplesOpt(showCmdHelpExample.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd ShowCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd showCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
-func (cmd ShowCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd showCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd ShowCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd showCmd) Info() ChatInfo {
 	return cmd.info
 }
 
-func (cmd *ShowCmd) resolveDynamicOptions() {
+func (cmd *showCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid show command: %v", cmd.input))
 		return

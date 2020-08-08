@@ -1,8 +1,9 @@
 package help
 
-// Evebot Command Examples
+// Examples Evebot Command Examples
 type Examples []string
 
+// String converts example slice to a string
 func (ebce Examples) String() string {
 	var msg string
 	for _, s := range ebce {

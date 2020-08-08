@@ -10,6 +10,7 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/mux"
 )
 
+// InitController initializes the controller (handlers)
 func InitController(cfg *config.Config) []mux.EveController {
 
 	cmdResolver := resolver.NewResolver()
@@ -28,5 +29,6 @@ func InitController(cfg *config.Config) []mux.EveController {
 	return []mux.EveController{
 		NewPingController(),
 		NewSlackController(svc),
+		NewEveController(svc),
 	}
 }

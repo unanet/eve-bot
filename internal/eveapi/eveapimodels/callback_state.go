@@ -7,6 +7,7 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
+// CallbackState data structure
 type CallbackState struct {
 	User    string               `json:"user"`
 	Channel string               `json:"channel"`
@@ -21,14 +22,22 @@ func (cbs *CallbackState) cleanUser() {
 	if cbs.User == "channel" {
 		cbs.User = "!channel"
 		return
-	} else {
-		cbs.User = "@" + cbs.User
-		return
 	}
+	cbs.User = "@" + cbs.User
+	return
 }
 
+const (
+	allCaughtUpMsg = "we're all caught up! There is nothing to deploy..."
+)
+
 func (cbs *CallbackState) nothingToDeployResponse() string {
-	msg := fmt.Sprintf("\n<%s>, we're all caught up! There is nothing to deploy...\n", cbs.User)
+	msg := ""
+	if len(cbs.User) > 0 {
+		msg = fmt.Sprintf("\n<%s>, %s\n", cbs.User, allCaughtUpMsg)
+	} else {
+		msg = fmt.Sprintf("\n%s\n", allCaughtUpMsg)
+	}
 
 	details := ""
 	if (cbs.Payload.Namespace != nil) && len(cbs.Payload.Namespace.Alias) > 0 {
@@ -119,12 +128,11 @@ func (cbs *CallbackState) initialResult() string {
 	return result
 }
 
-func (cbs *CallbackState) appendApiMessages(result *string) string {
+func (cbs *CallbackState) appendAPIMessages(result *string) string {
 	return *result + HeaderMsg("Messages") + "\n```" + APIMessages(cbs.Payload.Messages) + "```"
 }
 
-// ToChatMsg takes the eve-api callback payload
-// and converts it to a Chat Message (string with formatting/proper messaging)
+// ToChatMsg converts the eve-api callback payload to a Chat Message (string with formatting/proper messaging)
 func (cbs *CallbackState) ToChatMsg() string {
 	if cbs == nil {
 		log.Logger.Error("invalid callback state")
@@ -147,5 +155,5 @@ func (cbs *CallbackState) ToChatMsg() string {
 		return result
 	}
 
-	return cbs.appendApiMessages(&result)
+	return cbs.appendAPIMessages(&result)
 }

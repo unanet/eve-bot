@@ -8,12 +8,13 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
-type InvalidCmd struct {
+type invalidCmd struct {
 	baseCommand
 }
 
+// NewInvalidCommand creates a New InvalidCmd that implements the EvebotCommand interface
 func NewInvalidCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := InvalidCmd{baseCommand{
+	cmd := invalidCmd{baseCommand{
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: ""},
 		arguments:  args.Args{},
@@ -24,26 +25,27 @@ func NewInvalidCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd InvalidCmd) AckMsg() (string, bool) {
-	summary := help.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmd.input))
-
-	helpMsg := help.New(
-		help.HeaderOpt(summary.String()),
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd invalidCmd) AckMsg() (string, bool) {
+	summary := help.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmd.input)).String()
+	return cmd.BaseAckMsg(help.New(
+		help.HeaderOpt(summary),
 		help.CommandsOpt(NonHelpCmds),
 		help.ExamplesOpt(NonHelpCommandExamples.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd InvalidCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd invalidCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
 	return true
 }
 
-func (cmd InvalidCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd invalidCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd InvalidCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd invalidCmd) Info() ChatInfo {
 	return cmd.info
 }

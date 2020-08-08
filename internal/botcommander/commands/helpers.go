@@ -4,13 +4,13 @@ import (
 	"regexp"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
 
-func ExtractServiceArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefinitions {
-	if val, ok := opts[args.ServicesName]; ok {
+// ExtractArtifactsDefinition extracts the ArtifactDefinitions from the CommandOptions
+func ExtractArtifactsDefinition(defType string, opts CommandOptions) eveapimodels.ArtifactDefinitions {
+	if val, ok := opts[defType]; ok {
 		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
 			return artifactDefs
 		}
@@ -20,19 +20,9 @@ func ExtractServiceArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefini
 	return nil
 }
 
-func ExtractDatabaseArtifactsOpt(opts CommandOptions) eveapimodels.ArtifactDefinitions {
-	if val, ok := opts[args.DatabasesName]; ok {
-		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
-			return artifactDefs
-		}
-		return nil
-
-	}
-	return nil
-}
-
-func ExtractForceDeployOpt(opts CommandOptions) bool {
-	if val, ok := opts[args.ForceDeployName]; ok {
+// ExtractBoolOpt extracts a bool key/val from the opts
+func ExtractBoolOpt(defType string, opts CommandOptions) bool {
+	if val, ok := opts[defType]; ok {
 		if forceDepVal, ok := val.(bool); ok {
 			return forceDepVal
 		}
@@ -41,18 +31,9 @@ func ExtractForceDeployOpt(opts CommandOptions) bool {
 	return false
 }
 
-func ExtractDryrunOpt(opts CommandOptions) bool {
-	if val, ok := opts[args.DryrunName]; ok {
-		if dryRunVal, ok := val.(bool); ok {
-			return dryRunVal
-		}
-		return false
-	}
-	return false
-}
-
-func ExtractEnvironmentOpt(opts CommandOptions) string {
-	if val, ok := opts[params.EnvironmentName]; ok {
+// ExtractStringOpt extracts a string key/val from the options
+func ExtractStringOpt(defType string, opts CommandOptions) string {
+	if val, ok := opts[defType]; ok {
 		if envVal, ok := val.(string); ok {
 			return envVal
 		}
@@ -61,8 +42,9 @@ func ExtractEnvironmentOpt(opts CommandOptions) string {
 	return ""
 }
 
-func ExtractNSOpt(opts CommandOptions) eveapimodels.StringList {
-	if val, ok := opts[params.NamespaceName]; ok {
+// ExtractStringListOpt extracts a string slice key value from the options
+func ExtractStringListOpt(defType string, opts CommandOptions) eveapimodels.StringList {
+	if val, ok := opts[defType]; ok {
 		if nsVal, ok := val.(string); ok {
 			return eveapimodels.StringList{nsVal}
 		}
@@ -71,6 +53,8 @@ func ExtractNSOpt(opts CommandOptions) eveapimodels.StringList {
 	return nil
 }
 
+// CleanUrls cleans the incoming URLs
+// this iterates the incoming command and removes an encoding slack adds to URLs
 func CleanUrls(input string) string {
 	matcher := regexp.MustCompile(`<[a-zA-Z]+://[a-zA-Z._\-:\d/|]+>`)
 	matchIndexes := matcher.FindAllStringIndex(input, -1)
@@ -80,13 +64,7 @@ func CleanUrls(input string) string {
 		return input
 	}
 
-	firstMatchIndex := matchIndexes[0][0]
-	lastMatchIndex := matchIndexes[matchCount-1][1]
-
-	firstPart := input[0:firstMatchIndex]
-	lastPart := input[lastMatchIndex:]
-
-	cleanPart := firstPart
+	cleanPart := input[0:matchIndexes[0][0]]
 	for i, v := range matchIndexes {
 		if i > 0 {
 			previousMatchLastIndex := matchIndexes[i-1][1]
@@ -108,7 +86,7 @@ func CleanUrls(input string) string {
 
 		cleanPart = cleanPart + cleanVal
 	}
-	return cleanPart + lastPart
+	return cleanPart + input[matchIndexes[matchCount-1][1]:]
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {

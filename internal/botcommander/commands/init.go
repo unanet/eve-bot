@@ -1,15 +1,13 @@
 package commands
 
-import "gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
+import (
+	"fmt"
 
-var (
-	CommandInitializerMap  = map[string]interface{}{}
-	NonHelpCommands        []EvebotCommand
-	NonHelpCommandExamples help.Examples
-	NonHelpCmds            string
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 )
 
-func init() {
+var (
+	// CommandInitializerMap is the main map that holds all commands
 	CommandInitializerMap = map[string]interface{}{
 		helpCmdName:    NewHelpCommand,
 		DeployCmdName:  NewDeployCommand,
@@ -19,22 +17,20 @@ func init() {
 		DeleteCmdName:  NewDeleteCommand,
 		ReleaseCmdName: NewReleaseCommand,
 	}
-
-	NonHelpCommands = []EvebotCommand{}
-
-	for k, v := range CommandInitializerMap {
-		if k != "help" {
-			NonHelpCommands = append(NonHelpCommands, v.(func([]string, string, string) EvebotCommand)([]string{}, "", ""))
-		}
-	}
-
+	// NonHelpCommandExamples is hydrated during init and holds all of the non-helper command examples
 	NonHelpCommandExamples = help.Examples{}
+	// NonHelpCmds holds all of the non-helper command names
+	NonHelpCmds string
+)
 
-	for _, v := range NonHelpCommands {
-		if v.ChatInfo().CommandName != helpCmdName {
-			NonHelpCmds = NonHelpCmds + "\n" + v.ChatInfo().CommandName
-			NonHelpCommandExamples = append(NonHelpCommandExamples, v.ChatInfo().CommandName+" help")
+func init() {
+	// Iterate the full command map and extract the Non-Help Command
+	// we utilize these for system wide help calls
+	for k, v := range CommandInitializerMap {
+		if k != helpCmdName {
+			nonHelpCmd := v.(func([]string, string, string) EvebotCommand)([]string{}, "", "")
+			NonHelpCmds = NonHelpCmds + "\n" + nonHelpCmd.Info().CommandName
+			NonHelpCommandExamples = append(NonHelpCommandExamples, fmt.Sprintf("%s %s", nonHelpCmd.Info().CommandName, helpCmdName))
 		}
 	}
-
 }

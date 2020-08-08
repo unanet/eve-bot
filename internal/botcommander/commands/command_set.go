@@ -8,11 +8,12 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 )
 
-type SetCmd struct {
+type setCmd struct {
 	baseCommand
 }
 
 const (
+	// SetCmdName id/key
 	SetCmdName = "set"
 )
 
@@ -30,8 +31,9 @@ var (
 	}
 )
 
+// NewSetCommand creates a New SetCmd that implements the EvebotCommand interface
 func NewSetCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := SetCmd{baseCommand{
+	cmd := setCmd{baseCommand{
 		input:  cmdFields,
 		info:   ChatInfo{User: user, Channel: channel, CommandName: SetCmdName},
 		opts:   make(CommandOptions),
@@ -41,30 +43,31 @@ func NewSetCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd SetCmd) AckMsg() (string, bool) {
-
-	helpMsg := help.New(
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd setCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(setCmdHelpSummary.String()),
 		help.UsageOpt(setCmdHelpUsage.String()),
 		help.ExamplesOpt(setCmdHelpExample.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd SetCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd setCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
-func (cmd SetCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd setCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd SetCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd setCmd) Info() ChatInfo {
 	return cmd.info
 }
 
-func (cmd *SetCmd) resolveDynamicOptions() {
+func (cmd *setCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command params: %v", cmd.input))
 		return

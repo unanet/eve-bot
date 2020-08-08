@@ -1,11 +1,14 @@
 package eveapimodels
 
+// DeploymentPlanType data structure
 type DeploymentPlanType string
 
+// String returns the string deployment type
 func (dpt DeploymentPlanType) String() string {
 	return string(dpt)
 }
 
+// DeploymentPlanOptions data structure
 type DeploymentPlanOptions struct {
 	Artifacts        ArtifactDefinitions `json:"artifacts"`
 	ForceDeploy      bool                `json:"force_deploy"`

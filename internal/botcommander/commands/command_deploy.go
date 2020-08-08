@@ -9,11 +9,12 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
-type DeployCmd struct {
+type deployCmd struct {
 	baseCommand
 }
 
 const (
+	// DeployCmdName is used as key/id for the delete command
 	DeployCmdName = "deploy"
 )
 
@@ -33,8 +34,9 @@ var (
 	}
 )
 
+// NewDeployCommand creates a New DeployCmd that implements the EvebotCommand interface
 func NewDeployCommand(cmdFields []string, channel, user string) EvebotCommand {
-	cmd := DeployCmd{baseCommand{
+	cmd := deployCmd{baseCommand{
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: DeployCmdName},
 		arguments:  args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultServicesArg()},
@@ -46,31 +48,32 @@ func NewDeployCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd DeployCmd) AckMsg() (string, bool) {
-
-	helpMsg := help.New(
+// AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+func (cmd deployCmd) AckMsg() (string, bool) {
+	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(deployCmdHelpSummary.String()),
 		help.UsageOpt(deployCmdHelpUsage.String()),
 		help.ArgsOpt(cmd.arguments.String()),
 		help.ExamplesOpt(deployCmdHelpExample.String()),
-	).String()
-
-	return cmd.BaseAckMsg(helpMsg)
+	).String())
 }
 
-func (cmd DeployCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
+// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
+func (cmd deployCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	return validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
-func (cmd DeployCmd) DynamicOptions() CommandOptions {
+// Options satisfies the EveBotCommand Interface and returns the dynamic options
+func (cmd deployCmd) Options() CommandOptions {
 	return cmd.opts
 }
 
-func (cmd DeployCmd) ChatInfo() ChatInfo {
+// Info satisfies the EveBotCommand Interface and returns the Chat Info
+func (cmd deployCmd) Info() ChatInfo {
 	return cmd.info
 }
 
-func (cmd *DeployCmd) resolveDynamicOptions() {
+func (cmd *deployCmd) resolveDynamicOptions() {
 	if cmd.ValidInputLength() == false {
 		cmd.errs = append(cmd.errs, fmt.Errorf("resolve cmd params err invalid input: %v", cmd.input))
 		return

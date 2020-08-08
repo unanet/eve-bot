@@ -22,15 +22,18 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
+// Config data structure for the Eve API
 // EVEBOT_EVEAPI_BASE_URL
 // EVEBOT_EVEAPI_TIMEOUT
 // EVEBOT_EVEAPI_CALLBACK_URL
 type Config struct {
-	EveapiBaseUrl     string        `split_words:"true" required:"true"`
+	EveapiBaseURL     string        `split_words:"true" required:"true"`
 	EveapiTimeout     time.Duration `split_words:"true" default:"20s"`
-	EveapiCallbackUrl string        `split_words:"true" required:"true"`
+	EveapiCallbackURL string        `split_words:"true" required:"true"`
 }
 
+// Client interface for Eve API
+// TODO: clean up this interface with more generic calls and interfaces
 type Client interface {
 	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
 	GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error)
@@ -46,31 +49,34 @@ type Client interface {
 	Release(ctx context.Context, payload eve.Release) (eve.Release, error)
 }
 
+// client data structure
 type client struct {
 	cfg   *Config
 	sling *sling.Sling
 }
 
+// NewClient creates a new eve api client
 func NewClient(cfg Config) Client {
 	var httpClient = &http.Client{
 		Timeout:   cfg.EveapiTimeout,
 		Transport: evehttp.LoggingTransport,
 	}
 
-	if !strings.HasSuffix(cfg.EveapiBaseUrl, "/") {
-		cfg.EveapiBaseUrl += "/"
+	if !strings.HasSuffix(cfg.EveapiBaseURL, "/") {
+		cfg.EveapiBaseURL += "/"
 	}
 
 	return &client{
 		cfg: &cfg,
 		sling: sling.New().
-			Base(cfg.EveapiBaseUrl).
+			Base(cfg.EveapiBaseURL).
 			Client(httpClient).
 			Add("User-Agent", "eve-bot").
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 }
 
+// Release method calls the API to move artifacts in feeds
 func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release, error) {
 	var success eve.Release
 	var failure eveerror.RestError
@@ -95,6 +101,7 @@ func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release,
 	}
 }
 
+// SetNamespaceVersion sets the version on the namespace
 func (c *client) SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error) {
 	var success eve.Namespace
 	var failure eveerror.RestError
@@ -127,6 +134,7 @@ func (c *client) SetNamespaceVersion(ctx context.Context, version string, id int
 	}
 }
 
+// SetServiceVersion sets the version on the service
 func (c *client) SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error) {
 	var success eveapimodels.EveService
 	var failure eveerror.RestError
@@ -159,6 +167,7 @@ func (c *client) SetServiceVersion(ctx context.Context, version string, id int) 
 	}
 }
 
+// DeleteServiceMetadata deletes a metadata key on a service
 func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error) {
 	var success params.MetadataMap
 	var failure eveerror.RestError
@@ -185,6 +194,7 @@ func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (p
 	}
 }
 
+// GetServiceByID returns a service by an ID
 func (c *client) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error) {
 	var success eveapimodels.EveService
 	var failure eveerror.RestError
@@ -207,6 +217,7 @@ func (c *client) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveSe
 	}
 }
 
+// GetServicesByNamespace returns all of the services for a given namespace
 func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error) {
 	var success eveapimodels.Services
 	var failure eveerror.RestError
@@ -229,6 +240,7 @@ func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) (
 	}
 }
 
+// GetEnvironmentByID returns an environment by ID
 func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error) {
 	var success eve.Environment
 	var failure eveerror.RestError
@@ -251,6 +263,7 @@ func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Enviro
 	}
 }
 
+// GetEnvironments returns all of the environments
 func (c *client) GetEnvironments(ctx context.Context) (eveapimodels.Environments, error) {
 	var success eveapimodels.Environments
 	var failure eveerror.RestError
@@ -273,6 +286,7 @@ func (c *client) GetEnvironments(ctx context.Context) (eveapimodels.Environments
 	}
 }
 
+// GetNamespacesByEnvironment returns all of the namespaces for an environment
 func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error) {
 	var success eveapimodels.Namespaces
 	var failure eveerror.RestError
@@ -296,16 +310,17 @@ func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName
 	}
 }
 
+// Deploy calls the eve api to deploy resources
 func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, user, channel, ts string) (*eveapimodels.DeploymentPlanOptions, error) {
 	var success eveapimodels.DeploymentPlanOptions
 	var failure eveerror.RestError
 
-	cbUrlVals := url.Values{}
-	cbUrlVals.Set("user", user)
-	cbUrlVals.Add("channel", channel)
-	cbUrlVals.Add("ts", ts)
+	cbURLVals := url.Values{}
+	cbURLVals.Set("user", user)
+	cbURLVals.Add("channel", channel)
+	cbURLVals.Add("ts", ts)
 
-	dp.CallbackURL = c.cfg.EveapiCallbackUrl + "?" + cbUrlVals.Encode()
+	dp.CallbackURL = c.cfg.EveapiCallbackURL + "?" + cbURLVals.Encode()
 
 	r, err := c.sling.New().Post("deployment-plans").BodyJSON(dp).Request()
 	if err != nil {
@@ -329,6 +344,7 @@ func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptio
 	}
 }
 
+// SetServiceMetadata sets the metadata on the service
 func (c *client) SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error) {
 	var success params.MetadataMap
 	var failure eveerror.RestError
@@ -355,6 +371,7 @@ func (c *client) SetServiceMetadata(ctx context.Context, metadata params.Metadat
 	}
 }
 
+// GetNamespaceByID returns the namespace by an ID
 func (c *client) GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error) {
 	var success eve.Namespace
 	var failure eveerror.RestError

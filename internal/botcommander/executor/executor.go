@@ -3,7 +3,6 @@ package executor
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	"go.uber.org/zap"
 
@@ -15,15 +14,18 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 )
 
+// Executor interface takes an EvebotCommand and Executes a matching handler
 type Executor interface {
 	Execute(ctx context.Context, cmd commands.EvebotCommand, timestamp string)
 }
 
+// EvebotCommandExecutor is the data structure that implements the Executor
 type EvebotCommandExecutor struct {
 	eveAPIClient eveapi.Client
 	chatSvc      chatservice.Provider
 }
 
+// NewExecutor creator a new executor
 func NewExecutor(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Executor {
 	return &EvebotCommandExecutor{
 		eveAPIClient: eveAPIClient,
@@ -31,18 +33,18 @@ func NewExecutor(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Execu
 	}
 }
 
+// Execute satisfies the Executor.Execute interface
 func (h *EvebotCommandExecutor) Execute(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	log.Logger.Debug("command handler execute", zap.Any("cmd_type", reflect.TypeOf(cmd)))
-	cmdHandlerFunc := handlers.CommandHandlerMap[cmd.ChatInfo().CommandName]
+	cmdHandlerFunc := handlers.CommandHandlerMap[cmd.Info().CommandName]
 	if cmdHandlerFunc == nil {
-		h.invalidCommandHandlerErr(ctx, "nil handler", cmd.ChatInfo().Channel, timestamp)
+		h.invalidCommandHandlerErr(ctx, "nil handler", cmd.Info().Channel, timestamp)
 		return
 	}
 	if cmdHandlerFuncVal, ok := cmdHandlerFunc.(func(*eveapi.Client, *chatservice.Provider) handlers.CommandHandler); ok {
 		cmdHandlerFuncVal(&h.eveAPIClient, &h.chatSvc).Handle(ctx, cmd, timestamp)
 		return
 	}
-	h.invalidCommandHandlerErr(ctx, "failed command type cast", cmd.ChatInfo().Channel, timestamp)
+	h.invalidCommandHandlerErr(ctx, "failed command type cast", cmd.Info().Channel, timestamp)
 }
 
 func cleanSlackMsg(msg string) string {
