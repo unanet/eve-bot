@@ -64,6 +64,7 @@ type baseCommand struct {
 func (bc *baseCommand) IsHelpRequest() bool {
 	if len(bc.input) == 0 ||
 		bc.input[0] == helpCmdName ||
+		bc.input[0] == "" ||
 		bc.input[len(bc.input)-1] == helpCmdName ||
 		(len(bc.input) == 1 && bc.input[0] == bc.info.CommandName) {
 		return true
@@ -103,6 +104,7 @@ func (bc *baseCommand) BaseErrMsg() string {
 
 // BaseAckMsg is figures out what to send to the user immediately (acknowledgment)
 func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
+
 	if bc.IsHelpRequest() {
 		return fmt.Sprintf("<@%s>...\n\n%s", bc.info.User, cmdHelp), false
 	}

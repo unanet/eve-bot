@@ -82,7 +82,7 @@ func (c EveController) eveCronCallbackHandler(w http.ResponseWriter, r *http.Req
 
 	cbState := eveapimodels.CallbackState{User: user, Channel: channel, Payload: payload}
 	log.Logger.Debug("eve cron callback notification", zap.Any("cb_state", cbState))
-	if cbState.Payload.Status == eve.DeploymentPlanStatusPending {
+	if cbState.Payload.Status == eve.DeploymentPlanStatusPending || cbState.Payload.NothingToDeploy() {
 		render.Respond(w, r, nil)
 		return
 	}
