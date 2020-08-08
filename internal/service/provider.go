@@ -1,4 +1,4 @@
-package evebotservice
+package service
 
 import (
 	"strings"
@@ -8,7 +8,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/errors"
 )
 
 // Provider provides access to the Slack Client
@@ -44,8 +43,4 @@ func New(
 		CommandExecutor:   ce,
 		allowedChannelMap: chanMap,
 	}
-}
-
-func botError(oerr error, msg string, status int) error {
-	return &errors.RestError{Code: status, Message: msg, OriginalError: oerr}
 }

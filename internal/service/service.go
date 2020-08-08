@@ -1,4 +1,4 @@
-package evebotservice
+package service
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
+	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
@@ -19,7 +20,7 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	var payload slack.InteractionCallback
 	err := json.Unmarshal([]byte(req.FormValue("payload")), &payload)
 	if err != nil {
-		return botError(err, "failed to parse interactive slack message payload", http.StatusInternalServerError)
+		return &errors.RestError{Code: http.StatusBadRequest, Message: "failed to parse interactive slack message payload", OriginalError: err}
 	}
 	log.Logger.Info(fmt.Sprintf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value))
 	return nil

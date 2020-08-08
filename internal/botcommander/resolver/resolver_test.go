@@ -10,6 +10,7 @@ import (
 
 func TestEvebotResolver_Resolve(t *testing.T) {
 
+	resolver := NewResolver()
 	user := "dummy"
 	channel := "chanelID"
 	validDeployCmd := "@evebot deploy current to int"
@@ -27,6 +28,8 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 	setMetaDataCmdCleanInput := "@evebot set metadata for unaneta in current una-int una-qa unanet_unanet_unanet.org_access.dataManager.people.default_to_all=false"
 	setMetaDataCmd2Input := "@evebot set metadata for unaneta in latest una-qa unanet_unanet_unanet.external.platform.url=<https://unaneta.qa-latest.unanet.io/platform|unaneta.qa-latest.unanet.io/platform>"
 	setMetaDataCmd2CleanInput := "@evebot set metadata for unaneta in latest una-qa unanet_unanet_unanet.external.platform.url=unaneta.qa-latest.unanet.io/platform"
+	invalidCmd := "@evebot wtf does this do"
+	rootCmd := "@evebot"
 
 	type args struct {
 		input, channel, user string
@@ -36,6 +39,16 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 		args args
 		want commands.EvebotCommand
 	}{
+		{
+			name: "root command",
+			args: args{input: rootCmd, channel: channel, user: user},
+			want: commands.NewRootCmd([]string{""}, channel, user),
+		},
+		{
+			name: "invalid command",
+			args: args{input: invalidCmd, channel: channel, user: user},
+			want: commands.NewInvalidCommand(strings.Fields(invalidCmd)[1:], channel, user),
+		},
 		{
 			name: "set metadata clean url",
 			args: args{input: setMetaDataCmd2Input, channel: channel, user: user},
@@ -102,10 +115,11 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 			want: commands.NewDeployCommand(strings.Fields(deployCmdHelp2)[1:], channel, user),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			cmd := NewResolver().Resolve(tt.args.input, tt.args.channel, tt.args.user)
+			cmd := resolver.Resolve(tt.args.input, tt.args.channel, tt.args.user)
 
 			if !reflect.DeepEqual(cmd, tt.want) {
 				t.Errorf("\nA = %v\nB = %v", cmd, tt.want)

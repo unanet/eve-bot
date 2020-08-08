@@ -6,7 +6,7 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/evebotservice"
+	"gitlab.unanet.io/devops/eve-bot/internal/service"
 	"gitlab.unanet.io/devops/eve/pkg/mux"
 )
 
@@ -18,7 +18,7 @@ func InitController(cfg *config.Config) []mux.EveController {
 	chatSvc := chatservice.New(chatservice.Slack, cfg)
 	cmdExecutor := executor.NewExecutor(eveAPI, chatSvc)
 
-	svc := evebotservice.New(
+	svc := service.New(
 		cfg,
 		cmdResolver,
 		eveAPI,

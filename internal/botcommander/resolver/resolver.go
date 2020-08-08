@@ -45,7 +45,7 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 	newCmdFuncInterface := commands.CommandInitializerMap[cleanCmdFields[0]]
 	if newCmdFuncInterface == nil {
 		// this is bad - we will want to be alerted on this error
-		log.Logger.Error("invalid new command initializer func", zap.String("input", cleanCmdFields[0]))
+		log.Logger.Info("invalid command", zap.String("command", cleanCmdFields[0]), zap.String("input", input))
 		return commands.NewInvalidCommand(cleanCmdFields, channel, user)
 	}
 
@@ -56,7 +56,7 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 	}
 
 	// this is bad - we will want to be alerted on this error
-	log.Logger.Error("unknown cmd resolved", zap.String("input", cleanCmdFields[0]))
+	log.Logger.Error("unknown command resolved", zap.String("input", input))
 	return commands.NewInvalidCommand(cleanCmdFields, channel, user)
 }
 

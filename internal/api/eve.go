@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-	"gitlab.unanet.io/devops/eve-bot/internal/evebotservice"
+	"gitlab.unanet.io/devops/eve-bot/internal/service"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -16,11 +16,11 @@ import (
 
 // EveController for slack routes
 type EveController struct {
-	svc *evebotservice.Provider
+	svc *service.Provider
 }
 
 // NewEveController New creates a new eve controller (route handler)
-func NewEveController(svc *evebotservice.Provider) *EveController {
+func NewEveController(svc *service.Provider) *EveController {
 	return &EveController{svc: svc}
 }
 

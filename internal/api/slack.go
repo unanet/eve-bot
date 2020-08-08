@@ -14,7 +14,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/slack-go/slack"
-	"gitlab.unanet.io/devops/eve-bot/internal/evebotservice"
+	"gitlab.unanet.io/devops/eve-bot/internal/service"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
@@ -22,11 +22,11 @@ import (
 
 // SlackController for slack routes
 type SlackController struct {
-	svc *evebotservice.Provider
+	svc *service.Provider
 }
 
 // NewSlackController creates a new slack controller (route handler)
-func NewSlackController(svc *evebotservice.Provider) *SlackController {
+func NewSlackController(svc *service.Provider) *SlackController {
 	return &SlackController{svc: svc}
 }
 
