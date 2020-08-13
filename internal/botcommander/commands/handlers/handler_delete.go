@@ -76,7 +76,10 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
 	var requestedMetadata []string
 	var validMetadata bool
-	if requestedMetadata, validMetadata = cmd.Options()[params.MetadataName].([]string); validMetadata == false {
+
+	opts := cmd.Options()
+
+	if requestedMetadata, validMetadata = opts[params.MetadataName].([]string); validMetadata == false {
 		log.Logger.Warn("troy debug invalid metadata",
 			zap.Any("opts", cmd.Options()),
 			zap.Strings("requestedMetadata", requestedMetadata),
