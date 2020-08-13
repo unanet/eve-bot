@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -74,7 +77,9 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 	var requestedMetadata []string
 	var validMetadata bool
 	if requestedMetadata, validMetadata = cmd.Options()[params.MetadataName].([]string); !validMetadata {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid MetadataName Param"))
+		log.Logger.Debug("troy debug invalid metadata", zap.Any("opts", cmd.Options()))
+		h.chatSvc.UserNotificationThread(ctx, "invalid metadata", cmd.Info().User, cmd.Info().Channel, *ts)
+		//h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid MetadataName Param"))
 		return
 	}
 	if len(requestedMetadata) == 0 {
