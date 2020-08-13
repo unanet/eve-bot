@@ -77,7 +77,7 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 	var requestedMetadata []string
 	var validMetadata bool
 	if requestedMetadata, validMetadata = cmd.Options()[params.MetadataName].([]string); !validMetadata {
-		log.Logger.Debug("troy debug invalid metadata", zap.Any("opts", cmd.Options()))
+		log.Logger.Warn("troy debug invalid metadata", zap.Any("opts", cmd.Options()))
 		h.chatSvc.UserNotificationThread(ctx, "invalid metadata", cmd.Info().User, cmd.Info().Channel, *ts)
 		//h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid MetadataName Param"))
 		return
