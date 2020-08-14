@@ -35,14 +35,6 @@ func (ilb *InputLengthBounds) Valid(input []string) bool {
 	return ilb.ValidMax(input) && ilb.ValidMin(input)
 }
 
-// InputCommand is the input command structure
-type InputCommand []string
-
-// Length returns the length of the InputCommand
-func (ic InputCommand) Length() int {
-	return len(ic)
-}
-
 // ChatInfo contains the Chat Command Info
 type ChatInfo struct {
 	User, Channel, CommandName string
@@ -51,7 +43,7 @@ type ChatInfo struct {
 // baseCommand
 // the root/abstract/base (i.e. shared/common) struct that all commands share
 type baseCommand struct {
-	input      InputCommand
+	input      []string
 	bounds     InputLengthBounds
 	info       ChatInfo
 	errs       []error
