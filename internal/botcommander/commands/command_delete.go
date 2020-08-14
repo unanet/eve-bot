@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
@@ -103,7 +102,7 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 		cmd.opts[params.ServiceName] = cmd.input[3]
 		cmd.opts[params.NamespaceName] = cmd.input[5]
 		cmd.opts[params.EnvironmentName] = cmd.input[6]
-		cmd.opts[params.MetadataName] = strings.Split(strings.Join(cmd.input[7:], ","), ",")
+		cmd.opts[params.MetadataName] = cmd.input[7:]
 		log.Logger.Warn("TROY DEBUG", zap.Any("opts", cmd.opts))
 		return
 	case resources.VersionName:
