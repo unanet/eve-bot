@@ -3,9 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -103,7 +100,6 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 		cmd.opts[params.NamespaceName] = cmd.input[5]
 		cmd.opts[params.EnvironmentName] = cmd.input[6]
 		cmd.opts[params.MetadataName] = cmd.input[7:]
-		log.Logger.Warn("TROY DEBUG", zap.Any("opts", cmd.opts))
 		return
 	case resources.VersionName:
 		// delete version for unaneta in current una-int
