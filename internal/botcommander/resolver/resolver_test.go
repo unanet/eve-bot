@@ -28,7 +28,7 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 	setMetaDataCmdCleanInput := "@evebot set metadata for unaneta in current una-int una-qa unanet_unanet_unanet.org_access.dataManager.people.default_to_all=false"
 	setMetaDataCmd2Input := "@evebot set metadata for unaneta in latest una-qa unanet_unanet_unanet.external.platform.url=<https://unaneta.qa-latest.unanet.io/platform|unaneta.qa-latest.unanet.io/platform>"
 	setMetaDataCmd2CleanInput := "@evebot set metadata for unaneta in latest una-qa unanet_unanet_unanet.external.platform.url=unaneta.qa-latest.unanet.io/platform"
-	deleteMetaDataCmd := "@evebot delete metadata for unaneta in current una-int key"
+	deleteMetaDataCmd := "@evebot delete metadata for unaneta in current una-int key,key2,key3"
 	invalidCmd := "@evebot wtf does this do"
 	rootCmd := "@evebot"
 
