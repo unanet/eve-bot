@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -74,27 +71,17 @@ func (h DeleteHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 }
 
 func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
-	var requestedMetadata []string
-	var validMetadata bool
 
 	opts := cmd.Options()
 
-	if requestedMetadata, validMetadata = opts[params.MetadataName].([]string); validMetadata == false {
-		log.Logger.Warn("troy debug invalid metadata",
-			zap.Any("opts", cmd.Options()),
-			zap.Strings("requestedMetadata", requestedMetadata),
-			zap.Bool("validMetadata", validMetadata))
-		h.chatSvc.UserNotificationThread(ctx, "invalid metadata", cmd.Info().User, cmd.Info().Channel, *ts)
-		//h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid MetadataName Param"))
-		return
-	}
-	if len(requestedMetadata) == 0 {
+	if len(opts[params.MetadataName].([]string)) == 0 {
 		h.chatSvc.UserNotificationThread(ctx, "you must supply 1 or more metadata keys", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
+
 	var md params.MetadataMap
 	var err error
-	for _, m := range requestedMetadata {
+	for _, m := range opts[params.MetadataName].([]string) {
 		md, err = h.eveAPIClient.DeleteServiceMetadata(ctx, m, svc.ID)
 		if err != nil {
 			h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
