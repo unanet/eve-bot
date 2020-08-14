@@ -89,8 +89,8 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 
 	switch cmd.opts["resource"] {
 	case resources.MetadataName:
-		// delete metadata for unaneta in current una-int key,key2,key3
-		// delete metadata for {{ service }} in {{ namespace }} {{ environment }} key,key2,key3
+		// delete metadata for unaneta in current una-int key key2 key3
+		// delete metadata for {{ service }} in {{ namespace }} {{ environment }} key key2 key3
 		if cmd.ValidInputLength() == false {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete metadata: %v", cmd.input))
 			return
