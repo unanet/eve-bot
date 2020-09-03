@@ -32,7 +32,6 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 	invalidCmd := "@evebot wtf does this do"
 	rootCmd := "@evebot"
 	setMetaDataCmdDbURL := "@evebot set metadata for auroraa in current una-int unanet_database_unatime.database.url=jdbc:postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/aurorab_int_current?escapeSyntaxCallMode=callIfNoReturn"
-	setMetaDataCmdDbURL2 := "@evebot set metadata for auroraa in current una-int unanet_database_unatime.database.url=jdbc:<postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/aurorab_int_current?escapeSyntaxCallMode=callIfNoReturn>"
 
 	type args struct {
 		input, channel, user string
