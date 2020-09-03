@@ -43,11 +43,6 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 		want commands.EvebotCommand
 	}{
 		{
-			name: "set metadata db url 2",
-			args: args{input: setMetaDataCmdDbURL2, channel: channel, user: user},
-			want: commands.NewSetCommand(strings.Fields(setMetaDataCmdDbURL2)[1:], channel, user),
-		},
-		{
 			name: "set metadata db url",
 			args: args{input: setMetaDataCmdDbURL, channel: channel, user: user},
 			want: commands.NewSetCommand(strings.Fields(setMetaDataCmdDbURL)[1:], channel, user),
