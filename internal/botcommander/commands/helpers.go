@@ -59,7 +59,7 @@ func ExtractStringListOpt(defType string, opts CommandOptions) eveapimodels.Stri
 // CleanUrls cleans the incoming URLs
 // this iterates the incoming command and removes an encoding slack adds to URLs
 func CleanUrls(input string) string {
-	matcher := regexp.MustCompile(`<[a-zA-Z]+://[a-zA-Z._\-:\d/|]+>`)
+	matcher := regexp.MustCompile(`<.+://.+>`)
 	matchIndexes := matcher.FindAllStringIndex(input, -1)
 	matchCount := len(matchIndexes)
 
