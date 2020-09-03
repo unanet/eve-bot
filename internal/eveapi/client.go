@@ -349,15 +349,12 @@ func (c *client) SetServiceMetadata(ctx context.Context, metadata params.Metadat
 	var success params.MetadataMap
 	var failure eveerror.RestError
 
-	log.Logger.Warn("Set SVC Metadata 2 ", zap.Any("metadatamap", metadata))
-
 	r, err := c.sling.New().Patch(fmt.Sprintf("services/%v/metadata", id)).BodyJSON(metadata).Request()
 	if err != nil {
 		log.Logger.Error("error preparing eve-api SetServiceMetadata request", zap.Error(err))
 		return nil, err
 	}
 
-	log.Logger.Warn("eve-api SetServiceMetadata req", zap.Any("req", metadata))
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
 		log.Logger.Error("error calling eve-api SetServiceMetadata", zap.Error(err))

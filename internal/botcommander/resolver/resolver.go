@@ -26,7 +26,6 @@ func NewResolver() Resolver {
 // this is where all of the "magic" happens that basically translates a user command to an EveBot command
 func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotCommand {
 	// parse the input string and break out into fields (array)
-	log.Logger.Warn("resolver", zap.String("input", input))
 
 	msgFields := strings.Fields(input)
 	if len(msgFields) == 1 {
@@ -35,15 +34,12 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 		return commands.NewRootCmd([]string{""}, channel, user)
 	}
 
-	log.Logger.Warn("msgFields", zap.Strings("msgFields", msgFields))
 	// scrub the input fields for invalid data (link encoding)
 	cleanCmdFields := cleanCommandField(msgFields[1:])
 	if cleanCmdFields == nil {
 		log.Logger.Error("invalid clean cmd fields")
 		return commands.NewInvalidCommand(cleanCmdFields, channel, user)
 	}
-
-	log.Logger.Warn("cleanCmdFields", zap.Strings("cleanCmdFields", cleanCmdFields))
 
 	// make sure after you create a new command,
 	// you add the New func to the map so that it is picked up here

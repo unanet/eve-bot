@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
@@ -91,7 +88,6 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid metadata map"))
 		return
 	}
-	log.Logger.Warn("Set SVC Metadata", zap.Any("metadatamap", metadataMap))
 
 	md, err := h.eveAPIClient.SetServiceMetadata(ctx, metadataMap, svc.ID)
 	if err != nil {

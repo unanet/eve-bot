@@ -3,9 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -103,7 +100,6 @@ func (cmd *setCmd) resolveDynamicOptions() {
 		cmd.opts[params.ServiceName] = cmd.input[3]
 		cmd.opts[params.NamespaceName] = cmd.input[5]
 		cmd.opts[params.EnvironmentName] = cmd.input[6]
-		log.Logger.Warn("metadata111", zap.Strings("input", cmd.input[7:]))
 		cmd.opts[params.MetadataName] = hydrateMetadataMap(cmd.input[7:])
 		return
 	case resources.VersionName:
