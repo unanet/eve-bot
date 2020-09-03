@@ -25,7 +25,7 @@ type EvebotCommandExecutor struct {
 	chatSvc      chatservice.Provider
 }
 
-// NewExecutor creator a new executor
+// NewExecutor creates a new executor
 func NewExecutor(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Executor {
 	return &EvebotCommandExecutor{
 		eveAPIClient: eveAPIClient,

@@ -71,6 +71,11 @@ func Test_CleanUrls(t *testing.T) {
 			args: args{input: "<postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current|unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current>"},
 			want: "unanet-aurora-db.app-nonprod.unanet.io:5432/auroraa_int_current",
 		},
+		{
+			name: "db url parse",
+			args: args{input: "jdbc:postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/aurorab_int_current?escapeSyntaxCallMode=callIfNoReturn"},
+			want: "jdbc:postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/aurorab_int_current?escapeSyntaxCallMode=callIfNoReturn",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

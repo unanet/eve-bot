@@ -31,6 +31,7 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 	deleteMetaDataCmd := "@evebot delete metadata for unaneta in current una-int key key2 key3"
 	invalidCmd := "@evebot wtf does this do"
 	rootCmd := "@evebot"
+	setMetaDataCmdDbURL := "@evebot set metadata for auroraa in current una-int unanet_database_unatime.database.url=jdbc:postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/aurorab_int_current?escapeSyntaxCallMode=callIfNoReturn"
 
 	type args struct {
 		input, channel, user string
@@ -40,6 +41,11 @@ func TestEvebotResolver_Resolve(t *testing.T) {
 		args args
 		want commands.EvebotCommand
 	}{
+		{
+			name: "set metadata db url",
+			args: args{input: setMetaDataCmdDbURL, channel: channel, user: user},
+			want: commands.NewSetCommand(strings.Fields(setMetaDataCmdDbURL)[1:], channel, user),
+		},
 		{
 			name: "delete command",
 			args: args{input: deleteMetaDataCmd, channel: channel, user: user},
