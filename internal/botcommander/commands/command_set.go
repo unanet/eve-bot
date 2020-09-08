@@ -106,6 +106,7 @@ func (cmd *setCmd) resolveDynamicOptions() {
 		cmd.opts[params.NamespaceName] = cmd.input[5]
 		cmd.opts[params.EnvironmentName] = cmd.input[6]
 		cmd.opts[params.MetadataName] = hydrateMetadataMap(cmd.input[7:])
+		log.Logger.Debug("set metadata", zap.Any("metadata", cmd.opts[params.MetadataName]))
 		return
 	case resources.VersionName:
 		switch len(cmd.input) {

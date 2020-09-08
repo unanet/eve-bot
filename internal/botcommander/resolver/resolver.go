@@ -35,8 +35,6 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 		return commands.NewRootCmd([]string{""}, channel, user)
 	}
 
-	log.Logger.Debug("resolve command fields", zap.Strings("msgFields", msgFields))
-
 	// scrub the input fields for invalid data (link encoding)
 	cleanCmdFields := cleanCommandField(msgFields[1:])
 	if cleanCmdFields == nil {
@@ -44,7 +42,7 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 		return commands.NewInvalidCommand(cleanCmdFields, channel, user)
 	}
 
-	log.Logger.Debug("resolve command clean fields", zap.Strings("cleanCmdFields", cleanCmdFields))
+	log.Logger.Debug("resolve command cleaned", zap.Strings("fields", cleanCmdFields))
 
 	// make sure after you create a new command,
 	// you add the New func to the map so that it is picked up here

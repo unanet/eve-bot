@@ -93,23 +93,17 @@ func CleanUrls(input string) string {
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
-	log.Logger.Debug("hydrateMetadataMap", zap.Strings("keyvals", keyvals))
+	log.Logger.Debug("set metadata hydrate map input", zap.Strings("keyvals", keyvals))
 	result := make(params.MetadataMap, 0)
 	if len(keyvals) == 0 {
 		return nil
 	}
 	for _, s := range keyvals {
-		log.Logger.Debug("hydrateMetadataMap iteration", zap.String("s", s))
 		if strings.Contains(s, "=") {
-			log.Logger.Debug("hydrateMetadataMap iteration = ", zap.String("s", s))
 			argKV := strings.Split(s, "=")
-			log.Logger.Debug("hydrateMetadataMap iteration = argKV", zap.Strings("argKV", argKV))
-			key := CleanUrls(argKV[0])
-			log.Logger.Debug("hydrateMetadataMap iteration = argKV key", zap.String("key", key))
-			value := CleanUrls(strings.Join(argKV[1:], "="))
-			log.Logger.Debug("hydrateMetadataMap iteration = argKV value", zap.String("value", value))
-			result[key] = value
+			result[CleanUrls(argKV[0])] = CleanUrls(strings.Join(argKV[1:], "="))
 		}
 	}
+	log.Logger.Debug("set metadata hydrate map result", zap.Any("result", result))
 	return result
 }
