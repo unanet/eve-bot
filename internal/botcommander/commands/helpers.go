@@ -106,7 +106,7 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 			log.Logger.Debug("hydrateMetadataMap iteration = argKV", zap.Strings("argKV", argKV))
 			key := CleanUrls(argKV[0])
 			log.Logger.Debug("hydrateMetadataMap iteration = argKV key", zap.String("key", key))
-			value := CleanUrls(strings.Join(argKV[1:], ","))
+			value := CleanUrls(strings.Join(argKV[1:], "="))
 			log.Logger.Debug("hydrateMetadataMap iteration = argKV value", zap.String("value", value))
 			result[key] = value
 		}
