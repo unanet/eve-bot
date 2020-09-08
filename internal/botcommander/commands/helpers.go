@@ -4,8 +4,11 @@ import (
 	"regexp"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 // ExtractArtifactsDefinition extracts the ArtifactDefinitions from the CommandOptions
@@ -90,15 +93,21 @@ func CleanUrls(input string) string {
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
+	log.Logger.Debug("hydrateMetadataMap", zap.Strings("keyvals", keyvals))
 	result := make(params.MetadataMap, 0)
 	if len(keyvals) == 0 {
 		return nil
 	}
 	for _, s := range keyvals {
+		log.Logger.Debug("hydrateMetadataMap iteration", zap.String("s", s))
 		if strings.Contains(s, "=") {
+			log.Logger.Debug("hydrateMetadataMap iteration = ", zap.String("s", s))
 			argKV := strings.Split(s, "=")
+			log.Logger.Debug("hydrateMetadataMap iteration = argKV", zap.Strings("argKV", argKV))
 			key := CleanUrls(argKV[0])
-			value := CleanUrls(argKV[1])
+			log.Logger.Debug("hydrateMetadataMap iteration = argKV key", zap.String("key", key))
+			value := CleanUrls(strings.Join(argKV[1:], ","))
+			log.Logger.Debug("hydrateMetadataMap iteration = argKV value", zap.String("value", value))
 			result[key] = value
 		}
 	}
