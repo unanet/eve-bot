@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -82,10 +85,14 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 	var md params.MetadataMap
 	var err error
 	for _, m := range opts[params.MetadataName].([]string) {
-		md, err = h.eveAPIClient.DeleteServiceMetadata(ctx, m, svc.ID)
-		if err != nil {
-			h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
-			return
+		if isValidMetadata(m) {
+			md, err = h.eveAPIClient.DeleteServiceMetadata(ctx, m, svc.ID)
+			if err != nil {
+				h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
+				return
+			}
+		} else {
+			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid metadata key: %s", m), cmd.Info().User, cmd.Info().Channel, *ts)
 		}
 	}
 	if md == nil {
@@ -102,4 +109,20 @@ func (h DeleteHandler) deleteVersion(ctx context.Context, cmd commands.EvebotCom
 		return
 	}
 	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("%s version deleted", updatedSvc.Name), cmd.Info().User, cmd.Info().Channel, *ts)
+}
+
+func isValidMetadata(key string) bool {
+	// Guard against the user sending key=value
+	// we only want to send the key to the API
+	metadatakey := key
+	if strings.Contains(key, "=") {
+		log.Logger.Debug("metadata key contains equal", zap.String("key", key))
+		metadatakey = strings.Split(key, "=")[0]
+		log.Logger.Debug("split metadata on equal", zap.String("metadatakey", metadatakey))
+	}
+	if strings.Contains(metadatakey, "/") {
+		log.Logger.Warn("metadata key contains slash", zap.String("metadatakey", metadatakey))
+		return false
+	}
+	return true
 }

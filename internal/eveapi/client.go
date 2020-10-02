@@ -172,13 +172,24 @@ func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (p
 	var success params.MetadataMap
 	var failure eveerror.RestError
 
-	r, err := c.sling.New().Delete(fmt.Sprintf("services/%v/metadata/%s", id, m)).Request()
+	// Guard against the user sending key=value
+	// we only want to send the key to the API
+	metadatakey := m
+	if strings.Contains(m, "=") {
+		metadatakey = strings.Split(m, "=")[0]
+	}
+
+	if strings.Contains(metadatakey, "/") {
+		return nil, fmt.Errorf("invalid metadata key: %s", metadatakey)
+	}
+
+	r, err := c.sling.New().Delete(fmt.Sprintf("services/%v/metadata/%s", id, metadatakey)).Request()
 	if err != nil {
 		log.Logger.Error("error preparing eve-api DeleteServiceMetadata request", zap.Error(err))
 		return nil, err
 	}
 
-	log.Logger.Debug("eve-api DeleteServiceMetadata req", zap.Any("metadata_key", m), zap.Int("service", id))
+	log.Logger.Debug("eve-api DeleteServiceMetadata req", zap.Any("metadata_key", metadatakey), zap.Int("service", id))
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
 		log.Logger.Error("error calling eve-api DeleteServiceMetadata", zap.Error(err))
