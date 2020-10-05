@@ -223,7 +223,7 @@ func (c *client) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveSe
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetServicesByNamespace", zap.String("error_msg", failure.Message))
+		log.Logger.Debug("an error occurred while trying to call eve-api GetServiceByID", zap.String("error_msg", failure.Message), zap.Int("api_status", resp.StatusCode))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
