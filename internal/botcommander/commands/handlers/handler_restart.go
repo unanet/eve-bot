@@ -39,29 +39,15 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	//svc, err := h.eveAPIClient.GetServiceByName(ctx, ns.Name, cmd.Options()[params.ServiceName].(string))
-	//if err != nil {
-	//	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed to find service: %s", err.Error()), cmd.Info().User, cmd.Info().Channel, timestamp)
-	//	return
-	//}
-
 	chatUser, err := h.chatSvc.GetUser(ctx, cmd.Info().User)
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
 		return
 	}
 
-	//env, err := h.eveAPIClient.GetEnvironmentByID(ctx, strconv.Itoa(ns.EnvironmentID))
-	//if err != nil {
-	//	h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
-	//	return
-	//}
-
-	cmdAPIOpts := cmd.Options()
-
 	var artifactDef eveapimodels.ArtifactDefinitions
 
-	artifactsRequested := commands.ExtractArtifactsDefinition(args.ServicesName, cmdAPIOpts)
+	artifactsRequested := commands.ExtractArtifactsDefinition(args.ServicesName, cmd.Options())
 
 	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, ns.Name)
 	if err != nil {
@@ -89,8 +75,8 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		ForceDeploy:      true,
 		User:             chatUser.Name,
 		DryRun:           false,
-		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmdAPIOpts),
-		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
+		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmd.Options()),
+		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmd.Options()),
 		Type:             "application",
 	}
 
@@ -117,8 +103,4 @@ func servicesToArtifactDef(svcs eveapimodels.Services) eveapimodels.ArtifactDefi
 		result = append(result, def)
 	}
 	return result
-}
-
-func (h RestartHandler) toChatMessage(resp eve.Service) string {
-	return fmt.Sprintf("Restarted Service: `%s`\nVersion: `%s`", resp.Name, resp.DeployedVersion)
 }
