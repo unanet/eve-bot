@@ -108,12 +108,13 @@ func toServicesMap(svcs eveapimodels.Services) map[string]eve.Service {
 }
 
 func servicesToArtifactDef(svcs eveapimodels.Services) eveapimodels.ArtifactDefinitions {
-	result := make(eveapimodels.ArtifactDefinitions, 0, len(svcs))
-	for i, svc := range svcs {
-		result[i] = &eveapimodels.ArtifactDefinition{
+	var result eveapimodels.ArtifactDefinitions
+	for _, svc := range svcs {
+		def := &eveapimodels.ArtifactDefinition{
 			Name:             svc.Name,
 			RequestedVersion: svc.DeployedVersion,
 		}
+		result = append(result, def)
 	}
 	return result
 }
