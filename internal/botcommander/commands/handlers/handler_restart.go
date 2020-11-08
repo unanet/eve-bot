@@ -77,9 +77,9 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		// lets map them first and then "find" them
 		// ... a map here is faster than the nested for loops required
 		svcMap := toServicesMap(svcs)
-		currServicesRequest := make([]eve.Service, 0, len(artifactsRequested))
-		for i, artifactReq := range artifactsRequested {
-			currServicesRequest[i] = svcMap[artifactReq.Name]
+		var currServicesRequest []eve.Service
+		for _, artifactReq := range artifactsRequested {
+			currServicesRequest = append(currServicesRequest, svcMap[artifactReq.Name])
 		}
 		artifactDef = servicesToArtifactDef(currServicesRequest)
 	}
