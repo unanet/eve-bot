@@ -3,12 +3,14 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"strconv"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
@@ -28,22 +30,7 @@ func NewRestartHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provide
 	}
 }
 
-//{
-//"id": 83,
-//"namespace_id": 28,
-//"namespace_name": "una-qa-release",
-//"artifact_id": 202,
-//"artifact_name": "unanet-app",
-//"override_version": "",
-//"deployed_version": "20.7.0.5839",
-//"created_at": "2020-06-22T18:16:58.349838Z",
-//"updated_at": "2020-11-03T20:42:41.054868Z",
-//"name": "unaneta",
-//"sticky_sessions": true,
-//"count": 1
-//}
-
-// Handle handles the ReleaseCmd
+// Handle handles the RestartCmd
 func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 
 	ns, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
@@ -52,11 +39,11 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	svc, err := h.eveAPIClient.GetServiceByName(ctx, ns.Name, cmd.Options()[params.ServiceName].(string))
-	if err != nil {
-		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed to find service: %s", err.Error()), cmd.Info().User, cmd.Info().Channel, timestamp)
-		return
-	}
+	//svc, err := h.eveAPIClient.GetServiceByName(ctx, ns.Name, cmd.Options()[params.ServiceName].(string))
+	//if err != nil {
+	//	h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed to find service: %s", err.Error()), cmd.Info().User, cmd.Info().Channel, timestamp)
+	//	return
+	//}
 
 	chatUser, err := h.chatSvc.GetUser(ctx, cmd.Info().User)
 	if err != nil {
@@ -64,29 +51,71 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	env, err := h.eveAPIClient.GetEnvironmentByID(ctx, strconv.Itoa(ns.EnvironmentID))
+	//env, err := h.eveAPIClient.GetEnvironmentByID(ctx, strconv.Itoa(ns.EnvironmentID))
+	//if err != nil {
+	//	h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
+	//	return
+	//}
+
+	cmdAPIOpts := cmd.Options()
+
+	var artifactDef eveapimodels.ArtifactDefinitions
+
+	artifactsRequested := commands.ExtractArtifactsDefinition(args.ServicesName, cmdAPIOpts)
+
+	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, ns.Name)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
+		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("(GetServicesByNamespace) failed to find service: %s", err.Error()), cmd.Info().User, cmd.Info().Channel, timestamp)
 		return
 	}
 
+	if len(artifactsRequested) == 0 {
+		// No specific services were requests, so we are "restarting" (redeploying the same version) of all services in the namesace
+		artifactDef = servicesToArtifactDef(svcs)
+	} else {
+		// The user has requested specific services
+		// lets map them first and then "find" them
+		// ... a map here is faster than the nested for loops required
+		svcMap := toServicesMap(svcs)
+		currServicesRequest := make([]eve.Service, 0, len(artifactsRequested))
+		for i, artifactReq := range artifactsRequested {
+			currServicesRequest[i] = svcMap[artifactReq.Name]
+		}
+		artifactDef = servicesToArtifactDef(currServicesRequest)
+	}
+
 	deployOpts := eveapimodels.DeploymentPlanOptions{
-		Artifacts: eveapimodels.ArtifactDefinitions{
-			&eveapimodels.ArtifactDefinition{
-				Name:             svc.Name,
-				RequestedVersion: svc.DeployedVersion,
-			},
-		},
+		Artifacts:        artifactDef,
 		ForceDeploy:      true,
 		User:             chatUser.Name,
 		DryRun:           false,
-		Environment:      env.Name,
-		NamespaceAliases: []string{ns.Alias},
+		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmdAPIOpts),
+		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Type:             "application",
 	}
 
 	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, deployOpts)
 
+}
+
+// we convert the slice of services to map["service_name"] = Service
+func toServicesMap(svcs eveapimodels.Services) map[string]eve.Service {
+	result := make(map[string]eve.Service)
+	for _, svc := range svcs {
+		result[svc.Name] = svc
+	}
+	return result
+}
+
+func servicesToArtifactDef(svcs eveapimodels.Services) eveapimodels.ArtifactDefinitions {
+	result := make(eveapimodels.ArtifactDefinitions, 0, len(svcs))
+	for i, svc := range svcs {
+		result[i] = &eveapimodels.ArtifactDefinition{
+			Name:             svc.Name,
+			RequestedVersion: svc.DeployedVersion,
+		}
+	}
+	return result
 }
 
 func (h RestartHandler) toChatMessage(resp eve.Service) string {
