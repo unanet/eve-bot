@@ -16,6 +16,7 @@ var (
 		SetCmdName:     NewSetCommand,
 		DeleteCmdName:  NewDeleteCommand,
 		ReleaseCmdName: NewReleaseCommand,
+		RestartCmdName: NewRestartCommand,
 	}
 	// NonHelpCommandExamples is hydrated during init and holds all of the non-helper command examples
 	NonHelpCommandExamples = help.Examples{}

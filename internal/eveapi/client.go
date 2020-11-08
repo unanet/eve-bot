@@ -40,6 +40,7 @@ type Client interface {
 	GetEnvironments(ctx context.Context) (eveapimodels.Environments, error)
 	GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error)
 	GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error)
+	GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error)
 	GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error)
 	SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error)
 	DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error)
@@ -97,6 +98,29 @@ func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release,
 		return success, nil
 	default:
 		log.Logger.Debug("an error occurred while trying to call eve-api SetNamespaceVersion", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
+}
+
+// GetServiceByName returns a service by name and namespace name
+func (c *client) GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error) {
+	var success eve.Service
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Get(fmt.Sprintf("namespaces/%s/services/%s", namespace, service)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetServiceByName request", zap.Error(err))
+		return success, err
+	}
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetServiceByName", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }

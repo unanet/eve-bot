@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	msgErrNotification           = "Something terrible has happened..."
-	msgErrNotificationAssurance  = "I've dispatched a semi-competent team of monkeys to battle the issue..."
+	msgErrNotificationAssurance  = "We've received the alert and someone is looking into the error..."
 	msgNotification              = "I've got some news..."
 	msgDeploymentErrNotification = "I detected some deployment *errors:*"
 	msgLogLinks                  = "Here are the latest logs..."

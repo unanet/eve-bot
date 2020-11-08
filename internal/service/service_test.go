@@ -105,6 +105,10 @@ func (meac MockEveAPIClient) GetServicesByNamespace(ctx context.Context, namespa
 	return eveapimodels.Services{}, nil
 }
 
+func (meac MockEveAPIClient) GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error) {
+	return eve.Service{}, nil
+}
+
 func (meac MockEveAPIClient) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error) {
 	return eveapimodels.EveService{}, nil
 }
