@@ -13,5 +13,6 @@ var (
 		commands.SetCmdName:     NewSetHandler,
 		commands.DeleteCmdName:  NewDeleteHandler,
 		commands.ReleaseCmdName: NewReleaseHandler,
+		commands.RestartCmdName: NewRestartHandler,
 	}
 )
