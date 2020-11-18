@@ -40,6 +40,10 @@ func mapToEveService(s eve.Service) eveapimodels.EveService {
 	}
 }
 
+func metaDataServiceKey(service, namespace string) string {
+	return fmt.Sprintf("eve-bot:%s:%s", service, namespace)
+}
+
 func resolveNamespace(ctx context.Context, api eveapi.Client, cmd commands.EvebotCommand) (eve.Namespace, error) {
 	var nv eve.Namespace
 
