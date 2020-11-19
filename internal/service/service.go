@@ -41,6 +41,24 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 		}
 	}
 
+	// SlackMaintenanceEnabled is like a "feature flag"
+	// set to true and we are in Maintenance Mode
+	// Only Channels EVEBOT_SLACK_CHANNELS_MAINTENANCE my-evebot,evebot-tests are allowed to issue commands
+	if p.Cfg.SlackMaintenanceEnabled {
+		incomingChannel, err := p.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
+		if err != nil {
+			// This shouldn't happen, but if it does, we don't want to be locked out from deploying eve
+			// so we will show the error (which get's logged) and DevOps will take care of it the issue
+			p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
+		} else {
+			// Not coming from an approved Maintenance channel Show the maintenance mode
+			if _, ok := p.allowedMaintenanceChannelMap[incomingChannel.Name]; ok == false {
+				_ = p.ChatService.PostMessageThread(ctx, "Sorry, but we are currently in maintenance mode. Please check back later.", cmd.Info().Channel, ev.ThreadTimeStamp)
+				return
+			}
+		}
+	}
+
 	// Hydrate the Acknowledgement Message and whether or not we should continue...
 	ackMsg, cont := cmd.AckMsg()
 	// Send the AckMsgFn and get the Timestamp back so we can thread it later on...
