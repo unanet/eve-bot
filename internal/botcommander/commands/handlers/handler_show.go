@@ -86,7 +86,7 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 }
 
 func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
-	svc, ns := resolveServiceNamespace(ctx, h.eveAPIClient, h.chatSvc, cmd, ts)
+	ns, svc := resolveServiceNamespace(ctx, h.eveAPIClient, h.chatSvc, cmd, ts)
 	if svc == nil || ns == nil {
 		return
 	}
