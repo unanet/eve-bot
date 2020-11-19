@@ -31,7 +31,6 @@ func mapToEveService(s eve.Service) eveapimodels.EveService {
 		ArtifactName:    s.ArtifactName,
 		OverrideVersion: s.OverrideVersion,
 		DeployedVersion: s.DeployedVersion,
-		Metadata:        s.Metadata,
 		CreatedAt:       s.CreatedAt,
 		UpdatedAt:       s.UpdatedAt,
 		Name:            s.Name,
