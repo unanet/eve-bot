@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+
 	"gitlab.unanet.io/devops/eve/pkg/log"
 	"go.uber.org/zap"
 
@@ -62,10 +66,10 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 		return
 	}
 
-	var md params.MetadataMap
+	var md eve.Metadata
 	for _, m := range opts[params.MetadataName].([]string) {
 		if isValidMetadata(m) {
-			md, err = h.eveAPIClient.DeleteMetadata(ctx, mdItem.ID, m)
+			md, err = h.eveAPIClient.DeleteMetadataKey(ctx, mdItem.ID, m)
 			if err != nil {
 				h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
 				return
@@ -74,11 +78,8 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid metadata key: %s", m), cmd.Info().User, cmd.Info().Channel, *ts)
 		}
 	}
-	if md == nil {
-		h.chatSvc.UserNotificationThread(ctx, "no metadata", cmd.Info().User, cmd.Info().Channel, *ts)
-		return
-	}
-	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.Info().User, cmd.Info().Channel, *ts)
+
+	h.chatSvc.UserNotificationThread(ctx, eveapimodels.MetaData{Input: md}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h DeleteHandler) deleteVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string) {

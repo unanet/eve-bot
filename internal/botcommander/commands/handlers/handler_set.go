@@ -21,6 +21,9 @@ type SetHandler struct {
 	chatSvc      chatservice.Provider
 }
 
+// We use this stacking order as the default for all user (eve-bot) metadata
+const stackingOrder = 400
+
 // NewSetHandler creates a SetHandler
 func NewSetHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
 	return SetHandler{
@@ -108,7 +111,7 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 		Description:   md.Description,
 		MetadataID:    md.ID,
 		ServiceID:     svc.ID,
-		StackingOrder: 400,
+		StackingOrder: stackingOrder,
 	})
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("failed to save metadata"))
