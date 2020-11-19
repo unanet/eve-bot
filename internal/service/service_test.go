@@ -149,6 +149,10 @@ func (meac MockEveAPIClient) UpsertMetadataServiceMap(context.Context, eve.Metad
 	return eve.MetadataServiceMap{}, nil
 }
 
+func (meac MockEveAPIClient) DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error) {
+	return eve.Metadata{}, nil
+}
+
 type MockConfig struct {
 }
 

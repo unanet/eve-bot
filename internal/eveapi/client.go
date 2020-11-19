@@ -34,7 +34,7 @@ type Config struct {
 }
 
 // Client interface for Eve API
-// TODO: clean up this interface with more generic calls and interfaces
+// TODO: clean up this interface with more generic calls
 type Client interface {
 	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
 	GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error)
@@ -51,6 +51,7 @@ type Client interface {
 	GetMetadata(ctx context.Context, key string) (eve.Metadata, error)
 	UpsertMergeMetadata(context.Context, eve.Metadata) (eve.Metadata, error)
 	UpsertMetadataServiceMap(context.Context, eve.MetadataServiceMap) (eve.MetadataServiceMap, error)
+	DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error)
 }
 
 // client data structure
@@ -77,6 +78,30 @@ func NewClient(cfg Config) Client {
 			Client(httpClient).
 			Add("User-Agent", "eve-bot").
 			ResponseDecoder(evejson.NewJsonDecoder()),
+	}
+}
+
+func (c *client) DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error) {
+	var success eve.Metadata
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Delete(fmt.Sprintf("metadata/%s/%s", strconv.Itoa(id), key)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api DeleteMetadataKey request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api DeleteMetadataKey", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
 	}
 }
 
@@ -150,7 +175,6 @@ func (c *client) GetMetadata(ctx context.Context, key string) (eve.Metadata, err
 		log.Logger.Debug("an error occurred while trying to call eve-api GetMetadata", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
-
 }
 
 // Release method calls the API to move artifacts in feeds
