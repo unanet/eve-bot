@@ -1,8 +1,6 @@
 package eveapimodels
 
 import (
-	"encoding/json"
-
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
@@ -27,20 +25,6 @@ func (e Services) ToChatMessage() string {
 	return msg
 }
 
-// MetadataToChatMessage converts the Service.Metadata to chat message
-func (s EveService) MetadataToChatMessage() string {
-	if s.ID == 0 || len(s.Metadata) == 0 {
-		return "no metadata"
-	}
-
-	jsonB, err := json.MarshalIndent(s.Metadata, "", "    ")
-	if err != nil {
-		return "invalid json metadata"
-	}
-
-	return "```" + string(jsonB) + "```"
-}
-
 type MetaData struct {
 	Input eve.Metadata
 }
@@ -50,9 +34,17 @@ func (d MetaData) ToChatMessage() string {
 		return "no metadata"
 	}
 
-	jsonB, err := json.MarshalIndent(d.Input.Value, "", "	")
-	if err != nil {
-		return "invalid json metadata"
+	msg := ""
+
+	for k, v := range d.Input.Value {
+		msg += "`" + k + "`" + ":" + v.(string) + "\n"
 	}
-	return "```" + string(jsonB) + "```"
+
+	return msg
+
+	//jsonB, err := json.MarshalIndent(d.Input.Value, "", "	")
+	//if err != nil {
+	//	return "invalid json metadata"
+	//}
+	//return "```" + string(jsonB) + "```"
 }
