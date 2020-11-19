@@ -17,5 +17,5 @@ type Config struct {
 	SlackChannelsAuth         string `split_words:"true" required:"true"`
 	SlackChannelsMaintenance  string `split_words:"true" required:"true"`
 	SlackAuthEnabled          bool   `split_words:"true" required:"true"`
-	SlackMaintenanceEnabled   bool   `split_words:"true" required:"true"`
+	SlackMaintenanceEnabled   bool   `split_words:"true" default:"false"`
 }

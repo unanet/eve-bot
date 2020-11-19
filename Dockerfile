@@ -12,7 +12,6 @@ ENV EVEBOT_EVEAPI_CALLBACK_URL http://eve-bot-v1:3000/eve-callback
 ENV EVEBOT_SLACK_CHANNELS_AUTH my-evebot,evebot-tests,hydra,admin-ci
 ENV EVEBOT_SLACK_CHANNELS_MAINTENANCE my-evebot,evebot-tests
 ENV EVEBOT_SLACK_AUTH_ENABLED true
-ENV EVEBOT_SLACK_MAINTENANCE_ENABLED false
 
 ADD ./bin/eve-bot /app/eve-bot
 WORKDIR /app
