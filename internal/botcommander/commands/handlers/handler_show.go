@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
@@ -9,6 +10,7 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+	"gitlab.unanet.io/devops/eve/pkg/errors"
 )
 
 // ShowHandler is the handler for the ShowCmd
@@ -85,14 +87,29 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 	h.chatSvc.ShowResultsMessageThread(ctx, svcs.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
+func resourceNotFoundError(err error) bool {
+	if e, ok := err.(*errors.RestError); ok {
+		if e.Code == 404 {
+			return true
+		}
+	}
+	return false
+}
+
 func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
 	ns, svc := resolveServiceNamespace(ctx, h.eveAPIClient, h.chatSvc, cmd, ts)
 	if svc == nil || ns == nil {
 		return
 	}
 
-	metadata, err := h.eveAPIClient.GetMetadata(ctx, metaDataServiceKey(svc.Name, ns.Name))
+	mdKey := metaDataServiceKey(svc.Name, ns.Name)
+
+	metadata, err := h.eveAPIClient.GetMetadata(ctx, mdKey)
 	if err != nil {
+		if resourceNotFoundError(err) {
+			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("no metadata found for: %s", mdKey), cmd.Info().User, cmd.Info().Channel, *ts)
+			return
+		}
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
 		return
 	}
