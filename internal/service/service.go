@@ -53,7 +53,7 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 		} else {
 			// Not coming from an approved Maintenance channel Show the maintenance mode
 			if _, ok := p.allowedMaintenanceChannelMap[incomingChannel.Name]; ok == false {
-				_ = p.ChatService.PostMessageThread(ctx, "Sorry, but we are currently in maintenance mode. Please check back later.", cmd.Info().Channel, ev.ThreadTimeStamp)
+				_ = p.ChatService.PostMessageThread(ctx, ":middle_finger: We are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
 				return
 			}
 		}
