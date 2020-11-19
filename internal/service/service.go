@@ -44,23 +44,18 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// SlackMaintenanceEnabled is like a "feature flag"
 	// set to true and we are in Maintenance Mode
 	// Only Channels EVEBOT_SLACK_CHANNELS_MAINTENANCE my-evebot,evebot-tests are allowed to issue commands
-	log.Logger.Warn("TROY SAMPSON", zap.Bool("maintenance", p.Cfg.SlackMaintenanceEnabled))
 	if p.Cfg.SlackMaintenanceEnabled {
 		incomingChannel, err := p.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
-		log.Logger.Warn("TROY SAMPSON CHANNEL", zap.String("channel_name", incomingChannel.Name))
 		if err != nil {
-			log.Logger.Error("TROY SAMPSON CHANNEL", zap.Error(err))
 			// This shouldn't happen, but if it does, we don't want to be locked out from deploying eve
 			// so we will show the error (which get's logged) and DevOps will take care of it the issue
 			p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
 		} else {
-			log.Logger.Warn("TROY SAMPSON CHANNEL MAP", zap.Any("channels", p.allowedMaintenanceChannelMap))
 			// Not coming from an approved Maintenance channel Show the maintenance mode
 			if _, ok := p.allowedMaintenanceChannelMap[incomingChannel.Name]; ok == false {
 				_ = p.ChatService.PostMessageThread(ctx, "Sorry, but we are currently in maintenance mode. Please check back later.", cmd.Info().Channel, ev.ThreadTimeStamp)
 				return
 			}
-			log.Logger.Warn("TROY SAMPSON CHANNEL MAP NOT IN", zap.Any("channels", p.allowedMaintenanceChannelMap), zap.String("channel", incomingChannel.Name))
 		}
 	}
 
