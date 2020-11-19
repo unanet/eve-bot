@@ -1,6 +1,8 @@
 package eveapimodels
 
 import (
+	"strconv"
+
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
@@ -35,9 +37,10 @@ func (d MetaData) ToChatMessage() string {
 	}
 
 	msg := ""
-
+	count := 0
 	for k, v := range d.Input.Value {
-		msg += "`" + k + "`" + ":" + v.(string) + "\n"
+		count++
+		msg += strconv.Itoa(count) + ".	" + "`" + k + "`" + ":" + v.(string) + "\n"
 	}
 
 	return msg
