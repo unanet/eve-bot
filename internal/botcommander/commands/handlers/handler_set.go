@@ -89,13 +89,33 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 		return
 	}
 
-	md, err := h.eveAPIClient.SetServiceMetadata(ctx, metadataMap, svc.ID)
+	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
+		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
 
-	h.chatSvc.UserNotificationThread(ctx, md.ToString(), cmd.Info().User, cmd.Info().Channel, *ts)
+	md, err := h.eveAPIClient.UpsertMergeMetadata(ctx, eve.Metadata{
+		Description: metaDataServiceKey(svc.Name, nv.Name),
+		Value:       metadataMap.ToMetadataField(),
+	})
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("failed to save metadata"))
+		return
+	}
+
+	_, err = h.eveAPIClient.UpsertMetadataServiceMap(ctx, eve.MetadataServiceMap{
+		Description:   md.Description,
+		MetadataID:    md.ID,
+		ServiceID:     svc.ID,
+		StackingOrder: 400,
+	})
+	if err != nil {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("failed to save metadata"))
+		return
+	}
+
+	h.chatSvc.UserNotificationThread(ctx, eveapimodels.MetaData{Input: md}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {

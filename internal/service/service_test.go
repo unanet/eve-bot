@@ -137,6 +137,18 @@ func (meac MockEveAPIClient) Release(ctx context.Context, payload eve.Release) (
 	return eve.Release{}, nil
 }
 
+func (meac MockEveAPIClient) GetMetadata(ctx context.Context, key string) (eve.Metadata, error) {
+	return eve.Metadata{}, nil
+}
+
+func (meac MockEveAPIClient) UpsertMergeMetadata(context.Context, eve.Metadata) (eve.Metadata, error) {
+	return eve.Metadata{}, nil
+}
+
+func (meac MockEveAPIClient) UpsertMetadataServiceMap(context.Context, eve.MetadataServiceMap) (eve.MetadataServiceMap, error) {
+	return eve.MetadataServiceMap{}, nil
+}
+
 type MockConfig struct {
 }
 

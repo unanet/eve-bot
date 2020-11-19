@@ -2,6 +2,8 @@ package params
 
 import (
 	"encoding/json"
+
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 const (
@@ -53,4 +55,12 @@ func (e MetadataMap) ToString() string {
 		return "invalid json metadata"
 	}
 	return string(jsonB)
+}
+
+func (e MetadataMap) ToMetadataField() eve.MetadataField {
+	result := make(eve.MetadataField)
+	for k, v := range e {
+		result[k] = v
+	}
+	return result
 }

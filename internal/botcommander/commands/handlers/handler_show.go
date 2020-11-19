@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
@@ -88,41 +86,16 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 }
 
 func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
-	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
-	if err != nil {
-		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.Info().User, cmd.Info().Channel, *ts)
+	svc, ns := resolveServiceNamespace(ctx, h.eveAPIClient, h.chatSvc, cmd, ts)
+	if svc == nil || ns == nil {
 		return
 	}
-	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
-	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
-		return
-	}
-	if svcs == nil {
-		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.Info().User, cmd.Info().Channel, *ts)
-		return
-	}
-	var requestedSvcName string
-	var valid bool
-	if requestedSvcName, valid = cmd.Options()[params.ServiceName].(string); !valid {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid ServiceName Param"))
-		return
-	}
-	var svc eveapimodels.EveService
-	for _, s := range svcs {
-		if strings.ToLower(s.Name) == strings.ToLower(requestedSvcName) {
-			svc = mapToEveService(s)
-			break
-		}
-	}
-	if svc.ID == 0 {
-		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid requested service: %s", requestedSvcName), cmd.Info().User, cmd.Info().Channel, *ts)
-		return
-	}
-	fullSvc, err := h.eveAPIClient.GetServiceByID(ctx, svc.ID)
+
+	metadata, err := h.eveAPIClient.GetMetadata(ctx, metaDataServiceKey(svc.Name, ns.Name))
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
 		return
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, fullSvc.MetadataToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapimodels.MetaData{Input: metadata}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
 }

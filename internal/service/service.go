@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"reflect"
-
-	"go.uber.org/zap"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -48,12 +45,12 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 		incomingChannel, err := p.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
 		if err != nil {
 			// This shouldn't happen, but if it does, we don't want to be locked out from deploying eve
-			// so we will show the error (which get's logged) and DevOps will take care of it the issue
+			// so we will show the error (which is logged) and DevOps will take care of the issue (hopefully...)
 			p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
 		} else {
 			// Not coming from an approved Maintenance channel Show the maintenance mode
 			if _, ok := p.allowedMaintenanceChannelMap[incomingChannel.Name]; ok == false {
-				_ = p.ChatService.PostMessageThread(ctx, ":middle_finger: We are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
+				_ = p.ChatService.PostMessageThread(ctx, ":construction: We are currently in maintenance mode :construction:", cmd.Info().Channel, ev.ThreadTimeStamp)
 				return
 			}
 		}
@@ -65,7 +62,6 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Info().Channel, ev.ThreadTimeStamp)
 	// If the AckMessage needs to continue (no errors)...
 	if cont {
-		log.Logger.Debug("execute command handler", zap.Any("cmd_type", reflect.TypeOf(cmd)))
 		// Asynchronous Command Handler
 		go p.CommandExecutor.Execute(context.TODO(), cmd, timeStamp)
 	}

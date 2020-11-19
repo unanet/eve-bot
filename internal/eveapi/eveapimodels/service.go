@@ -40,3 +40,19 @@ func (s EveService) MetadataToChatMessage() string {
 
 	return "```" + string(jsonB) + "```"
 }
+
+type MetaData struct {
+	Input eve.Metadata
+}
+
+func (d MetaData) ToChatMessage() string {
+	if d.Input.ID == 0 || len(d.Input.Value) == 0 {
+		return "no metadata"
+	}
+
+	jsonB, err := json.MarshalIndent(d.Input.Value, "", "	")
+	if err != nil {
+		return "invalid json metadata"
+	}
+	return "```" + string(jsonB) + "```"
+}

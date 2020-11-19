@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,12 +43,14 @@ type Client interface {
 	GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error)
 	GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error)
 	GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error)
-	SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error)
 	DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error)
 	SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error)
 	SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error)
 	GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error)
 	Release(ctx context.Context, payload eve.Release) (eve.Release, error)
+	GetMetadata(ctx context.Context, key string) (eve.Metadata, error)
+	UpsertMergeMetadata(context.Context, eve.Metadata) (eve.Metadata, error)
+	UpsertMetadataServiceMap(context.Context, eve.MetadataServiceMap) (eve.MetadataServiceMap, error)
 }
 
 // client data structure
@@ -77,6 +80,79 @@ func NewClient(cfg Config) Client {
 	}
 }
 
+func (c *client) UpsertMetadataServiceMap(ctx context.Context, payload eve.MetadataServiceMap) (eve.MetadataServiceMap, error) {
+	var success eve.MetadataServiceMap
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Put(fmt.Sprintf("metadata/%s/service-maps", strconv.Itoa(payload.MetadataID))).BodyJSON(payload).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api UpsertMetadataServiceMap request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api UpsertMetadataServiceMap", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
+}
+
+func (c *client) UpsertMergeMetadata(ctx context.Context, payload eve.Metadata) (eve.Metadata, error) {
+	var success eve.Metadata
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Patch(fmt.Sprintf("metadata")).BodyJSON(payload).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api UpsertMergeMetadata request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api UpsertMergeMetadata", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
+}
+
+func (c *client) GetMetadata(ctx context.Context, key string) (eve.Metadata, error) {
+	var success eve.Metadata
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Get(fmt.Sprintf("metadata/%s", key)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetMetadata request", zap.Error(err))
+		return success, err
+	}
+
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return success, nil
+	default:
+		log.Logger.Debug("an error occurred while trying to call eve-api GetMetadata", zap.String("error_msg", failure.Message))
+		return success, fmt.Errorf(failure.Message)
+	}
+
+}
+
 // Release method calls the API to move artifacts in feeds
 func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release, error) {
 	var success eve.Release
@@ -94,10 +170,10 @@ func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release,
 	}
 
 	switch resp.StatusCode {
-	case http.StatusOK, http.StatusCreated, http.StatusAccepted:
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api SetNamespaceVersion", zap.String("error_msg", failure.Message))
+		log.Logger.Debug("an error occurred while trying to call eve-api Release", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
@@ -375,32 +451,6 @@ func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptio
 		return &success, nil
 	default:
 		log.Logger.Debug("an error occurred while trying to call eve-api deploy", zap.String("error_msg", failure.Message))
-		return nil, fmt.Errorf(failure.Message)
-	}
-}
-
-// SetServiceMetadata sets the metadata on the service
-func (c *client) SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error) {
-	var success params.MetadataMap
-	var failure eveerror.RestError
-
-	r, err := c.sling.New().Patch(fmt.Sprintf("services/%v/metadata", id)).BodyJSON(metadata).Request()
-	if err != nil {
-		log.Logger.Error("error preparing eve-api SetServiceMetadata request", zap.Error(err))
-		return nil, err
-	}
-
-	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
-	if err != nil {
-		log.Logger.Error("error calling eve-api SetServiceMetadata", zap.Error(err))
-		return nil, err
-	}
-
-	switch resp.StatusCode {
-	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
-		return success, nil
-	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api SetServiceMetadata", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
