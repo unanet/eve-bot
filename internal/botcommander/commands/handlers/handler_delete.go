@@ -71,6 +71,10 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 		if isValidMetadata(m) {
 			md, err = h.eveAPIClient.DeleteMetadataKey(ctx, mdItem.ID, m)
 			if err != nil {
+				if resourceNotFoundError(err) {
+					h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed to delete metadata key: %s", m), cmd.Info().User, cmd.Info().Channel, *ts)
+					return
+				}
 				h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
 				return
 			}
@@ -79,7 +83,7 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 		}
 	}
 
-	h.chatSvc.UserNotificationThread(ctx, eveapimodels.MetaData{Input: md}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapimodels.MetaData{Input: md}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h DeleteHandler) deleteVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string) {

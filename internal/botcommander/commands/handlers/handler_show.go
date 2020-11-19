@@ -46,6 +46,10 @@ func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, tim
 func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
 	envs, err := h.eveAPIClient.GetEnvironments(ctx)
 	if err != nil {
+		if resourceNotFoundError(err) {
+			h.chatSvc.UserNotificationThread(ctx, "failed to get environments", cmd.Info().User, cmd.Info().Channel, *ts)
+			return
+		}
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
 		return
 	}
@@ -59,6 +63,10 @@ func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCo
 func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
 	ns, err := h.eveAPIClient.GetNamespacesByEnvironment(ctx, cmd.Options()[params.EnvironmentName].(string))
 	if err != nil {
+		if resourceNotFoundError(err) {
+			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed to get namespaces in environment: %s", cmd.Options()[params.EnvironmentName].(string)), cmd.Info().User, cmd.Info().Channel, *ts)
+			return
+		}
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
 		return
 	}
@@ -77,6 +85,10 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 	}
 	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, nv.Name)
 	if err != nil {
+		if resourceNotFoundError(err) {
+			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed to get services in namespace: %s", nv.Name), cmd.Info().User, cmd.Info().Channel, *ts)
+			return
+		}
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
 		return
 	}

@@ -51,7 +51,11 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 
 	svcs, err := h.eveAPIClient.GetServicesByNamespace(ctx, ns.Name)
 	if err != nil {
-		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("(GetServicesByNamespace) failed to find service: %s", err.Error()), cmd.Info().User, cmd.Info().Channel, timestamp)
+		if resourceNotFoundError(err) {
+			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("failed to find services for namespace: %s", ns.Name), cmd.Info().User, cmd.Info().Channel, timestamp)
+			return
+		}
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
 		return
 	}
 
