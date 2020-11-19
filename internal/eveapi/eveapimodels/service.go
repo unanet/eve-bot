@@ -1,7 +1,7 @@
 package eveapimodels
 
 import (
-	"strconv"
+	"encoding/json"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
@@ -36,18 +36,9 @@ func (d MetaData) ToChatMessage() string {
 		return "no metadata"
 	}
 
-	msg := ""
-	count := 0
-	for k, v := range d.Input.Value {
-		count++
-		msg += strconv.Itoa(count) + ".	" + "`" + k + "`" + ":" + v.(string) + "\n"
+	jsonB, err := json.MarshalIndent(d.Input.Value, "", "	")
+	if err != nil {
+		return "invalid json metadata"
 	}
-
-	return msg
-
-	//jsonB, err := json.MarshalIndent(d.Input.Value, "", "	")
-	//if err != nil {
-	//	return "invalid json metadata"
-	//}
-	//return "```" + string(jsonB) + "```"
+	return "```" + string(jsonB) + "```"
 }
