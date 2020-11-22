@@ -1,7 +1,8 @@
-package eveapimodels
+package eveapi
 
 import (
 	"fmt"
+	"strings"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -15,21 +16,43 @@ type CallbackState struct {
 	Payload eve.NSDeploymentPlan `json:"payload"`
 }
 
-func (cbs *CallbackState) cleanUser() {
-	if cbs.User == "" {
-		return
+const (
+	allCaughtUpMsg = "We're all caught up! There is nothing to deploy..."
+)
+
+// messages converts a slice of strings into a string message
+func messages(msgs []string) string {
+	infoMsgs := ""
+	for _, msg := range msgs {
+		if len(infoMsgs) == 0 {
+			infoMsgs = "\n- " + msg
+		} else {
+			infoMsgs = infoMsgs + "\n- " + msg
+		}
 	}
-	if cbs.User == "channel" {
-		cbs.User = "!channel"
-		return
+	if len(infoMsgs) == 0 {
+		return ""
 	}
-	cbs.User = "@" + cbs.User
-	return
+	return infoMsgs
 }
 
-const (
-	allCaughtUpMsg = "we're all caught up! There is nothing to deploy..."
-)
+// headerMsg formats a header msg
+func headerMsg(val string) string {
+	return fmt.Sprintf("\n*%s*", strings.Title(strings.ToLower(val)))
+}
+
+func (cbs *CallbackState) cleanUser() {
+	switch cbs.User {
+	case "":
+		return
+	case "channel":
+		cbs.User = "!channel"
+		return
+	default:
+		cbs.User = "@" + cbs.User
+		return
+	}
+}
 
 func (cbs *CallbackState) nothingToDeployResponse() string {
 	msg := ""
@@ -57,7 +80,7 @@ func (cbs *CallbackState) nothingToDeployResponse() string {
 	}
 
 	if len(cbs.Payload.Messages) > 0 {
-		return msg + HeaderMsg("Messages") + "\n```" + APIMessages(cbs.Payload.Messages) + "```"
+		return msg + headerMsg("Messages") + "\n```" + messages(cbs.Payload.Messages) + "```"
 	}
 	return msg
 }
@@ -68,11 +91,11 @@ func (cbs *CallbackState) appendDeployServicesResult(result *string) {
 		for svcResult, svcs := range cbs.Payload.Services.ToResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployServicesResults = "\n```" + ServicesResultBlock(svcs) + "```"
+				deployServicesResults = "\n```" + ToChatMessage(svcs) + "```"
 				break
 			}
 
-			svcResultMessage := HeaderMsg(svcResult.String()) + "\n```" + ServicesResultBlock(svcs) + "```"
+			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + ToChatMessage(svcs) + "```"
 
 			if len(deployServicesResults) == 0 {
 				deployServicesResults = svcResultMessage
@@ -90,11 +113,11 @@ func (cbs *CallbackState) appendDeployMigrationsResult(result *string) {
 		for migResult, migs := range cbs.Payload.Migrations.ToResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployMigrationsResults = "\n```" + MigrationResultBlock(migs) + "```"
+				deployMigrationsResults = "\n```" + ToChatMessage(migs) + "```"
 				break
 			}
 
-			svcResultMessage := HeaderMsg(migResult.String()) + "\n```" + MigrationResultBlock(migs) + "```"
+			svcResultMessage := headerMsg(migResult.String()) + "\n```" + ToChatMessage(migs) + "```"
 
 			if len(deployMigrationsResults) == 0 {
 				deployMigrationsResults = svcResultMessage
@@ -106,7 +129,7 @@ func (cbs *CallbackState) appendDeployMigrationsResult(result *string) {
 	}
 }
 
-func (cbs *CallbackState) initialResult() string {
+func (cbs *CallbackState) initMsg() string {
 	var ackMessage string
 	switch cbs.Payload.Status {
 	case eve.DeploymentPlanStatusComplete:
@@ -121,15 +144,15 @@ func (cbs *CallbackState) initialResult() string {
 
 	var result string
 	if len(cbs.User) > 0 {
-		result = fmt.Sprintf("\n<%s>, %s...\n\n%s", cbs.User, ackMessage, EnvironmentNamespaceMsg(&cbs.Payload))
+		result = fmt.Sprintf("\n<%s>, %s...\n\n%s", cbs.User, ackMessage, ToChatMessage(&cbs.Payload))
 	} else {
-		result = fmt.Sprintf("\n%s...\n\n%s", ackMessage, EnvironmentNamespaceMsg(&cbs.Payload))
+		result = fmt.Sprintf("\n%s...\n\n%s", ackMessage, ToChatMessage(&cbs.Payload))
 	}
 	return result
 }
 
 func (cbs *CallbackState) appendAPIMessages(result *string) string {
-	return *result + HeaderMsg("Messages") + "\n```" + APIMessages(cbs.Payload.Messages) + "```"
+	return *result + headerMsg("Messages") + "\n```" + messages(cbs.Payload.Messages) + "```"
 }
 
 // ToChatMsg converts the eve-api callback payload to a Chat Message (string with formatting/proper messaging)
@@ -145,7 +168,7 @@ func (cbs *CallbackState) ToChatMsg() string {
 		return cbs.nothingToDeployResponse()
 	}
 
-	result := cbs.initialResult()
+	result := cbs.initMsg()
 
 	cbs.appendDeployServicesResult(&result)
 

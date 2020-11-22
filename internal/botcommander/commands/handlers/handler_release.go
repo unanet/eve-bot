@@ -30,7 +30,7 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 
 	dynamicOpts := cmd.Options()
 
-	resp, err := h.eveAPIClient.Release(ctx, eve.Release{
+	release, err := h.eveAPIClient.Release(ctx, eve.Release{
 		Artifact: dynamicOpts[params.ArtifactName].(string),
 		Version:  dynamicOpts[params.ArtifactVersionName].(string),
 		FromFeed: dynamicOpts[params.FromFeedName].(string),
@@ -41,9 +41,5 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	h.chatSvc.ReleaseResultsMessageThread(ctx, toChatMessage(resp), cmd.Info().User, cmd.Info().Channel, timestamp)
-}
-
-func toChatMessage(resp eve.Release) string {
-	return fmt.Sprintf("Artifact: `%s`\nVersion: `%s`\nFrom: `%s`\nTo: `%s`", resp.Artifact, resp.Version, resp.FromFeed, resp.ToFeed)
+	h.chatSvc.ReleaseResultsMessageThread(ctx, eveapi.ToChatMessage(release), cmd.Info().User, cmd.Info().Channel, timestamp)
 }

@@ -17,7 +17,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
@@ -85,32 +84,32 @@ func (me MockExecutor) Execute(ctx context.Context, cmd commands.EvebotCommand, 
 type MockEveAPIClient struct {
 }
 
-func (meac MockEveAPIClient) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error) {
-	return &eveapimodels.DeploymentPlanOptions{}, nil
+func (meac MockEveAPIClient) Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eve.DeploymentPlanOptions, error) {
+	return &eve.DeploymentPlanOptions{}, nil
 }
 
 func (meac MockEveAPIClient) GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error) {
 	return &eve.Environment{}, nil
 }
 
-func (meac MockEveAPIClient) GetEnvironments(ctx context.Context) (eveapimodels.Environments, error) {
-	return eveapimodels.Environments{}, nil
+func (meac MockEveAPIClient) GetEnvironments(ctx context.Context) ([]eve.Environment, error) {
+	return []eve.Environment{}, nil
 }
 
-func (meac MockEveAPIClient) GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error) {
-	return eveapimodels.Namespaces{}, nil
+func (meac MockEveAPIClient) GetNamespacesByEnvironment(ctx context.Context, environmentName string) ([]eve.Namespace, error) {
+	return []eve.Namespace{}, nil
 }
 
-func (meac MockEveAPIClient) GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error) {
-	return eveapimodels.Services{}, nil
+func (meac MockEveAPIClient) GetServicesByNamespace(ctx context.Context, namespace string) ([]eve.Service, error) {
+	return []eve.Service{}, nil
 }
 
 func (meac MockEveAPIClient) GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error) {
 	return eve.Service{}, nil
 }
 
-func (meac MockEveAPIClient) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error) {
-	return eveapimodels.EveService{}, nil
+func (meac MockEveAPIClient) GetServiceByID(ctx context.Context, id int) (eve.Service, error) {
+	return eve.Service{}, nil
 }
 
 func (meac MockEveAPIClient) SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error) {
@@ -121,8 +120,8 @@ func (meac MockEveAPIClient) DeleteServiceMetadata(ctx context.Context, m string
 	return params.MetadataMap{}, nil
 }
 
-func (meac MockEveAPIClient) SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error) {
-	return eveapimodels.EveService{}, nil
+func (meac MockEveAPIClient) SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error) {
+	return eve.Service{}, nil
 }
 
 func (meac MockEveAPIClient) SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error) {

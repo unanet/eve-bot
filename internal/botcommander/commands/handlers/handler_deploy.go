@@ -3,12 +3,13 @@ package handlers
 import (
 	"context"
 
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
 
 // DeployHandler is the handler for the DeployCmd
@@ -35,7 +36,7 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 
 	cmdAPIOpts := cmd.Options()
 
-	deployOpts := eveapimodels.DeploymentPlanOptions{
+	deployOpts := eve.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractArtifactsDefinition(args.ServicesName, cmdAPIOpts),
 		ForceDeploy:      commands.ExtractBoolOpt(args.ForceDeployName, cmdAPIOpts),
 		User:             chatUser.Name,
@@ -43,7 +44,7 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmdAPIOpts),
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Messages:         nil,
-		Type:             "application",
+		Type:             eve.DeploymentPlanTypeApplication,
 	}
 
 	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, deployOpts)

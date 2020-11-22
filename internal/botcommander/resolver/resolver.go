@@ -9,7 +9,7 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 )
 
-// Resolver resolves the input commands and returns a valid EvebotCommand or an Error
+// Resolver resolves the input and returns an EvebotCommand (Invalid command instead of an error for error cases)
 type Resolver interface {
 	Resolve(input, channel, user string) commands.EvebotCommand
 }
@@ -26,7 +26,7 @@ func NewResolver() Resolver {
 // this is where all of the "magic" happens that basically translates a user command to an EveBot command
 func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotCommand {
 	// parse the input string and break out into fields (array)
-	log.Logger.Debug("resolve command", zap.String("input", input))
+	log.Logger.Info("resolve command", zap.String("input", input))
 
 	msgFields := strings.Fields(input)
 	if len(msgFields) == 1 {
@@ -41,8 +41,6 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 		log.Logger.Error("invalid clean cmd fields")
 		return commands.NewInvalidCommand(cleanCmdFields, channel, user)
 	}
-
-	log.Logger.Debug("resolve command cleaned", zap.Strings("fields", cleanCmdFields))
 
 	// make sure after you create a new command,
 	// you add the New func to the map so that it is picked up here

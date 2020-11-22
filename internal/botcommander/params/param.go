@@ -24,13 +24,3 @@ type baseParam struct {
 	description string
 	value       string
 }
-
-// ConditionalParam is the interface for conditional parameters
-type ConditionalParam interface {
-	Name() string
-	Description() string
-	Value() string
-}
-
-// ConditionalParams is a slice of Conditional Params
-type ConditionalParams []ConditionalParam
