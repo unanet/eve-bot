@@ -9,7 +9,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 )
 
@@ -57,7 +56,7 @@ func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCo
 		h.chatSvc.UserNotificationThread(ctx, "no environments", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, envs.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(envs), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
@@ -74,7 +73,7 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 		h.chatSvc.UserNotificationThread(ctx, "no namespaces", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, ns.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(ns), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
@@ -96,7 +95,7 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, svcs.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(svcs), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func resourceNotFoundError(err error) bool {
@@ -126,5 +125,5 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 		return
 	}
 
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapimodels.MetaData{Input: metadata}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(metadata), cmd.Info().User, cmd.Info().Channel, *ts)
 }

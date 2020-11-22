@@ -3,12 +3,9 @@ package commands
 import (
 	"fmt"
 
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 type setCmd struct {
@@ -36,7 +33,6 @@ var (
 
 // NewSetCommand creates a New SetCmd that implements the EvebotCommand interface
 func NewSetCommand(cmdFields []string, channel, user string) EvebotCommand {
-	log.Logger.Debug("set command ", zap.Strings("cmdFields", cmdFields))
 	cmd := setCmd{baseCommand{
 		input:  cmdFields,
 		info:   ChatInfo{User: user, Channel: channel, CommandName: SetCmdName},
@@ -95,7 +91,6 @@ func (cmd *setCmd) resolveDynamicOptions() {
 
 	switch cmd.opts["resource"] {
 	case resources.MetadataName:
-		log.Logger.Debug("set metadata command ", zap.Strings("cmdFields", cmd.input[7:]))
 		// set metadata for unaneta in current una-int key=value
 		// set metadata for {{ service }} in {{ namespace }} {{ environment }} key=value key=value key=value
 		if len(cmd.input) < 8 {
@@ -106,7 +101,6 @@ func (cmd *setCmd) resolveDynamicOptions() {
 		cmd.opts[params.NamespaceName] = cmd.input[5]
 		cmd.opts[params.EnvironmentName] = cmd.input[6]
 		cmd.opts[params.MetadataName] = hydrateMetadataMap(cmd.input[7:])
-		log.Logger.Debug("set metadata", zap.Any("metadata", cmd.opts[params.MetadataName]))
 		return
 	case resources.VersionName:
 		switch len(cmd.input) {

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 
 	"gitlab.unanet.io/devops/eve/pkg/log"
@@ -83,7 +81,7 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 		}
 	}
 
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapimodels.MetaData{Input: md}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(md), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h DeleteHandler) deleteVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
@@ -105,9 +103,7 @@ func isValidMetadata(key string) bool {
 	// we only want to send the key to the API
 	metadatakey := key
 	if strings.Contains(key, "=") {
-		log.Logger.Debug("metadata key contains equal", zap.String("key", key))
 		metadatakey = strings.Split(key, "=")[0]
-		log.Logger.Debug("split metadata on equal", zap.String("metadatakey", metadatakey))
 	}
 	if strings.Contains(metadatakey, "/") {
 		log.Logger.Warn("metadata key contains slash", zap.String("metadatakey", metadatakey))

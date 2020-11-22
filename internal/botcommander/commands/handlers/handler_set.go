@@ -11,7 +11,6 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
@@ -52,10 +51,10 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 
 	// Service was supplied (we are setting the resource at the service level)
 	if _, ok := cmd.Options()[params.ServiceName].(string); ok {
-		var svc eveapimodels.EveService
+		var svc eve.Service
 		for _, s := range svcs {
 			if strings.ToLower(s.Name) == strings.ToLower(cmd.Options()[params.ServiceName].(string)) {
-				svc = mapToEveService(s)
+				svc = s
 				break
 			}
 		}
@@ -83,7 +82,7 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 	}
 }
 
-func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
+func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eve.Service) {
 	var metadataMap params.MetadataMap
 	var metaDataOK bool
 
@@ -118,10 +117,10 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 		return
 	}
 
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapimodels.MetaData{Input: md}.ToChatMessage(), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(md), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
-func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eveapimodels.EveService) {
+func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eve.Service) {
 	var version string
 	var versionOK bool
 	if version, versionOK = cmd.Options()[params.VersionName].(string); !versionOK {

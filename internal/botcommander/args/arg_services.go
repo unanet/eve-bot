@@ -3,7 +3,7 @@ package args
 import (
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 /*
@@ -37,10 +37,10 @@ func (svcs Services) Description() string {
 
 // Value is the value of the Services argument
 func (svcs Services) Value() interface{} {
-	var artifactDefs eveapimodels.ArtifactDefinitions
+	var artifactDefs eve.ArtifactDefinitions
 
 	for _, v := range svcs {
-		artifactDefs = append(artifactDefs, &eveapimodels.ArtifactDefinition{
+		artifactDefs = append(artifactDefs, &eve.ArtifactDefinition{
 			Name:             v.Name,
 			RequestedVersion: v.Version,
 		})

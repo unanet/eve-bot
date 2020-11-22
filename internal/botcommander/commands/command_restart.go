@@ -2,9 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 
@@ -20,17 +17,9 @@ const (
 )
 
 var (
-	restartCmdHelpSummary = help.Summary("The `restart` command is used to restart services in a namespace")
-	restartCmdHelpUsage   = help.Usage{
-		"restart {{ namespace }} in {{ environment }}",
-		"restart {{ namespace }} in {{ environment }} services={{ service_name }}",
-		"restart {{ namespace }} in {{ environment }} services={{ service_name,service_name,... }}",
-	}
-	restartCmdHelpExample = help.Examples{
-		"restart current in una-int",
-		"restart current in una-int services=subcontractor",
-		"restart current in una-int services=subcontractor,platform",
-	}
+	restartCmdHelpSummary = help.Summary("The `restart` command is used to restart a service in a namespace")
+	restartCmdHelpUsage   = help.Usage{"restart {{ service }} in {{ namespace }} {{ environment }}"}
+	restartCmdHelpExample = help.Examples{"restart platform in current una-int"}
 )
 
 // NewRestartCommand creates a New RestartCmd that implements the EvebotCommand interface
@@ -39,7 +28,7 @@ func NewRestartCommand(cmdFields []string, channel, user string) EvebotCommand {
 		input:  cmdFields,
 		info:   ChatInfo{User: user, Channel: channel, CommandName: RestartCmdName},
 		opts:   make(CommandOptions),
-		bounds: InputLengthBounds{Min: 4, Max: 5},
+		bounds: InputLengthBounds{Min: 5, Max: 5},
 	}}
 	cmd.resolveDynamicOptions()
 	return cmd
@@ -79,17 +68,7 @@ func (cmd *restartCmd) resolveDynamicOptions() {
 		return
 	}
 
-	cmd.opts[params.NamespaceName] = cmd.input[1]
-	cmd.opts[params.EnvironmentName] = cmd.input[3]
-
-	for _, s := range cmd.input[3:] {
-		if strings.Contains(s, "=") {
-			argKV := strings.Split(s, "=")
-			if suppliedArg := args.ResolveArgumentKV(argKV); suppliedArg != nil {
-				cmd.opts[suppliedArg.Name()] = suppliedArg.Value()
-			} else {
-				cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", argKV))
-			}
-		}
-	}
+	cmd.opts[params.ServiceName] = cmd.input[1]
+	cmd.opts[params.NamespaceName] = cmd.input[3]
+	cmd.opts[params.EnvironmentName] = cmd.input[4]
 }

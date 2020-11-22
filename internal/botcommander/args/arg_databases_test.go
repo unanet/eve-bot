@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 var db = Database{
@@ -69,7 +69,7 @@ func TestDatabases_Value(t *testing.T) {
 		{
 			name: "happy path",
 			dbs:  Databases{db},
-			want: eveapimodels.ArtifactDefinitions{&eveapimodels.ArtifactDefinition{
+			want: eve.ArtifactDefinitions{&eve.ArtifactDefinition{
 				Name:             db.Name,
 				RequestedVersion: db.Version,
 			}},

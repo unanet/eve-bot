@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 	"gitlab.unanet.io/devops/eve-bot/internal/service"
 	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
 )
 
 // EveController for slack routes
@@ -50,8 +49,7 @@ func (c EveController) eveCallbackHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	cbState := eveapimodels.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts}
-	log.Logger.Debug("eve callback notification", zap.Any("cb_state", cbState))
+	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload, TS: ts}
 	c.svc.ChatService.PostMessageThread(r.Context(), cbState.ToChatMsg(), cbState.Channel, cbState.TS)
 
 	if cbState.Payload.Status == eve.DeploymentPlanStatusErrors {
@@ -80,8 +78,7 @@ func (c EveController) eveCronCallbackHandler(w http.ResponseWriter, r *http.Req
 		user = "channel"
 	}
 
-	cbState := eveapimodels.CallbackState{User: user, Channel: channel, Payload: payload}
-	log.Logger.Debug("eve cron callback notification", zap.Any("cb_state", cbState))
+	cbState := eveapi.CallbackState{User: user, Channel: channel, Payload: payload}
 	if cbState.Payload.Status == eve.DeploymentPlanStatusPending || cbState.Payload.NothingToDeploy() {
 		render.Respond(w, r, nil)
 		return

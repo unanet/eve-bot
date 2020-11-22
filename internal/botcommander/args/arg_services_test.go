@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 var fakeServices = Services{Service{Name: "fake-service", Version: "1.0.0"}}
@@ -60,7 +60,7 @@ func TestServices_Value(t *testing.T) {
 		{
 			name: "happy path",
 			svcs: fakeServices,
-			want: eveapimodels.ArtifactDefinitions{&eveapimodels.ArtifactDefinition{Name: fakeServices[0].Name, RequestedVersion: fakeServices[0].Version}},
+			want: eve.ArtifactDefinitions{&eve.ArtifactDefinition{Name: fakeServices[0].Name, RequestedVersion: fakeServices[0].Version}},
 		},
 	}
 	for _, tt := range tests {

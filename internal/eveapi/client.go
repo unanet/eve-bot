@@ -9,18 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-
-	"go.uber.org/zap"
-
 	"github.com/dghubble/sling"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	eveerror "gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	evehttp "gitlab.unanet.io/devops/eve/pkg/http"
 	evejson "gitlab.unanet.io/devops/eve/pkg/json"
 	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
 )
 
 // Config data structure for the Eve API
@@ -34,17 +30,17 @@ type Config struct {
 }
 
 // Client interface for Eve API
-// TODO: clean up this interface with more generic calls
+// TODO: clean up this interface with more generic calls (GET,PUT,POST,DELETE,PATCH with interfaces{})
 type Client interface {
-	Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eveapimodels.DeploymentPlanOptions, error)
+	Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eve.DeploymentPlanOptions, error)
 	GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error)
-	GetEnvironments(ctx context.Context) (eveapimodels.Environments, error)
-	GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error)
-	GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error)
+	GetEnvironments(ctx context.Context) ([]eve.Environment, error)
+	GetNamespacesByEnvironment(ctx context.Context, environmentName string) ([]eve.Namespace, error)
+	GetServicesByNamespace(ctx context.Context, namespace string) ([]eve.Service, error)
 	GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error)
-	GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error)
+	GetServiceByID(ctx context.Context, id int) (eve.Service, error)
 	DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error)
-	SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error)
+	SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error)
 	SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error)
 	GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error)
 	Release(ctx context.Context, payload eve.Release) (eve.Release, error)
@@ -81,6 +77,7 @@ func NewClient(cfg Config) Client {
 	}
 }
 
+// DeleteMetadataKey calls the API to delete the metadata KEY (leaves empty {} is no metadata)
 func (c *client) DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error) {
 	var success eve.Metadata
 	var failure eveerror.RestError
@@ -100,11 +97,11 @@ func (c *client) DeleteMetadataKey(ctx context.Context, id int, key string) (eve
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api DeleteMetadataKey", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
 
+// UpsertMetadataServiceMap calls the API to upsert (insert/update) the metadata service map record
 func (c *client) UpsertMetadataServiceMap(ctx context.Context, payload eve.MetadataServiceMap) (eve.MetadataServiceMap, error) {
 	var success eve.MetadataServiceMap
 	var failure eveerror.RestError
@@ -124,11 +121,11 @@ func (c *client) UpsertMetadataServiceMap(ctx context.Context, payload eve.Metad
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api UpsertMetadataServiceMap", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
 
+// UpsertMergeMetadata calls the API to upsert (insert/update) the metadata record
 func (c *client) UpsertMergeMetadata(ctx context.Context, payload eve.Metadata) (eve.Metadata, error) {
 	var success eve.Metadata
 	var failure eveerror.RestError
@@ -148,11 +145,11 @@ func (c *client) UpsertMergeMetadata(ctx context.Context, payload eve.Metadata) 
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api UpsertMergeMetadata", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
 
+// GetMetadata calls the API to retrieve metadata by key
 func (c *client) GetMetadata(ctx context.Context, key string) (eve.Metadata, error) {
 	var success eve.Metadata
 	var failure eveerror.RestError
@@ -172,7 +169,6 @@ func (c *client) GetMetadata(ctx context.Context, key string) (eve.Metadata, err
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetMetadata", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
@@ -197,7 +193,6 @@ func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release,
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api Release", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
@@ -220,7 +215,6 @@ func (c *client) GetServiceByName(ctx context.Context, namespace, service string
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetServiceByName", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
@@ -253,14 +247,13 @@ func (c *client) SetNamespaceVersion(ctx context.Context, version string, id int
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api SetNamespaceVersion", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
 
 // SetServiceVersion sets the version on the service
-func (c *client) SetServiceVersion(ctx context.Context, version string, id int) (eveapimodels.EveService, error) {
-	var success eveapimodels.EveService
+func (c *client) SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error) {
+	var success eve.Service
 	var failure eveerror.RestError
 
 	fullSvc, err := c.GetServiceByID(ctx, id)
@@ -286,7 +279,6 @@ func (c *client) SetServiceVersion(ctx context.Context, version string, id int) 
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api DeleteServiceMetadata", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
@@ -313,7 +305,6 @@ func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (p
 		return nil, err
 	}
 
-	log.Logger.Debug("eve-api DeleteServiceMetadata req", zap.Any("metadata_key", metadatakey), zap.Int("service", id))
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
 		log.Logger.Error("error calling eve-api DeleteServiceMetadata", zap.Error(err))
@@ -324,14 +315,13 @@ func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (p
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api DeleteServiceMetadata", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
 
 // GetServiceByID returns a service by an ID
-func (c *client) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveService, error) {
-	var success eveapimodels.EveService
+func (c *client) GetServiceByID(ctx context.Context, id int) (eve.Service, error) {
+	var success eve.Service
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get(fmt.Sprintf("services/%v", id)).Request()
 	if err != nil {
@@ -347,14 +337,13 @@ func (c *client) GetServiceByID(ctx context.Context, id int) (eveapimodels.EveSe
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetServiceByID", zap.String("error_msg", failure.Message), zap.Int("api_status", resp.StatusCode))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
 
 // GetServicesByNamespace returns all of the services for a given namespace
-func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) (eveapimodels.Services, error) {
-	var success eveapimodels.Services
+func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) ([]eve.Service, error) {
+	var success []eve.Service
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get(fmt.Sprintf("namespaces/%s/services", namespace)).Request()
 	if err != nil {
@@ -370,7 +359,6 @@ func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) (
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetServicesByNamespace", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
@@ -393,14 +381,13 @@ func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Enviro
 	case http.StatusOK:
 		return &success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetEnvironment", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
 
 // GetEnvironments returns all of the environments
-func (c *client) GetEnvironments(ctx context.Context) (eveapimodels.Environments, error) {
-	var success eveapimodels.Environments
+func (c *client) GetEnvironments(ctx context.Context) ([]eve.Environment, error) {
+	var success []eve.Environment
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get("environments").Request()
 	if err != nil {
@@ -416,14 +403,13 @@ func (c *client) GetEnvironments(ctx context.Context) (eveapimodels.Environments
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetEnvironments", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
 
 // GetNamespacesByEnvironment returns all of the namespaces for an environment
-func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName string) (eveapimodels.Namespaces, error) {
-	var success eveapimodels.Namespaces
+func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName string) ([]eve.Namespace, error) {
+	var success []eve.Namespace
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get("namespaces").Request()
 	if err != nil {
@@ -440,14 +426,13 @@ func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespacesByEnvironment", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
 
 // Deploy calls the eve api to deploy resources
-func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptions, user, channel, ts string) (*eveapimodels.DeploymentPlanOptions, error) {
-	var success eveapimodels.DeploymentPlanOptions
+func (c *client) Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, user, channel, ts string) (*eve.DeploymentPlanOptions, error) {
+	var success eve.DeploymentPlanOptions
 	var failure eveerror.RestError
 
 	cbURLVals := url.Values{}
@@ -463,7 +448,6 @@ func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptio
 		return nil, err
 	}
 
-	log.Logger.Debug("eve-api Deploy req", zap.Any("req", dp))
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {
 		log.Logger.Error("error calling eve-api Deploy", zap.Error(err))
@@ -474,7 +458,6 @@ func (c *client) Deploy(ctx context.Context, dp eveapimodels.DeploymentPlanOptio
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return &success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api deploy", zap.String("error_msg", failure.Message))
 		return nil, fmt.Errorf(failure.Message)
 	}
 }
@@ -500,7 +483,6 @@ func (c *client) GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, e
 	case http.StatusOK:
 		return success, nil
 	default:
-		log.Logger.Debug("an error occurred while trying to call eve-api GetNamespaceByID", zap.String("error_msg", failure.Message))
 		return success, fmt.Errorf(failure.Message)
 	}
 }

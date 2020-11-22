@@ -37,16 +37,6 @@ func IsValid(res string) bool {
 	return false
 }
 
-// IsValidAction validates that the action resource can be set
-func IsValidAction(res string) bool {
-	for _, v := range []Resource{DefaultMetadata(), DefaultVersion()} {
-		if v.Name() == strings.ToLower(res) {
-			return true
-		}
-	}
-	return false
-}
-
 // IsValidSet validates that the supplied resource can be set
 func IsValidSet(res string) bool {
 	for _, v := range []Resource{DefaultMetadata(), DefaultVersion()} {

@@ -4,17 +4,15 @@ import (
 	"regexp"
 	"strings"
 
-	"go.uber.org/zap"
+	"gitlab.unanet.io/devops/eve/pkg/eve"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-	"gitlab.unanet.io/devops/eve/pkg/log"
 )
 
 // ExtractArtifactsDefinition extracts the ArtifactDefinitions from the CommandOptions
-func ExtractArtifactsDefinition(defType string, opts CommandOptions) eveapimodels.ArtifactDefinitions {
+func ExtractArtifactsDefinition(defType string, opts CommandOptions) eve.ArtifactDefinitions {
 	if val, ok := opts[defType]; ok {
-		if artifactDefs, ok := val.(eveapimodels.ArtifactDefinitions); ok {
+		if artifactDefs, ok := val.(eve.ArtifactDefinitions); ok {
 			return artifactDefs
 		}
 		return nil
@@ -46,10 +44,10 @@ func ExtractStringOpt(defType string, opts CommandOptions) string {
 }
 
 // ExtractStringListOpt extracts a string slice key value from the options
-func ExtractStringListOpt(defType string, opts CommandOptions) eveapimodels.StringList {
+func ExtractStringListOpt(defType string, opts CommandOptions) eve.StringList {
 	if val, ok := opts[defType]; ok {
 		if nsVal, ok := val.(string); ok {
-			return eveapimodels.StringList{nsVal}
+			return eve.StringList{nsVal}
 		}
 		return nil
 	}
@@ -93,7 +91,6 @@ func CleanUrls(input string) string {
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
-	log.Logger.Debug("set metadata hydrate map input", zap.Strings("keyvals", keyvals))
 	result := make(params.MetadataMap, 0)
 	if len(keyvals) == 0 {
 		return nil
@@ -104,6 +101,5 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 			result[CleanUrls(argKV[0])] = CleanUrls(strings.Join(argKV[1:], "="))
 		}
 	}
-	log.Logger.Debug("set metadata hydrate map result", zap.Any("result", result))
 	return result
 }

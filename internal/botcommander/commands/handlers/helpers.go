@@ -9,8 +9,6 @@ import (
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
@@ -22,7 +20,7 @@ func deployHandler(
 	chatSvc chatservice.Provider,
 	cmd commands.EvebotCommand,
 	timestamp string,
-	deployOpts eveapimodels.DeploymentPlanOptions) {
+	deployOpts eve.DeploymentPlanOptions) {
 
 	resp, err := eveAPIClient.Deploy(ctx, deployOpts, cmd.Info().User, cmd.Info().Channel, timestamp)
 	if err != nil && len(err.Error()) > 0 {
@@ -42,11 +40,11 @@ func resolveServiceNamespace(
 	ctx context.Context,
 	eveAPIClient eveapi.Client,
 	chatSvc chatservice.Provider,
-	cmd commands.EvebotCommand, ts *string) (*eve.Namespace, *eveapimodels.EveService) {
+	cmd commands.EvebotCommand, ts *string) (*eve.Namespace, *eve.Service) {
 
 	var ns eve.Namespace
-	var svc eveapimodels.EveService
-	var svcs eveapimodels.Services
+	var svc eve.Service
+	var svcs []eve.Service
 	var err error
 
 	ns, err = resolveNamespace(ctx, eveAPIClient, cmd)
@@ -71,7 +69,7 @@ func resolveServiceNamespace(
 	}
 	for _, s := range svcs {
 		if strings.ToLower(s.Name) == strings.ToLower(requestedSvcName) {
-			svc = mapToEveService(s)
+			svc = s
 			break
 		}
 	}
@@ -79,10 +77,38 @@ func resolveServiceNamespace(
 		chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid requested service: %s", requestedSvcName), cmd.Info().User, cmd.Info().Channel, *ts)
 		return &ns, &svc
 	}
-	svc, err = eveAPIClient.GetServiceByID(ctx, svc.ID)
-	if err != nil {
-		chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
-		return &ns, &svc
-	}
+	//svc, err = eveAPIClient.GetServiceByID(ctx, svc.ID)
+	//if err != nil {
+	//	chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
+	//	return &ns, &svc
+	//}
 	return &ns, &svc
+}
+
+func metaDataServiceKey(service, namespace string) string {
+	return fmt.Sprintf("eve-bot:%s:%s", service, namespace)
+}
+
+func resolveNamespace(ctx context.Context, api eveapi.Client, cmd commands.EvebotCommand) (eve.Namespace, error) {
+	var nv eve.Namespace
+
+	dynamicOpts := cmd.Options()
+
+	// Gotta get the namespaces first, since we are working with the Alias, and not the Name/ID
+	namespaces, err := api.GetNamespacesByEnvironment(ctx, dynamicOpts[params.EnvironmentName].(string))
+	if err != nil {
+		return nv, err
+	}
+
+	for _, v := range namespaces {
+		if strings.ToLower(v.Alias) == strings.ToLower(dynamicOpts[params.NamespaceName].(string)) {
+			nv = v
+			break
+		}
+	}
+
+	if nv.ID == 0 {
+		return nv, fmt.Errorf("invalid namespace")
+	}
+	return nv, nil
 }

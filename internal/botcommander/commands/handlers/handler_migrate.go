@@ -4,12 +4,13 @@ import (
 	"context"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/eve"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi/eveapimodels"
 )
 
 // MigrateHandler is the handler for the MigrateCmd
@@ -36,7 +37,7 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 
 	cmdAPIOpts := cmd.Options()
 
-	deployOpts := eveapimodels.DeploymentPlanOptions{
+	deployOpts := eve.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractArtifactsDefinition(args.DatabasesName, cmdAPIOpts),
 		ForceDeploy:      commands.ExtractBoolOpt(args.ForceDeployName, cmdAPIOpts),
 		User:             chatUser.Name,
@@ -44,7 +45,7 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmdAPIOpts),
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Messages:         nil,
-		Type:             "migration",
+		Type:             eve.DeploymentPlanTypeMigration,
 	}
 
 	resp, err := h.eveAPIClient.Deploy(ctx, deployOpts, cmd.Info().User, cmd.Info().Channel, timestamp)
