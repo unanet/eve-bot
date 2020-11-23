@@ -152,6 +152,10 @@ func (meac MockEveAPIClient) DeleteMetadataKey(ctx context.Context, id int, key 
 	return eve.Metadata{}, nil
 }
 
+func (meac MockEveAPIClient) GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve.Job, error) {
+	return []eve.Job{}, nil
+}
+
 type MockConfig struct {
 }
 
