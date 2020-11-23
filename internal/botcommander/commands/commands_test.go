@@ -12,6 +12,21 @@ func Test_CleanUrls(t *testing.T) {
 		want string
 	}{
 		{
+			name: "test regex input",
+			args: args{input: "'//(.+).<http://unanet.io/*|unanet.io/*>'"},
+			want: "'//(.+).unanet.io/*'",
+		},
+		{
+			name: "test regex input",
+			args: args{input: "\"//(.+).<http://unanet.io/*|unanet.io/*>\""},
+			want: "\"//(.+).unanet.io/*\"",
+		},
+		{
+			name: "test regex input",
+			args: args{input: "//(.+).<http://unanet.io/*|unanet.io/*>"},
+			want: "//(.+).unanet.io/*",
+		},
+		{
 			name: "test postgres url with equal 2",
 			args: args{input: "jdbc:<postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/tsgc_qa_current?escapeSyntaxCallMode=callIfNoReturn>"},
 			want: "jdbc:postgresql://unanet-aurora-db.app-nonprod.unanet.io:5432/tsgc_qa_current?escapeSyntaxCallMode=callIfNoReturn",
