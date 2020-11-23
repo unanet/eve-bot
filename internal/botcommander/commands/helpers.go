@@ -104,8 +104,8 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 	for _, s := range keyvals {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
-			//result[CleanUrls(argKV[0])] = CleanUrls(strings.Join(argKV[1:], "="))
-			result[argKV[0]] = strings.Join(argKV[1:], "=")
+			result[CleanUrls(argKV[0])] = CleanUrls(strings.Join(argKV[1:], "="))
+			//result[argKV[0]] = strings.Join(argKV[1:], "=")
 		}
 	}
 	return result
