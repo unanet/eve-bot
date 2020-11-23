@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	showCmdHelpSummary = help.Summary("The `show` command is used to show resources (environments,namespaces,services,metadata)")
+	showCmdHelpSummary = help.Summary("The `show` command is used to show resources (environments,namespaces,services,metadata,jobs)")
 	showCmdHelpUsage   = help.Usage{
 		"show {{ resources }}",
 		"show namespaces in {{ environment }}",
