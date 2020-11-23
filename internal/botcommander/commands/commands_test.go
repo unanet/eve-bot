@@ -12,22 +12,32 @@ func Test_CleanUrls(t *testing.T) {
 		want string
 	}{
 		{
-			name: "test regex input",
+			name: "test encoded input extended",
+			args: args{input: "REPORTING_customer.url.regex=&lt;blah&gt;"},
+			want: "REPORTING_customer.url.regex=<blah>",
+		},
+		{
+			name: "test <blah> input",
+			args: args{input: "<blah>"},
+			want: "blah",
+		},
+		{
+			name: "test encoded input simple",
 			args: args{input: "&lt;blah&gt;"},
 			want: "<blah>",
 		},
 		{
-			name: "test regex input",
+			name: "test regex url input",
 			args: args{input: "'//(.+).<http://unanet.io/*|unanet.io/*>'"},
 			want: "'//(.+).unanet.io/*'",
 		},
 		{
-			name: "test regex input",
+			name: "test regex url input 2",
 			args: args{input: "\"//(.+).<http://unanet.io/*|unanet.io/*>\""},
 			want: "\"//(.+).unanet.io/*\"",
 		},
 		{
-			name: "test regex input",
+			name: "test regex url input 3",
 			args: args{input: "//(.+).<http://unanet.io/*|unanet.io/*>"},
 			want: "//(.+).unanet.io/*",
 		},
