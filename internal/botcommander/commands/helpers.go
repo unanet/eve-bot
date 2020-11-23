@@ -4,6 +4,9 @@ import (
 	"regexp"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
@@ -67,7 +70,10 @@ func CleanUrls(input string) string {
 	matchCount := len(matchIndexes)
 
 	if matchCount == 0 {
-		return cleanEncoding(input)
+		log.Logger.Info("no match", zap.String("input", input))
+		cleanedEnc := cleanEncoding(input)
+		log.Logger.Info("cleanedEnc", zap.String("cleanedEnc", cleanedEnc))
+		return cleanedEnc
 	}
 
 	cleanPart := input[0:matchIndexes[0][0]]
@@ -93,7 +99,10 @@ func CleanUrls(input string) string {
 		cleanPart += cleanVal
 	}
 	result := cleanPart + input[matchIndexes[matchCount-1][1]:]
-	return cleanEncoding(result)
+	log.Logger.Info("result", zap.String("result", result))
+	cleanedEnc := cleanEncoding(result)
+	log.Logger.Info("result cleanedEnc", zap.String("cleanedEnc", cleanedEnc))
+	return cleanedEnc
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
@@ -104,8 +113,8 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 	for _, s := range keyvals {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
-			result[CleanUrls(argKV[0])] = CleanUrls(strings.Join(argKV[1:], "="))
-			//result[argKV[0]] = strings.Join(argKV[1:], "=")
+			//result[CleanUrls(argKV[0])] = CleanUrls(strings.Join(argKV[1:], "="))
+			result[argKV[0]] = strings.Join(argKV[1:], "=")
 		}
 	}
 	return result
