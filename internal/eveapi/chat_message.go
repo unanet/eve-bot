@@ -39,9 +39,21 @@ func ToChatMessage(model interface{}) string {
 		return namespacesMsg(v)
 	case []eve.Environment:
 		return environmentsMsg(v)
+	case []eve.Job:
+		return jobsMsg(v)
 	default:
 		return ""
 	}
+}
+
+func jobsMsg(v []eve.Job) string {
+	msg := ""
+	if msg = initListString(v, "jobs"); len(msg) == 0 {
+		for _, val := range v {
+			msg += "*Name:* " + "`" + val.Name + "`" + "\n" + "*Artifact:* " + "_" + val.ArtifactName + "_" + "\n" + "*Namespace:* " + "_" + val.NamespaceName + "_" + "\n\n"
+		}
+	}
+	return msg
 }
 
 func deployServiceMsg(v *eve.DeployService) string {

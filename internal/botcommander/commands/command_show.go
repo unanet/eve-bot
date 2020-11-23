@@ -24,12 +24,14 @@ var (
 		"show namespaces in {{ environment }}",
 		"show services in {{ namespace }} {{ environment }}",
 		"show metadata for {{ service }} in {{ namespace }} {{ environment }}",
+		"show jobs in {{ namespace }} {{ environment }}",
 	}
 	showCmdHelpExample = help.Examples{
 		"show environments",
 		"show namespaces in una-int",
 		"show services in current una-int",
 		"show metadata for unaneta in current una-int",
+		"show jobs in current una-int",
 	}
 )
 
@@ -92,6 +94,15 @@ func (cmd *showCmd) resolveDynamicOptions() {
 	}
 
 	switch cmd.opts["resource"] {
+	case resources.JobName:
+		// show jobs in {{namespace}} {{environment}}
+		if len(cmd.input) != 5 {
+			cmd.errs = append(cmd.errs, fmt.Errorf("invalid show jobs: %v", cmd.input))
+			return
+		}
+		cmd.opts[params.NamespaceName] = cmd.input[3]
+		cmd.opts[params.EnvironmentName] = cmd.input[4]
+		return
 	case resources.EnvironmentName:
 		// show environments
 		if len(cmd.input) != 2 {

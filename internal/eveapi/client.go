@@ -48,6 +48,7 @@ type Client interface {
 	UpsertMergeMetadata(context.Context, eve.Metadata) (eve.Metadata, error)
 	UpsertMetadataServiceMap(context.Context, eve.MetadataServiceMap) (eve.MetadataServiceMap, error)
 	DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error)
+	GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve.Job, error)
 }
 
 // client data structure
@@ -74,6 +75,27 @@ func NewClient(cfg Config) Client {
 			Client(httpClient).
 			Add("User-Agent", "eve-bot").
 			ResponseDecoder(evejson.NewJsonDecoder()),
+	}
+}
+
+func (c *client) GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve.Job, error) {
+	var success []eve.Job
+	var failure eveerror.RestError
+
+	r, err := c.sling.New().Get(fmt.Sprintf("namespaces/%v/jobs", ns.ID)).Request()
+	if err != nil {
+		log.Logger.Error("error preparing eve-api GetNamespaceJobs request", zap.Error(err))
+		return success, err
+	}
+	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
+	if err != nil {
+		return success, err
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		return success, nil
+	default:
+		return success, fmt.Errorf(failure.Message)
 	}
 }
 

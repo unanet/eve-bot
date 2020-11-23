@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"strings"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 
@@ -48,16 +47,5 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		Type:             eve.DeploymentPlanTypeMigration,
 	}
 
-	resp, err := h.eveAPIClient.Deploy(ctx, deployOpts, cmd.Info().User, cmd.Info().Channel, timestamp)
-	if err != nil && len(err.Error()) > 0 {
-		h.chatSvc.DeploymentNotificationThread(ctx, err.Error(), cmd.Info().User, cmd.Info().Channel, timestamp)
-		return
-	}
-	if resp == nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, errInvalidAPIResp)
-		return
-	}
-	if len(resp.Messages) > 0 {
-		h.chatSvc.UserNotificationThread(ctx, strings.Join(resp.Messages, ","), cmd.Info().User, cmd.Info().Channel, timestamp)
-	}
+	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, deployOpts)
 }

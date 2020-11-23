@@ -29,6 +29,8 @@ func NewShowHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) 
 // Handle handles the ShowCmd
 func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	switch cmd.Options()["resource"] {
+	case resources.JobName:
+		h.showJobs(ctx, cmd, &timestamp)
 	case resources.EnvironmentName:
 		h.showEnvironments(ctx, cmd, &timestamp)
 	case resources.NamespaceName:
@@ -74,6 +76,27 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 		return
 	}
 	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(ns), cmd.Info().User, cmd.Info().Channel, *ts)
+}
+
+func (h ShowHandler) showJobs(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
+	ns, svc := resolveServiceNamespace(ctx, h.eveAPIClient, h.chatSvc, cmd, ts)
+	if svc == nil || ns == nil {
+		h.chatSvc.UserNotificationThread(ctx, "invalid environment namespace request", cmd.Info().User, cmd.Info().Channel, *ts)
+		return
+	}
+	nsJobs, err := h.eveAPIClient.GetNamespaceJobs(ctx, ns)
+	if err != nil {
+		if resourceNotFoundError(err) {
+			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("no jobs found for namespace: %s", ns.Alias), cmd.Info().User, cmd.Info().Channel, *ts)
+			return
+		}
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
+		return
+	}
+	if nsJobs == nil || len(nsJobs) == 0 {
+		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("no jobs found for namespace: %s", ns.Alias), cmd.Info().User, cmd.Info().Channel, *ts)
+	}
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(nsJobs), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotCommand, ts *string) {

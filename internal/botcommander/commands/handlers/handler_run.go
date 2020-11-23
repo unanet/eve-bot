@@ -11,22 +11,22 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
-// DeployHandler is the handler for the DeployCmd
-type DeployHandler struct {
+// RunHandler is the handler for the RunCmd
+type RunHandler struct {
 	eveAPIClient eveapi.Client
 	chatSvc      chatservice.Provider
 }
 
-// NewDeployHandler creates a DeployHandler
-func NewDeployHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
-	return DeployHandler{
+// NewRunHandler creates a RunHandler
+func NewRunHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+	return RunHandler{
 		eveAPIClient: *eveAPIClient,
 		chatSvc:      *chatSvc,
 	}
 }
 
-// Handle handles the DeployCmd
-func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
+// Handle handles the RunCmd
+func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	chatUser, err := h.chatSvc.GetUser(ctx, cmd.Info().User)
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
@@ -36,14 +36,14 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 	cmdAPIOpts := cmd.Options()
 
 	deployOpts := eve.DeploymentPlanOptions{
-		Artifacts:        commands.ExtractArtifactsDefinition(args.ServicesName, cmdAPIOpts),
+		Artifacts:        commands.ExtractArtifactsDefinition(params.JobName, cmdAPIOpts),
 		ForceDeploy:      commands.ExtractBoolOpt(args.ForceDeployName, cmdAPIOpts),
 		User:             chatUser.Name,
 		DryRun:           commands.ExtractBoolOpt(args.DryrunName, cmdAPIOpts),
 		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmdAPIOpts),
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Messages:         nil,
-		Type:             eve.DeploymentPlanTypeApplication,
+		Type:             eve.DeploymentPlanTypeJob,
 	}
 
 	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, deployOpts)

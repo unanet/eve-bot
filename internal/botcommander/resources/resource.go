@@ -29,7 +29,7 @@ type baseResource struct {
 
 // IsValid validates id the supplied resource is valid
 func IsValid(res string) bool {
-	for _, v := range []Resource{DefaultEnvironment(), DefaultNamespace(), DefaultService(), DefaultMetadata()} {
+	for _, v := range []Resource{DefaultEnvironment(), DefaultNamespace(), DefaultService(), DefaultMetadata(), DefaultJob()} {
 		if v.Name() == strings.ToLower(res) {
 			return true
 		}

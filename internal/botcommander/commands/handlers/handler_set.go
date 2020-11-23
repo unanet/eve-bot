@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"fmt"
-
 	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
