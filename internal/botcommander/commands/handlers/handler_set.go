@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -95,10 +98,13 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
+	payload := metadataMap.ToMetadataField()
+
+	log.Logger.Info("TROY payload", zap.Any("payload", payload))
 
 	md, err := h.eveAPIClient.UpsertMergeMetadata(ctx, eve.Metadata{
 		Description: metaDataServiceKey(svc.Name, nv.Name),
-		Value:       metadataMap.ToMetadataField(),
+		Value:       payload,
 	})
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("failed to save metadata"))
