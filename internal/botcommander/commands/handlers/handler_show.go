@@ -79,12 +79,12 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 }
 
 func (h ShowHandler) showJobs(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
-	ns, svc := resolveServiceNamespace(ctx, h.eveAPIClient, h.chatSvc, cmd, ts)
-	if svc == nil || ns == nil {
+	ns, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
+	if err != nil {
 		h.chatSvc.UserNotificationThread(ctx, "invalid environment namespace request", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	nsJobs, err := h.eveAPIClient.GetNamespaceJobs(ctx, ns)
+	nsJobs, err := h.eveAPIClient.GetNamespaceJobs(ctx, &ns)
 	if err != nil {
 		if resourceNotFoundError(err) {
 			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("no jobs found for namespace: %s", ns.Alias), cmd.Info().User, cmd.Info().Channel, *ts)
