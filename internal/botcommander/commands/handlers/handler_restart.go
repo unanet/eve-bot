@@ -44,7 +44,7 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	deployOpts := eve.DeploymentPlanOptions{
+	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
 		Artifacts: eve.ArtifactDefinitions{
 			&eve.ArtifactDefinition{
 				Name:             commands.ExtractStringOpt(params.ServiceName, cmd.Options()),
@@ -57,8 +57,6 @@ func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmd.Options()),
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmd.Options()),
 		Type:             eve.DeploymentPlanTypeRestart,
-	}
-
-	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, deployOpts)
+	})
 
 }

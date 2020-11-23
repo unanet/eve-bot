@@ -36,7 +36,7 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 
 	cmdAPIOpts := cmd.Options()
 
-	deployOpts := eve.DeploymentPlanOptions{
+	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractArtifactsDefinition(args.DatabasesName, cmdAPIOpts),
 		ForceDeploy:      commands.ExtractBoolOpt(args.ForceDeployName, cmdAPIOpts),
 		User:             chatUser.Name,
@@ -45,7 +45,5 @@ func (h MigrateHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Messages:         nil,
 		Type:             eve.DeploymentPlanTypeMigration,
-	}
-
-	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, deployOpts)
+	})
 }

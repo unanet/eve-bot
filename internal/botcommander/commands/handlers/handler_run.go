@@ -35,7 +35,7 @@ func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 
 	cmdAPIOpts := cmd.Options()
 
-	deployOpts := eve.DeploymentPlanOptions{
+	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractArtifactsDefinition(params.JobName, cmdAPIOpts),
 		ForceDeploy:      commands.ExtractBoolOpt(args.ForceDeployName, cmdAPIOpts),
 		User:             chatUser.Name,
@@ -44,7 +44,5 @@ func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Messages:         nil,
 		Type:             eve.DeploymentPlanTypeJob,
-	}
-
-	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, deployOpts)
+	})
 }
