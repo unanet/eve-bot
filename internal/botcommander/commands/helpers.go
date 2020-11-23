@@ -70,9 +70,9 @@ func CleanUrls(input string) string {
 	matchCount := len(matchIndexes)
 
 	if matchCount == 0 {
-		log.Logger.Info("no match", zap.String("input", input))
+		log.Logger.Info("CleanUrls no match", zap.String("input", input))
 		cleanedEnc := cleanEncoding(input)
-		log.Logger.Info("cleanedEnc", zap.String("cleanedEnc", cleanedEnc))
+		log.Logger.Info("CleanUrls no match cleaned", zap.String("cleanedEnc", cleanedEnc))
 		return cleanedEnc
 	}
 
@@ -99,9 +99,9 @@ func CleanUrls(input string) string {
 		cleanPart += cleanVal
 	}
 	result := cleanPart + input[matchIndexes[matchCount-1][1]:]
-	log.Logger.Info("result", zap.String("result", result))
+	log.Logger.Info("CleanUrls result", zap.String("result", result))
 	cleanedEnc := cleanEncoding(result)
-	log.Logger.Info("result cleanedEnc", zap.String("cleanedEnc", cleanedEnc))
+	log.Logger.Info("CleanUrls result cleaned", zap.String("cleanedEnc", cleanedEnc))
 	return cleanedEnc
 }
 
