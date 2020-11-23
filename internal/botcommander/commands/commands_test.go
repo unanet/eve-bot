@@ -13,6 +13,11 @@ func Test_CleanUrls(t *testing.T) {
 	}{
 		{
 			name: "test regex input",
+			args: args{input: "&lt;blah&gt;"},
+			want: "<blah>",
+		},
+		{
+			name: "test regex input",
 			args: args{input: "'//(.+).<http://unanet.io/*|unanet.io/*>'"},
 			want: "'//(.+).unanet.io/*'",
 		},

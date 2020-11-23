@@ -53,6 +53,12 @@ func ExtractStringListOpt(defType string, opts CommandOptions) eve.StringList {
 	return nil
 }
 
+func cleanEncoding(input string) string {
+	input = strings.ReplaceAll(input, "&lt;", "<")
+	input = strings.ReplaceAll(input, "&gt;", ">")
+	return input
+}
+
 // CleanUrls cleans the incoming URLs
 // this iterates the incoming command and removes an encoding slack adds to URLs
 func CleanUrls(input string) string {
@@ -63,7 +69,9 @@ func CleanUrls(input string) string {
 	matchCount := len(matchIndexes)
 
 	if matchCount == 0 {
-		return input
+		//input = strings.ReplaceAll(input, "&lt;", "<")
+		//input = strings.ReplaceAll(input, "&gt;", ">")
+		return cleanEncoding(input)
 	}
 
 	cleanPart := input[0:matchIndexes[0][0]]
@@ -88,7 +96,12 @@ func CleanUrls(input string) string {
 
 		cleanPart = cleanPart + cleanVal
 	}
-	return cleanPart + input[matchIndexes[matchCount-1][1]:]
+	result := cleanPart + input[matchIndexes[matchCount-1][1]:]
+
+	//result = strings.ReplaceAll(result, "&lt;", "<")
+	//result = strings.ReplaceAll(result, "&gt;", ">")
+
+	return cleanEncoding(result)
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
