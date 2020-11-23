@@ -62,15 +62,11 @@ func cleanEncoding(input string) string {
 // CleanUrls cleans the incoming URLs
 // this iterates the incoming command and removes an encoding slack adds to URLs
 func CleanUrls(input string) string {
-	//matcher := regexp.MustCompile(`<[a-zA-Z]+:\/\/[a-zA-Z._\-:\d\/|?=]+>`)
-	//matcher := regexp.MustCompile(`<[a-zA-Z._\-.*:\d\/|?=]+>`)
 	matcher := regexp.MustCompile(`<([^>]*)>`)
 	matchIndexes := matcher.FindAllStringIndex(input, -1)
 	matchCount := len(matchIndexes)
 
 	if matchCount == 0 {
-		//input = strings.ReplaceAll(input, "&lt;", "<")
-		//input = strings.ReplaceAll(input, "&gt;", ">")
 		return cleanEncoding(input)
 	}
 
@@ -96,12 +92,7 @@ func CleanUrls(input string) string {
 
 		cleanPart = cleanPart + cleanVal
 	}
-	result := cleanPart + input[matchIndexes[matchCount-1][1]:]
-
-	//result = strings.ReplaceAll(result, "&lt;", "<")
-	//result = strings.ReplaceAll(result, "&gt;", ">")
-
-	return cleanEncoding(result)
+	return cleanEncoding(cleanPart + input[matchIndexes[matchCount-1][1]:])
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
