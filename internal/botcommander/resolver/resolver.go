@@ -17,8 +17,8 @@ type Resolver interface {
 // EvebotResolver implements the Resolver interface
 type EvebotResolver struct{}
 
-// NewResolver instantiates the Resolver
-func NewResolver() Resolver {
+// New instantiates the Resolver
+func New() Resolver {
 	return &EvebotResolver{}
 }
 

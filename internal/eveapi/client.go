@@ -57,8 +57,8 @@ type client struct {
 	sling *sling.Sling
 }
 
-// NewClient creates a new eve api client
-func NewClient(cfg Config) Client {
+// New creates a new eve api client
+func New(cfg Config) Client {
 	var httpClient = &http.Client{
 		Timeout:   cfg.EveapiTimeout,
 		Transport: evehttp.LoggingTransport,

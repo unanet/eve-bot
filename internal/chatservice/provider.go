@@ -33,8 +33,8 @@ type Provider interface {
 }
 
 // New returns a chat provider than implements the interface
-func New(st ProviderType, cfg *config.Config) Provider {
-	switch st {
+func New(pt ProviderType, cfg *config.Config) Provider {
+	switch pt {
 	case Slack:
 		return slackservice.New(slack.New(cfg.SlackUserOauthAccessToken))
 	default:

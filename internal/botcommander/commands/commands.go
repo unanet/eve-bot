@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 )
 

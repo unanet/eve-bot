@@ -10,7 +10,7 @@ import (
 
 func TestEvebotResolver_Resolve(t *testing.T) {
 
-	resolver := NewResolver()
+	resolver := New()
 	user := "dummy"
 	channel := "chanelID"
 	validDeployCmd := "@evebot deploy current to int"

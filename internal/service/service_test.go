@@ -3,170 +3,22 @@ package service
 import (
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"net/http/httptest"
+	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
+
+	"github.com/golang/mock/gomock"
 
 	"github.com/slack-go/slack/slackevents"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/executor"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resolver"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/eve"
-)
-
-type MockChatService struct {
-}
-
-func (mcs MockChatService) GetChannelInfo(ctx context.Context, channelID string) (chatmodels.Channel, error) {
-	return chatmodels.Channel{ID: channelID, Name: "somethingcool"}, nil
-}
-
-func (mcs MockChatService) PostMessage(ctx context.Context, msg, channel string) (timestamp string) {
-	return "2372372323"
-}
-
-func (mcs MockChatService) PostMessageThread(ctx context.Context, msg, channel, ts string) (timestamp string) {
-	return "2372372323"
-}
-
-func (mcs MockChatService) ErrorNotification(ctx context.Context, user, channel string, err error) {
-	return
-}
-
-func (mcs MockChatService) ErrorNotificationThread(ctx context.Context, user, channel, ts string, err error) {
-	return
-}
-
-func (mcs MockChatService) UserNotificationThread(ctx context.Context, msg, user, channel, ts string) {
-	return
-}
-
-func (mcs MockChatService) DeploymentNotificationThread(ctx context.Context, msg, user, channel, ts string) {
-	return
-}
-
-func (mcs MockChatService) GetUser(ctx context.Context, user string) (*chatmodels.ChatUser, error) {
-	return &chatmodels.ChatUser{Name: user}, nil
-}
-
-func (mcs MockChatService) PostLinkMessageThread(ctx context.Context, msg string, user string, channel string, ts string) {
-
-}
-
-func (mcs MockChatService) ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
-
-}
-
-func (mcs MockChatService) ReleaseResultsMessageThread(ctx context.Context, msg, user, channel, ts string) {
-
-}
-
-type MockResolver struct {
-}
-
-func (mr MockResolver) Resolve(input, channel, user string) commands.EvebotCommand {
-	return commands.NewInvalidCommand(strings.Fields(input), channel, user)
-}
-
-type MockExecutor struct {
-}
-
-func (me MockExecutor) Execute(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-
-}
-
-type MockEveAPIClient struct {
-}
-
-func (meac MockEveAPIClient) Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eve.DeploymentPlanOptions, error) {
-	return &eve.DeploymentPlanOptions{}, nil
-}
-
-func (meac MockEveAPIClient) GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error) {
-	return &eve.Environment{}, nil
-}
-
-func (meac MockEveAPIClient) GetEnvironments(ctx context.Context) ([]eve.Environment, error) {
-	return []eve.Environment{}, nil
-}
-
-func (meac MockEveAPIClient) GetNamespacesByEnvironment(ctx context.Context, environmentName string) ([]eve.Namespace, error) {
-	return []eve.Namespace{}, nil
-}
-
-func (meac MockEveAPIClient) GetServicesByNamespace(ctx context.Context, namespace string) ([]eve.Service, error) {
-	return []eve.Service{}, nil
-}
-
-func (meac MockEveAPIClient) GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error) {
-	return eve.Service{}, nil
-}
-
-func (meac MockEveAPIClient) GetServiceByID(ctx context.Context, id int) (eve.Service, error) {
-	return eve.Service{}, nil
-}
-
-func (meac MockEveAPIClient) SetServiceMetadata(ctx context.Context, metadata params.MetadataMap, id int) (params.MetadataMap, error) {
-	return params.MetadataMap{}, nil
-}
-
-func (meac MockEveAPIClient) DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error) {
-	return params.MetadataMap{}, nil
-}
-
-func (meac MockEveAPIClient) SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error) {
-	return eve.Service{}, nil
-}
-
-func (meac MockEveAPIClient) SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error) {
-	return eve.Namespace{}, nil
-}
-
-func (meac MockEveAPIClient) GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error) {
-	return eve.Namespace{}, nil
-}
-
-func (meac MockEveAPIClient) Release(ctx context.Context, payload eve.Release) (eve.Release, error) {
-	return eve.Release{}, nil
-}
-
-func (meac MockEveAPIClient) GetMetadata(ctx context.Context, key string) (eve.Metadata, error) {
-	return eve.Metadata{}, nil
-}
-
-func (meac MockEveAPIClient) UpsertMergeMetadata(context.Context, eve.Metadata) (eve.Metadata, error) {
-	return eve.Metadata{}, nil
-}
-
-func (meac MockEveAPIClient) UpsertMetadataServiceMap(context.Context, eve.MetadataServiceMap) (eve.MetadataServiceMap, error) {
-	return eve.MetadataServiceMap{}, nil
-}
-
-func (meac MockEveAPIClient) DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error) {
-	return eve.Metadata{}, nil
-}
-
-func (meac MockEveAPIClient) GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve.Job, error) {
-	return []eve.Job{}, nil
-}
-
-type MockConfig struct {
-}
-
-var (
-	mockChatService       = MockChatService{}
-	mockResolver          = MockResolver{}
-	mockExecutor          = MockExecutor{}
-	mockEveAPI            = MockEveAPIClient{}
-	cfg                   = &config.Config{}
-	mockallowedChannelMap = map[string]interface{}{}
-	mockHTTPRequest       = httptest.NewRequest("POST", "/somewhere", nil)
 )
 
 func TestProvider_HandleSlackInteraction(t *testing.T) {
@@ -180,6 +32,11 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 
 	// req.PostForm.Set("payload", mockSlackInteractionBody)
 	// req.Form.Set("payload", mockSlackInteractionBody)
+
+	mockChatSvc := chatservice.NewMockProvider(gomock.NewController(t))
+	mockResolver := resolver.NewMockResolver(gomock.NewController(t))
+	mockExecutor := executor.NewMockExecutor(gomock.NewController(t))
+	mockAPI := eveapi.NewMockClient(gomock.NewController(t))
 
 	type fields struct {
 		ChatService       chatservice.Provider
@@ -201,15 +58,15 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 		{
 			name: "sad path - invalid post body",
 			fields: fields{
-				ChatService:       mockChatService,
+				ChatService:       mockChatSvc,
 				CommandResolver:   mockResolver,
 				CommandExecutor:   mockExecutor,
-				EveAPI:            mockEveAPI,
-				Cfg:               cfg,
-				allowedChannelMap: mockallowedChannelMap,
+				EveAPI:            mockAPI,
+				Cfg:               &config.Config{},
+				allowedChannelMap: map[string]interface{}{},
 			},
 			args: args{
-				req: mockHTTPRequest,
+				req: httptest.NewRequest("POST", "/somewhere", nil),
 			},
 			wantErr: true,
 		},
@@ -231,6 +88,15 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 	}
 }
 
+type serviceMocks struct {
+	mockChat              chatservice.MockProvider
+	mockResolver          resolver.MockResolver
+	mockExecutor          executor.MockExecutor
+	mockAPI               eveapi.MockClient
+	mockCfg               *config.Config
+	mockAllowedChannelMap map[string]interface{}
+}
+
 func TestProvider_HandleSlackAppMentionEvent(t *testing.T) {
 	type fields struct {
 		ChatService       chatservice.Provider
@@ -243,13 +109,85 @@ func TestProvider_HandleSlackAppMentionEvent(t *testing.T) {
 	type args struct {
 		ctx context.Context
 		ev  *slackevents.AppMentionEvent
+		req *http.Request
 	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSlackEvent := &slackevents.AppMentionEvent{
+		Type:            "test",
+		User:            "someuser",
+		Text:            "show environment",
+		TimeStamp:       "2423423423",
+		ThreadTimeStamp: "2342342343",
+		Channel:         "test",
+		EventTimeStamp:  "2342342343",
+		UserTeam:        "unknown",
+		SourceTeam:      "unknown",
+		BotID:           "test",
+	}
+
+	mockChatInfo := commands.ChatInfo{
+		User:        mockSlackEvent.User,
+		Channel:     mockSlackEvent.Channel,
+		CommandName: strings.Split(mockSlackEvent.Text, " ")[0],
+	}
+
+	mockChatOpts := commands.CommandOptions{}
+
+	mockChatChannel := chatmodels.Channel{
+		ID:   "test",
+		Name: "WTF",
+	}
+
+	mockAllowedChannels := make(map[string]interface{})
+
+	mockChatSvc := chatservice.NewMockProvider(ctrl)
+	mockChatSvc.EXPECT().GetChannelInfo(context.Background(), mockSlackEvent.Channel).Return(mockChatChannel, nil)
+
+	mockEveCmd := commands.NewMockEvebotCommand(ctrl)
+	mockEveCmd.EXPECT().Info().Return(mockChatInfo)
+	mockEveCmd.EXPECT().Options().Return(mockChatOpts)
+	mockEveCmd.EXPECT().AckMsg().Return("Ohhh yeah", false)
+	mockEveCmd.EXPECT().IsAuthorized(mockAllowedChannels, mockChatSvc.GetChannelInfo).Return(true)
+
+	mockResolver := resolver.NewMockResolver(ctrl)
+	mockResolver.
+		EXPECT().
+		Resolve(mockSlackEvent.Text, mockSlackEvent.Channel, mockSlackEvent.User).
+		Return(mockEveCmd)
+
+	mockExecutor := executor.NewMockExecutor(ctrl)
+	mockAPI := eveapi.NewMockClient(ctrl)
+
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		name       string
+		fields     fields
+		args       args
+		wantErr    bool
+		setupMocks func(*serviceMocks)
 	}{
-		// TODO: Add test cases.
+		{
+			name: "sad path - invalid post body",
+			setupMocks: func(t *serviceMocks) {
+
+			},
+			fields: fields{
+				ChatService:       mockChatSvc,
+				CommandResolver:   mockResolver,
+				CommandExecutor:   mockExecutor,
+				EveAPI:            mockAPI,
+				Cfg:               &config.Config{},
+				allowedChannelMap: map[string]interface{}{},
+			},
+			args: args{
+				ctx: context.Background(),
+				ev:  mockSlackEvent,
+				req: httptest.NewRequest("POST", "/somewhere", nil),
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -261,7 +199,9 @@ func TestProvider_HandleSlackAppMentionEvent(t *testing.T) {
 				Cfg:               tt.fields.Cfg,
 				allowedChannelMap: tt.fields.allowedChannelMap,
 			}
-			p.HandleSlackAppMentionEvent(tt.args.ctx, tt.args.ev)
+			if err := p.HandleSlackAppMentionEvent(tt.args.ctx, tt.args.ev); (err != nil) != tt.wantErr {
+				t.Errorf("Provider.HandleSlackInteraction() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }
