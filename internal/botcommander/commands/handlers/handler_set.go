@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
@@ -99,8 +96,6 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 		return
 	}
 	payload := metadataMap.ToMetadataField()
-
-	log.Logger.Info("TROY payload", zap.Any("payload", payload))
 
 	md, err := h.eveAPIClient.UpsertMergeMetadata(ctx, eve.Metadata{
 		Description: metaDataServiceKey(svc.Name, nv.Name),

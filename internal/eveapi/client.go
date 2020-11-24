@@ -152,15 +152,11 @@ func (c *client) UpsertMergeMetadata(ctx context.Context, payload eve.Metadata) 
 	var success eve.Metadata
 	var failure eveerror.RestError
 
-	log.Logger.Info("TROY payload client call", zap.Any("payload", payload))
-
 	r, err := c.sling.New().Patch(fmt.Sprintf("metadata")).BodyJSON(payload).Request()
 	if err != nil {
 		log.Logger.Error("error preparing eve-api UpsertMergeMetadata request", zap.Error(err))
 		return success, err
 	}
-
-	log.Logger.Info("TROY payload client call req", zap.Any("r", r))
 
 	resp, err := c.sling.Do(r.WithContext(ctx), &success, &failure)
 	if err != nil {

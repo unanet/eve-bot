@@ -106,7 +106,6 @@ func CleanUrls(input string) string {
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
-	log.Logger.Info("TROY keyvals", zap.Strings("key vals", keyvals))
 	result := make(params.MetadataMap, 0)
 	if len(keyvals) == 0 {
 		return nil
@@ -119,6 +118,5 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 		}
 	}
 
-	log.Logger.Info("TROY keyvals result", zap.Any("result", result))
 	return result
 }
