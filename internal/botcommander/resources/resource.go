@@ -27,32 +27,20 @@ type baseResource struct {
 	value       string
 }
 
-// IsValid validates id the supplied resource is valid
-func IsValid(res string) bool {
-	for _, v := range []Resource{DefaultEnvironment(), DefaultNamespace(), DefaultService(), DefaultMetadata(), DefaultJob()} {
-		if v.Name() == strings.ToLower(res) {
-			return true
-		}
-	}
-	return false
+// FullResourceMap is just a map of resources that are available
+// This map should never be written to, just read for Validation
+var FullResourceMap = map[string]bool{
+	strings.ToLower(EnvironmentName): true,
+	strings.ToLower(NamespaceName):   true,
+	strings.ToLower(ServiceName):     true,
+	strings.ToLower(MetadataName):    true,
+	strings.ToLower(JobName):         true,
+	strings.ToLower(VersionName):     true,
 }
 
-// IsValidSet validates that the supplied resource can be set
-func IsValidSet(res string) bool {
-	for _, v := range []Resource{DefaultMetadata(), DefaultVersion()} {
-		if v.Name() == strings.ToLower(res) {
-			return true
-		}
-	}
-	return false
-}
-
-// IsValidDelete validates that the supplied resource can be deleted
-func IsValidDelete(res string) bool {
-	for _, v := range []Resource{DefaultMetadata(), DefaultVersion()} {
-		if v.Name() == strings.ToLower(res) {
-			return true
-		}
-	}
-	return false
+// ValidResMutations are just a map of resources that can be mutated by the bot (user)
+// This map should never be written to, just read for Validation
+var ValidResourcesMutations = map[string]bool{
+	strings.ToLower(MetadataName): true,
+	strings.ToLower(VersionName):  true,
 }

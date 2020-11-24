@@ -73,7 +73,7 @@ func (cmd *setCmd) resolveDynamicOptions() {
 		return
 	}
 
-	if resources.IsValidSet(cmd.input[1]) {
+	if ok := resources.ValidResourcesMutations[cmd.input[1]]; ok {
 		cmd.opts["resource"] = cmd.input[1]
 	} else {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set resource: %v", cmd.input))

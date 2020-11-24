@@ -71,7 +71,7 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 		return
 	}
 
-	if resources.IsValidDelete(cmd.input[1]) {
+	if ok := resources.ValidResourcesMutations[cmd.input[1]]; ok {
 		cmd.opts["resource"] = cmd.input[1]
 	} else {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete resource: %v", cmd.input))

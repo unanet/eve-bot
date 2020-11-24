@@ -77,7 +77,7 @@ func (cmd *showCmd) resolveDynamicOptions() {
 		return
 	}
 
-	if resources.IsValid(cmd.input[1]) {
+	if ok := resources.FullResourceMap[cmd.input[1]]; ok {
 		cmd.opts["resource"] = cmd.input[1]
 	} else {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid requested resource: %v", cmd.input))

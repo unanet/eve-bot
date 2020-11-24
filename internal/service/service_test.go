@@ -36,19 +36,19 @@ func (mcs MockChatService) PostMessageThread(ctx context.Context, msg, channel, 
 }
 
 func (mcs MockChatService) ErrorNotification(ctx context.Context, user, channel string, err error) {
-
+	return
 }
 
 func (mcs MockChatService) ErrorNotificationThread(ctx context.Context, user, channel, ts string, err error) {
-
+	return
 }
 
 func (mcs MockChatService) UserNotificationThread(ctx context.Context, msg, user, channel, ts string) {
-
+	return
 }
 
 func (mcs MockChatService) DeploymentNotificationThread(ctx context.Context, msg, user, channel, ts string) {
-
+	return
 }
 
 func (mcs MockChatService) GetUser(ctx context.Context, user string) (*chatmodels.ChatUser, error) {
