@@ -22,6 +22,14 @@ type Provider struct {
 	allowedMaintenanceChannelMap map[string]interface{}
 }
 
+func extractChannelMap(input string) map[string]interface{} {
+	chanMap := make(map[string]interface{})
+	for _, c := range strings.Split(input, ",") {
+		chanMap[c] = true
+	}
+	return chanMap
+}
+
 // New creates a new service provider
 func New(
 	cfg *config.Config,
@@ -31,27 +39,17 @@ func New(
 	ce executor.Executor,
 ) *Provider {
 
-	// Elevated Slack Channels that can issue "special" commands
-	// release, deploy to prod, etc.
-	chanMap := make(map[string]interface{})
-	for _, c := range strings.Split(cfg.SlackChannelsAuth, ",") {
-		chanMap[c] = true
-	}
-
-	// Elevated Slack Channels that aren't blocked from maintenance mode
-	// i.e. ops still needs to be able to test and deploy even during maintenance
-	maintenanceChanMap := make(map[string]interface{})
-	for _, c := range strings.Split(cfg.SlackChannelsMaintenance, ",") {
-		maintenanceChanMap[c] = true
-	}
-
 	return &Provider{
-		CommandResolver:              cr,
-		EveAPI:                       ea,
-		Cfg:                          cfg,
-		ChatService:                  cs,
-		CommandExecutor:              ce,
-		allowedChannelMap:            chanMap,
-		allowedMaintenanceChannelMap: maintenanceChanMap,
+		CommandResolver: cr,
+		EveAPI:          ea,
+		Cfg:             cfg,
+		ChatService:     cs,
+		CommandExecutor: ce,
+		// Elevated Slack Channels that can issue "special" commands
+		// release, deploy to prod, etc.
+		allowedChannelMap: extractChannelMap(cfg.SlackChannelsAuth),
+		// Elevated Slack Channels that aren't blocked from maintenance mode
+		// i.e. ops still needs to be able to test and deploy even during maintenance
+		allowedMaintenanceChannelMap: extractChannelMap(cfg.SlackChannelsMaintenance),
 	}
 }

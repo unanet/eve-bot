@@ -69,6 +69,7 @@ func (cmd *runCmd) resolveDynamicOptions() {
 		return
 	}
 
+	// run {{ job }} in {{ namespace }} {{ environment }}
 	cmd.opts[params.JobName] = cmd.input[1]
 	cmd.opts[params.NamespaceName] = cmd.input[3]
 	cmd.opts[params.EnvironmentName] = cmd.input[4]
