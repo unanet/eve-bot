@@ -75,10 +75,11 @@ func (cmd migrateCmd) Info() ChatInfo {
 }
 
 func (cmd migrateCmd) resolveDynamicOptions() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid command params: %v", cmd.input))
+	cmd.verifyInput()
+	if len(cmd.errs) > 0 {
 		return
 	}
+
 	cmd.opts[params.NamespaceName] = cmd.input[1]
 	cmd.opts[params.EnvironmentName] = cmd.input[3]
 

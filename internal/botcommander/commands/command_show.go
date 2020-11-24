@@ -72,23 +72,8 @@ func (cmd showCmd) Info() ChatInfo {
 }
 
 func (cmd *showCmd) resolveDynamicOptions() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid show command: %v", cmd.input))
-		return
-	}
-
-	if ok := resources.FullResourceMap[cmd.input[1]]; ok {
-		cmd.opts["resource"] = cmd.input[1]
-	} else {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid requested resource: %v", cmd.input))
-		return
-	}
-
-	if cmd.opts["resource"] == nil {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
-		return
-	}
-
+	cmd.verifyInput()
+	cmd.initializeResource()
 	if len(cmd.errs) > 0 {
 		return
 	}
@@ -142,5 +127,4 @@ func (cmd *showCmd) resolveDynamicOptions() {
 		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource supplied: %v", cmd.opts["resource"]))
 		return
 	}
-
 }

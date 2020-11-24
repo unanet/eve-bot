@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
@@ -50,6 +52,30 @@ type baseCommand struct {
 	arguments  args.Args
 	parameters params.Params
 	opts       CommandOptions // when we resolve the arguments and parameters we hydrate this map for fast lookup
+}
+
+func (bc *baseCommand) verifyInput() {
+	if bc.ValidInputLength() == false {
+		bc.errs = append(bc.errs, fmt.Errorf("invalid input length: %v", bc.input))
+	}
+}
+
+func (bc *baseCommand) initializeResource() {
+	if len(bc.input) < 2 {
+		bc.errs = append(bc.errs, fmt.Errorf("invalid input: %v", bc.input))
+		return
+	}
+	if ok := resources.FullResourceMap[bc.input[1]]; ok {
+		bc.opts["resource"] = bc.input[1]
+	} else {
+		bc.errs = append(bc.errs, fmt.Errorf("invalid requested resource: %v", bc.input))
+		return
+	}
+
+	if bc.opts["resource"] == nil {
+		bc.errs = append(bc.errs, fmt.Errorf("invalid resource: %v", bc.input))
+		return
+	}
 }
 
 // IsHelpRequest checks if the command is a request for help

@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"fmt"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
@@ -59,11 +57,7 @@ func (cmd restartCmd) Info() ChatInfo {
 }
 
 func (cmd *restartCmd) resolveDynamicOptions() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid restart command: %v", cmd.input))
-		return
-	}
-
+	cmd.verifyInput()
 	if len(cmd.errs) > 0 {
 		return
 	}

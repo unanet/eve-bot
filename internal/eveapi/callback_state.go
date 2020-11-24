@@ -39,9 +39,7 @@ func (cbs *CallbackState) ToChatMsg() string {
 
 	cbs.appendDeployMigrationsResult(&result)
 
-	if cbs.Payload.Messages == nil || len(cbs.Payload.Messages) == 0 {
-		return result
-	}
+	cbs.appendDeployJobsResult(&result)
 
 	return cbs.appendAPIMessages(&result)
 }
@@ -133,6 +131,28 @@ func (cbs *CallbackState) appendDeployServicesResult(result *string) {
 	}
 }
 
+func (cbs *CallbackState) appendDeployJobsResult(result *string) {
+	var deployJobsResults string
+	if cbs.Payload.Jobs != nil {
+		for jobResult, migs := range cbs.Payload.Jobs.ToResultMap() {
+			// Let's break out early when this is a pending/dryrun result
+			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
+				deployJobsResults = "\n```" + ToChatMessage(migs) + "```"
+				break
+			}
+
+			jobResultMessage := headerMsg(jobResult.String()) + "\n```" + ToChatMessage(migs) + "```"
+
+			if len(deployJobsResults) == 0 {
+				deployJobsResults = jobResultMessage
+			} else {
+				deployJobsResults = deployJobsResults + jobResultMessage
+			}
+		}
+		*result = *result + "\n" + deployJobsResults
+	}
+}
+
 func (cbs *CallbackState) appendDeployMigrationsResult(result *string) {
 	var deployMigrationsResults string
 	if cbs.Payload.Migrations != nil {
@@ -178,5 +198,8 @@ func (cbs *CallbackState) initMsg() string {
 }
 
 func (cbs *CallbackState) appendAPIMessages(result *string) string {
+	if cbs.Payload.Messages == nil || len(cbs.Payload.Messages) == 0 {
+		return *result
+	}
 	return *result + headerMsg("Messages") + "\n```" + messages(cbs.Payload.Messages) + "```"
 }

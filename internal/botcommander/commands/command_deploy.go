@@ -74,10 +74,11 @@ func (cmd deployCmd) Info() ChatInfo {
 }
 
 func (cmd *deployCmd) resolveDynamicOptions() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("resolve cmd params err invalid input: %v", cmd.input))
+	cmd.verifyInput()
+	if len(cmd.errs) > 0 {
 		return
 	}
+
 	cmd.opts[params.NamespaceName] = cmd.input[1]
 	cmd.opts[params.EnvironmentName] = cmd.input[3]
 

@@ -66,23 +66,8 @@ func (cmd deleteCmd) Info() ChatInfo {
 }
 
 func (cmd *deleteCmd) resolveDynamicOptions() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete command: %v", cmd.input))
-		return
-	}
-
-	if ok := resources.ValidResourcesMutations[cmd.input[1]]; ok {
-		cmd.opts["resource"] = cmd.input[1]
-	} else {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete resource: %v", cmd.input))
-		return
-	}
-
-	if cmd.opts["resource"] == nil {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
-		return
-	}
-
+	cmd.verifyInput()
+	cmd.initializeResource()
 	if len(cmd.errs) > 0 {
 		return
 	}

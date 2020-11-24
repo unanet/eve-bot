@@ -68,23 +68,8 @@ func (cmd setCmd) Info() ChatInfo {
 }
 
 func (cmd *setCmd) resolveDynamicOptions() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set command params: %v", cmd.input))
-		return
-	}
-
-	if ok := resources.ValidResourcesMutations[cmd.input[1]]; ok {
-		cmd.opts["resource"] = cmd.input[1]
-	} else {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid set resource: %v", cmd.input))
-		return
-	}
-
-	if cmd.opts["resource"] == nil {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid resource: %v", cmd.input))
-		return
-	}
-
+	cmd.verifyInput()
+	cmd.initializeResource()
 	if len(cmd.errs) > 0 {
 		return
 	}

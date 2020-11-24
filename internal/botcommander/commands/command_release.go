@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
@@ -68,8 +67,8 @@ func (cmd releaseCmd) Info() ChatInfo {
 }
 
 func (cmd *releaseCmd) resolveDynamicOptions() {
-	if cmd.ValidInputLength() == false {
-		cmd.errs = append(cmd.errs, fmt.Errorf("invalid release command: %v", cmd.input))
+	cmd.verifyInput()
+	if len(cmd.errs) > 0 {
 		return
 	}
 
