@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 )
@@ -201,5 +203,8 @@ func (cbs *CallbackState) appendAPIMessages(result *string) string {
 	if cbs.Payload.Messages == nil || len(cbs.Payload.Messages) == 0 {
 		return *result
 	}
+
+	log.Logger.Warn("TROY SAMPSON", zap.Any("payload", cbs.Payload))
+
 	return *result + headerMsg("Messages") + "\n```" + messages(cbs.Payload.Messages) + "```"
 }
