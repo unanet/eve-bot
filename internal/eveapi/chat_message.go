@@ -51,7 +51,7 @@ func ToChatMessage(model interface{}) string {
 }
 
 func deployJobMsg(j eve.DeployJob) string {
-	return fmt.Sprintf("Name: %s\nArtifact: %s\n\n", j.JobName, j.ArtifactName)
+	return fmt.Sprintf("Name: %s\nArtifact: %s\n", j.JobName, j.ArtifactName)
 }
 
 func deployJobsMsg(v eve.DeployJobs) string {
@@ -68,7 +68,7 @@ func jobsMsg(v []eve.Job) string {
 	msg := ""
 	if msg = initListString(v, "jobs"); len(msg) == 0 {
 		for _, val := range v {
-			msg += "Name: " + "`" + val.Name + "`" + "\n" + "Artifact: " + "_" + val.ArtifactName + "_" + "\n" + "Namespace: " + "_" + val.NamespaceName + "_" + "\n\n"
+			msg += "Name: " + "`" + val.Name + "`" + "\n" + "Artifact: " + "_" + val.ArtifactName + "_" + "\n" + "Namespace: " + "_" + val.NamespaceName + "_" + "\n"
 		}
 	}
 	return msg
