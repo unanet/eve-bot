@@ -137,14 +137,15 @@ func (cbs *CallbackState) appendDeployJobsResult(result *string) {
 	var deployJobsResults string
 	if cbs.Payload.Jobs != nil {
 		log.Logger.Warn("TROY SAMPSON cbs.Payload.Jobs", zap.Any("cbs.Payload.Jobs", cbs.Payload.Jobs))
-		for jobResult, migs := range cbs.Payload.Jobs.ToResultMap() {
+		for jobResult, jobs := range cbs.Payload.Jobs.ToResultMap() {
+			log.Logger.Warn("TROY SAMPSON jobResult", zap.Any("jobResult", jobResult))
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployJobsResults = "\n```" + ToChatMessage(migs) + "```"
+				deployJobsResults = "\n```" + ToChatMessage(jobs) + "```"
 				break
 			}
 
-			jobResultMessage := headerMsg(jobResult.String()) + "\n```" + ToChatMessage(migs) + "```"
+			jobResultMessage := headerMsg(jobResult.String()) + "\n```" + ToChatMessage(jobs) + "```"
 
 			if len(deployJobsResults) == 0 {
 				deployJobsResults = jobResultMessage

@@ -15,6 +15,10 @@ func ToChatMessage(model interface{}) string {
 	}
 
 	switch v := model.(type) {
+	case eve.DeployJob:
+		return deployJobMsg(v)
+	case eve.DeployJobs:
+		return deployJobsMsg(v)
 	case *eve.DeployService:
 		return deployServiceMsg(v)
 	case eve.DeployService:
@@ -44,6 +48,20 @@ func ToChatMessage(model interface{}) string {
 	default:
 		return ""
 	}
+}
+
+func deployJobMsg(j eve.DeployJob) string {
+	return fmt.Sprintf("*Name:* %s\n*Artifact:* %s\n\n", j.JobName, j.ArtifactName)
+}
+
+func deployJobsMsg(v eve.DeployJobs) string {
+	msg := ""
+	if msg = initListString(v, "jobs"); len(msg) == 0 {
+		for _, val := range v {
+			msg += deployJobMsg(*val)
+		}
+	}
+	return msg
 }
 
 func jobsMsg(v []eve.Job) string {
