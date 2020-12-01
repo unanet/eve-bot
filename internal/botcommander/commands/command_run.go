@@ -15,9 +15,17 @@ const (
 )
 
 var (
-	runCmdHelpSummary = help.Summary("The `run` command is used to run a job in a namespace")
-	runCmdHelpUsage   = help.Usage{"run {{ job }} in {{ namespace }} {{ environment }}"}
-	runCmdHelpExample = help.Examples{"run cvs-migration in current una-int"}
+	runCmdHelpSummary = help.Summary(
+		"The `run` command is used to run a job in a namespace",
+	)
+
+	runCmdHelpUsage = help.Usage{
+		"run {{ job }} in {{ namespace }} {{ environment }} {{key=value}}",
+	}
+
+	runCmdHelpExample = help.Examples{
+		"run cvs-migration in current una-int command=update",
+	}
 )
 
 // NewRunCommand creates a New RunCmd that implements the EvebotCommand interface
@@ -26,7 +34,7 @@ func NewRunCommand(cmdFields []string, channel, user string) EvebotCommand {
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: RunCmdName},
 		arguments:  args.Args{args.DefaultDryrunArg(), args.DefaultForceArg()},
-		parameters: params.Params{params.DefaultJob(), params.DefaultNamespace(), params.DefaultEnvironment()},
+		parameters: params.Params{params.DefaultJob(), params.DefaultNamespace(), params.DefaultEnvironment(), params.DefaultMetadata()},
 		opts:       make(CommandOptions),
 		bounds:     InputLengthBounds{Min: 5, Max: 7},
 	}}
@@ -65,7 +73,9 @@ func (cmd *runCmd) resolveDynamicOptions() {
 	}
 
 	// run {{ job }} in {{ namespace }} {{ environment }}
+	// run create-customer in current una-int name=username domain=something.something.somewhere
 	cmd.opts[params.JobName] = cmd.input[1]
 	cmd.opts[params.NamespaceName] = cmd.input[3]
 	cmd.opts[params.EnvironmentName] = cmd.input[4]
+	cmd.opts[params.MetadataName] = hydrateMetadataMap(cmd.input[5:])
 }
