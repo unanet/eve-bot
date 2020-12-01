@@ -25,7 +25,7 @@ func NewRunCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := runCmd{baseCommand{
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: RunCmdName},
-		arguments:  args.Args{args.DefaultForceArg()},
+		arguments:  args.Args{args.DefaultDryrunArg(), args.DefaultForceArg()},
 		parameters: params.Params{params.DefaultJob(), params.DefaultNamespace(), params.DefaultEnvironment()},
 		opts:       make(CommandOptions),
 		bounds:     InputLengthBounds{Min: 5, Max: 7},
