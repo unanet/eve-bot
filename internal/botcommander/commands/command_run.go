@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
@@ -24,9 +25,10 @@ func NewRunCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := runCmd{baseCommand{
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: RunCmdName},
+		arguments:  args.Args{args.DefaultForceArg()},
 		parameters: params.Params{params.DefaultJob(), params.DefaultNamespace(), params.DefaultEnvironment()},
 		opts:       make(CommandOptions),
-		bounds:     InputLengthBounds{Min: 5, Max: 5},
+		bounds:     InputLengthBounds{Min: 5, Max: 7},
 	}}
 	cmd.resolveDynamicOptions()
 	return cmd
