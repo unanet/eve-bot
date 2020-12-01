@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
@@ -33,6 +34,19 @@ func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 		return
 	}
 
+	var metadataMap params.MetadataMap
+	var metaDataOK bool
+
+	if metadataMap, metaDataOK = cmd.Options()[params.MetadataName].(params.MetadataMap); !metaDataOK {
+		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, fmt.Errorf("invalid metadata map"))
+		return
+	}
+
+	var metadataField = make(eve.MetadataField)
+	for k, v := range metadataMap {
+		metadataField[k] = v
+	}
+
 	cmdAPIOpts := cmd.Options()
 
 	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
@@ -44,5 +58,6 @@ func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Messages:         nil,
 		Type:             eve.DeploymentPlanTypeJob,
+		Metadata:         metadataField,
 	})
 }
