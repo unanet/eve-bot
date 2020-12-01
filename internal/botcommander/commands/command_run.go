@@ -1,11 +1,8 @@
 package commands
 
 import (
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
 
 type runCmd struct {
@@ -69,6 +66,4 @@ func (cmd *runCmd) resolveDynamicOptions() {
 	cmd.opts[params.JobName] = cmd.input[1]
 	cmd.opts[params.NamespaceName] = cmd.input[3]
 	cmd.opts[params.EnvironmentName] = cmd.input[4]
-
-	log.Logger.Warn("TROY SAMPSON", zap.Any("opts", cmd.opts))
 }

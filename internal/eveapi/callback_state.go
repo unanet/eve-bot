@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"go.uber.org/zap"
-
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/eve/pkg/log"
 )
@@ -136,9 +134,7 @@ func (cbs *CallbackState) appendDeployServicesResult(result *string) {
 func (cbs *CallbackState) appendDeployJobsResult(result *string) {
 	var deployJobsResults string
 	if cbs.Payload.Jobs != nil {
-		log.Logger.Warn("TROY SAMPSON cbs.Payload.Jobs", zap.Any("cbs.Payload.Jobs", cbs.Payload.Jobs))
 		for jobResult, jobs := range cbs.Payload.Jobs.ToResultMap() {
-			log.Logger.Warn("TROY SAMPSON jobResult", zap.Any("jobResult", jobResult))
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
 				deployJobsResults = "\n```" + ToChatMessage(jobs) + "```"
@@ -205,8 +201,6 @@ func (cbs *CallbackState) appendAPIMessages(result *string) string {
 	if cbs.Payload.Messages == nil || len(cbs.Payload.Messages) == 0 {
 		return *result
 	}
-
-	log.Logger.Warn("TROY SAMPSON appendAPIMessages", zap.Any("payload", cbs.Payload))
 
 	return *result + headerMsg("Messages") + "\n```" + messages(cbs.Payload.Messages) + "```"
 }
