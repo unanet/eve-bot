@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
@@ -37,9 +36,9 @@ func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 
 	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractArtifactsDefinition(params.JobName, cmdAPIOpts),
-		ForceDeploy:      commands.ExtractBoolOpt(args.ForceDeployName, cmdAPIOpts),
+		ForceDeploy:      true,
 		User:             chatUser.Name,
-		DryRun:           commands.ExtractBoolOpt(args.DryrunName, cmdAPIOpts),
+		DryRun:           false,
 		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmdAPIOpts),
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
 		Messages:         nil,

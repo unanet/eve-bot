@@ -1,11 +1,6 @@
 package commands
 
 import (
-	"strings"
-
-	"gitlab.unanet.io/devops/eve/pkg/mergemap"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 )
@@ -28,7 +23,7 @@ var (
 	}
 
 	runCmdHelpExample = help.Examples{
-		"run cvs-migration in current una-int force=true dryrun=true key=value key2=value2 keyN=valN",
+		"run cvs-migration in current una-int key=value key2=value2 keyN=valN",
 	}
 )
 
@@ -37,7 +32,6 @@ func NewRunCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := runCmd{baseCommand{
 		input:      cmdFields,
 		info:       ChatInfo{User: user, Channel: channel, CommandName: RunCmdName},
-		arguments:  args.Args{args.DefaultDryrunArg(), args.DefaultForceArg()},
 		parameters: params.Params{params.DefaultJob(), params.DefaultNamespace(), params.DefaultEnvironment()},
 		opts:       make(CommandOptions),
 		bounds:     InputLengthBounds{Min: 5, Max: 7},
@@ -81,20 +75,20 @@ func (cmd *runCmd) resolveDynamicOptions() {
 	cmd.opts[params.JobName] = cmd.input[1]
 	cmd.opts[params.NamespaceName] = cmd.input[3]
 	cmd.opts[params.EnvironmentName] = cmd.input[4]
+	cmd.opts[params.MetadataName] = hydrateMetadataMap(cmd.input[5:])
 
-	var finalMetadataMap params.MetadataMap
-	// iterate the remainder to inspect key=value types
-	for i, s := range cmd.input[5:] {
-		if strings.Contains(s, "=") {
-			argKV := strings.Split(s, "=")
-			if suppliedArg := args.ResolveArgumentKV(argKV); suppliedArg != nil {
-				cmd.opts[suppliedArg.Name()] = suppliedArg.Value()
-			} else {
-				finalMetadataMap = mergemap.Merge(finalMetadataMap, hydrateMetadataMap(cmd.input[i+5:i+5]))
-				//cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", argKV))
-			}
-		}
-	}
-
-	cmd.opts[params.MetadataName] = finalMetadataMap
+	//var finalMetadataMap params.MetadataMap
+	//// iterate the remainder to inspect key=value types
+	//for i, s := range cmd.input[5:] {
+	//	if strings.Contains(s, "=") {
+	//		argKV := strings.Split(s, "=")
+	//		if suppliedArg := args.ResolveArgumentKV(argKV); suppliedArg != nil {
+	//			cmd.opts[suppliedArg.Name()] = suppliedArg.Value()
+	//		} else {
+	//			finalMetadataMap = mergemap.Merge(finalMetadataMap, hydrateMetadataMap(cmd.input[i+5:i+5]))
+	//			//cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", argKV))
+	//		}
+	//	}
+	//}
+	//cmd.opts[params.MetadataName] = finalMetadataMap
 }
