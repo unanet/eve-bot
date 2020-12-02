@@ -51,7 +51,7 @@ func ToChatMessage(model interface{}) string {
 }
 
 func deployJobMsg(j eve.DeployJob) string {
-	return fmt.Sprintf("Name: %s\nArtifact: %s\n", j.JobName, j.ArtifactName)
+	return fmt.Sprintf("Name: %s\nArtifact: %s\nVersion: %s\n", j.JobName, j.ArtifactName, j.RequestedVersion)
 }
 
 func deployJobsMsg(v eve.DeployJobs) string {
