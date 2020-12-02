@@ -42,6 +42,13 @@ func ExtractStringOpt(defType string, opts CommandOptions) string {
 	return ""
 }
 
+func ExtractMetadataField(opts CommandOptions) eve.MetadataField {
+	if metadataMap, metaDataOK := opts[params.MetadataName].(params.MetadataMap); metaDataOK {
+		return metadataMap.ToMetadataField()
+	}
+	return nil
+}
+
 // ExtractStringListOpt extracts a string slice key value from the options
 func ExtractStringListOpt(defType string, opts CommandOptions) eve.StringList {
 	if val, ok := opts[defType]; ok {

@@ -82,24 +82,15 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 }
 
 func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eve.Service) {
-	var metadataMap params.MetadataMap
-	var metaDataOK bool
-
-	if metadataMap, metaDataOK = cmd.Options()[params.MetadataName].(params.MetadataMap); !metaDataOK {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid metadata map"))
-		return
-	}
-
 	nv, err := resolveNamespace(ctx, h.eveAPIClient, cmd)
 	if err != nil {
 		h.chatSvc.UserNotificationThread(ctx, err.Error(), cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	payload := metadataMap.ToMetadataField()
 
 	md, err := h.eveAPIClient.UpsertMergeMetadata(ctx, eve.Metadata{
 		Description: metaDataServiceKey(svc.Name, nv.Name),
-		Value:       payload,
+		Value:       commands.ExtractMetadataField(cmd.Options()),
 	})
 	if err != nil {
 		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("failed to save metadata"))
