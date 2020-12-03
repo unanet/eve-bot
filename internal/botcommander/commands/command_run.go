@@ -37,7 +37,7 @@ func NewRunCommand(cmdFields []string, channel, user string) EvebotCommand {
 		info:       ChatInfo{User: user, Channel: channel, CommandName: RunCmdName},
 		parameters: params.Params{params.DefaultJob(), params.DefaultNamespace(), params.DefaultEnvironment()},
 		opts:       make(CommandOptions),
-		bounds:     InputLengthBounds{Min: 5, Max: 7},
+		bounds:     InputLengthBounds{Min: 5, Max: -1},
 	}}
 	cmd.resolveDynamicOptions()
 	return cmd
