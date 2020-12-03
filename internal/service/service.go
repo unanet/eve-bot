@@ -25,7 +25,7 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 
 // HandleSlackAppMentionEvent takes slackevents.AppMentionEvent, resolves an EvebotCommand, and handles/executes it...
 func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackevents.AppMentionEvent) {
-	// Resolve the input and return a Command object
+	// Resolve the input and return an EvebotCommand object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
 	// SlackAuthEnabled is like a "feature flag"
@@ -40,7 +40,8 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 
 	// SlackMaintenanceEnabled is like a "feature flag"
 	// set to true and we are in Maintenance Mode
-	// Only Channels EVEBOT_SLACK_CHANNELS_MAINTENANCE my-evebot,evebot-tests are allowed to issue commands
+	// Only Channels set to the EVEBOT_SLACK_CHANNELS_MAINTENANCE environment variable are allowed to issue commands
+	// ex:  EVEBOT_SLACK_CHANNELS_MAINTENANCE=my-evebot,evebot-tests
 	if p.Cfg.SlackMaintenanceEnabled {
 		incomingChannel, err := p.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
 		if err != nil {
@@ -50,7 +51,7 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 		} else {
 			// Not coming from an approved Maintenance channel Show the maintenance mode
 			if _, ok := p.allowedMaintenanceChannelMap[incomingChannel.Name]; ok == false {
-				_ = p.ChatService.PostMessageThread(ctx, ":construction: We are currently in maintenance mode :construction:", cmd.Info().Channel, ev.ThreadTimeStamp)
+				_ = p.ChatService.PostMessageThread(ctx, ":construction: Sorry, but we are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
 				return
 			}
 		}
@@ -62,7 +63,8 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Info().Channel, ev.ThreadTimeStamp)
 	// If the AckMessage needs to continue (no errors)...
 	if cont {
-		// Asynchronous Command Handler
+		// Asynchronous CommandExecutor call
+		// which maps an EvebotCommand to and CommandHandler
 		go p.CommandExecutor.Execute(context.TODO(), cmd, timeStamp)
 	}
 }
