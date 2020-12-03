@@ -19,11 +19,14 @@ var (
 	)
 
 	runCmdHelpUsage = help.Usage{
-		"run {{ job }} in {{ namespace }} {{ environment }} {{key=value}}",
+		"run {{ job:version }} in {{ namespace }} {{ environment }} {{key=value}}",
 	}
 
 	runCmdHelpExample = help.Examples{
+		"run migration in current una-int key=value key2=value2 keyN=valN",
+		"run auto-migration:2020.4 in current una-int key=value key2=value2 keyN=valN",
 		"run cvs-migration in current una-int key=value key2=value2 keyN=valN",
+		"run hello-world:1 in current una-int key=value key2=value2 keyN=valN",
 	}
 )
 
@@ -76,19 +79,4 @@ func (cmd *runCmd) resolveDynamicOptions() {
 	cmd.opts[params.NamespaceName] = cmd.input[3]
 	cmd.opts[params.EnvironmentName] = cmd.input[4]
 	cmd.opts[params.MetadataName] = hydrateMetadataMap(cmd.input[5:])
-
-	//var finalMetadataMap params.MetadataMap
-	//// iterate the remainder to inspect key=value types
-	//for i, s := range cmd.input[5:] {
-	//	if strings.Contains(s, "=") {
-	//		argKV := strings.Split(s, "=")
-	//		if suppliedArg := args.ResolveArgumentKV(argKV); suppliedArg != nil {
-	//			cmd.opts[suppliedArg.Name()] = suppliedArg.Value()
-	//		} else {
-	//			finalMetadataMap = mergemap.Merge(finalMetadataMap, hydrateMetadataMap(cmd.input[i+5:i+5]))
-	//			//cmd.errs = append(cmd.errs, fmt.Errorf("invalid additional arg: %v", argKV))
-	//		}
-	//	}
-	//}
-	//cmd.opts[params.MetadataName] = finalMetadataMap
 }

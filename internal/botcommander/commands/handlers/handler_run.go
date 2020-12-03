@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"strings"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
@@ -34,8 +35,24 @@ func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 
 	cmdAPIOpts := cmd.Options()
 
+	// TODO: Get this out of the handler and into the command
+	//  ideally we resolve this data in the command, before passing to the handler
+	var aDefs eve.ArtifactDefinitions
+
+	if job, ok := cmdAPIOpts[params.JobName].(string); ok {
+		aDef := &eve.ArtifactDefinition{}
+		if strings.Contains(job, ":") {
+			kv := strings.Split(job, ":")
+			aDef.Name = kv[0]
+			aDef.RequestedVersion = kv[1]
+		} else {
+			aDef.Name = job
+		}
+		aDefs = append(aDefs, aDef)
+	}
+
 	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
-		Artifacts:        commands.ExtractArtifactsDefinition(params.JobName, cmdAPIOpts),
+		Artifacts:        aDefs,
 		ForceDeploy:      true,
 		User:             chatUser.Name,
 		DryRun:           false,

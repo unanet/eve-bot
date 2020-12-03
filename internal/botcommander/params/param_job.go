@@ -1,7 +1,7 @@
 package params
 
 const (
-	// NamespaceName param key/id
+	// JobName param key/id
 	JobName = "job"
 )
 
@@ -22,6 +22,7 @@ func (e Job) Description() string {
 
 // Value satisfies the param interface and returns the Namespace Value
 func (e Job) Value() string {
+
 	return e.value
 }
 
