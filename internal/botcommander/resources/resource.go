@@ -35,6 +35,7 @@ var FullResourceMap = map[string]bool{
 	strings.ToLower(ServiceName):     true,
 	strings.ToLower(MetadataName):    true,
 	strings.ToLower(JobName):         true,
+	"jobs":                           true, // Job vs Jobs TODO: Clean this up
 	strings.ToLower(VersionName):     true,
 }
 
