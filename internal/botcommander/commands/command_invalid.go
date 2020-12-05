@@ -30,8 +30,8 @@ func (cmd invalidCmd) AckMsg() (string, bool) {
 	summary := help.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmd.input)).String()
 	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(summary),
-		help.CommandsOpt(NonHelpCmds),
-		help.ExamplesOpt(NonHelpCommandExamples.String()),
+		help.CommandsOpt(NewFactory().NonHelpCmds()),
+		help.ExamplesOpt(NewFactory().NonHelpExamples().String()),
 	).String())
 }
 

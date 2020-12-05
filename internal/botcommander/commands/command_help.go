@@ -39,10 +39,10 @@ func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
 func (cmd helpCmd) AckMsg() (string, bool) {
 	return cmd.BaseAckMsg(help.New(
 		help.HeaderOpt(helpCmdHelpSummary.String()),
-		help.CommandsOpt(NonHelpCmds),
+		help.CommandsOpt(NewFactory().NonHelpCmds()),
 		help.UsageOpt(helpCmdHelpUsage.String()),
 		help.ArgsOpt(cmd.arguments.String()),
-		help.ExamplesOpt(NonHelpCommandExamples.String()),
+		help.ExamplesOpt(NewFactory().NonHelpExamples().String()),
 	).String())
 }
 

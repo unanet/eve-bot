@@ -74,8 +74,7 @@ func CleanUrls(input string) string {
 	matchCount := len(matchIndexes)
 
 	if matchCount == 0 {
-		cleanedEnc := cleanEncoding(input)
-		return cleanedEnc
+		return cleanEncoding(input)
 	}
 
 	cleanPart := input[0:matchIndexes[0][0]]
@@ -101,8 +100,7 @@ func CleanUrls(input string) string {
 		cleanPart += cleanVal
 	}
 	result := cleanPart + input[matchIndexes[matchCount-1][1]:]
-	cleanedEnc := cleanEncoding(result)
-	return cleanedEnc
+	return cleanEncoding(result)
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
@@ -114,7 +112,6 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
 			result[argKV[0]] = strings.Join(argKV[1:], "=")
-			//result[CleanUrls(argKV[0])] = CleanUrls(strings.Join(argKV[1:], "="))
 		}
 	}
 

@@ -4,14 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"go.uber.org/zap"
-
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands/handlers"
-	"gitlab.unanet.io/devops/eve/pkg/log"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands/handlers"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve/pkg/log"
+	"go.uber.org/zap"
 )
 
 // Executor interface takes an EvebotCommand and Executes a matching handler
@@ -23,28 +21,26 @@ type Executor interface {
 type EvebotCommandExecutor struct {
 	eveAPIClient eveapi.Client
 	chatSvc      chatservice.Provider
+	cmdFactory   handlers.Factory
 }
 
 // New creates a new executor
-func New(eveAPIClient eveapi.Client, chatSVC chatservice.Provider) Executor {
+func New(eveAPIClient eveapi.Client, chatSVC chatservice.Provider, handlerFactor handlers.Factory) Executor {
 	return &EvebotCommandExecutor{
 		eveAPIClient: eveAPIClient,
 		chatSvc:      chatSVC,
+		cmdFactory:   handlerFactor,
 	}
 }
 
 // Execute satisfies the Executor.Execute interface
 func (h *EvebotCommandExecutor) Execute(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	cmdHandlerFunc := handlers.CommandHandlerMap[cmd.Info().CommandName]
-	if cmdHandlerFunc == nil {
-		h.invalidCommandHandlerErr(ctx, "nil handler", cmd.Info().Channel, timestamp)
+	if cmdHandlerFunc := h.cmdFactory.Items()[cmd.Info().CommandName]; cmdHandlerFunc != nil {
+		cmdHandlerFunc(&h.eveAPIClient, &h.chatSvc).Handle(ctx, cmd, timestamp)
 		return
 	}
-	if cmdHandlerFuncVal, ok := cmdHandlerFunc.(func(*eveapi.Client, *chatservice.Provider) handlers.CommandHandler); ok {
-		cmdHandlerFuncVal(&h.eveAPIClient, &h.chatSvc).Handle(ctx, cmd, timestamp)
-		return
-	}
-	h.invalidCommandHandlerErr(ctx, "failed command type cast", cmd.Info().Channel, timestamp)
+	h.invalidCommandHandlerErr(ctx, "nil handler", cmd.Info().Channel, timestamp)
+	return
 }
 
 func cleanSlackMsg(msg string) string {

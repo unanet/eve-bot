@@ -15,11 +15,15 @@ type Resolver interface {
 }
 
 // EvebotResolver implements the Resolver interface
-type EvebotResolver struct{}
+type EvebotResolver struct {
+	cmdFactory commands.Factory
+}
 
 // New instantiates the Resolver
-func New() Resolver {
-	return &EvebotResolver{}
+func New(commandFactory commands.Factory) Resolver {
+	return &EvebotResolver{
+		commandFactory,
+	}
 }
 
 // Resolve resolves the command input from the Chat User and returns an EvebotCommand
@@ -44,20 +48,11 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 
 	// make sure after you create a new command,
 	// you add the New func to the map so that it is picked up here
-	newCmdFuncInterface := commands.CommandInitializerMap[cleanCmdFields[0]]
-	if newCmdFuncInterface == nil {
-		log.Logger.Info("invalid command", zap.String("command", cleanCmdFields[0]), zap.String("input", input))
-		return commands.NewInvalidCommand(cleanCmdFields, channel, user)
+	if fn := ebr.cmdFactory.Items()[cleanCmdFields[0]]; fn != nil {
+		return fn(cleanCmdFields, channel, user)
 	}
 
-	// Make sure the New Command func follows the standard New Command signature
-	// =======> func NewCmd(input []string, channel, user string) EvebotCommand { }
-	if newCmdFuncVal, ok := newCmdFuncInterface.(func([]string, string, string) commands.EvebotCommand); ok {
-		return newCmdFuncVal(cleanCmdFields, channel, user)
-	}
-
-	// this is bad - we will want to be alerted on this error
-	log.Logger.Error("unknown command resolved", zap.String("input", input))
+	log.Logger.Info("invalid command", zap.String("command", cleanCmdFields[0]), zap.String("input", input))
 	return commands.NewInvalidCommand(cleanCmdFields, channel, user)
 }
 
