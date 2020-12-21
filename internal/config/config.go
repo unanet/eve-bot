@@ -6,8 +6,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/slackservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"gitlab.unanet.io/devops/eve/pkg/mux"
+	"gitlab.unanet.io/devops/go/pkg/log"
 	"go.uber.org/zap"
 )
 
@@ -21,8 +20,7 @@ type (
 	LogConfig = log.Config
 	// SlackConfig is the slack config (secret, tokens..)
 	SlackConfig = slackservice.Config
-	// MuxConfig is the multiplexer (router) config (ports, timeouts)
-	MuxConfig = mux.Config
+
 	// EveAPIConfig is the config for the Eve API
 	EveAPIConfig = eveapi.Config
 )
@@ -31,8 +29,10 @@ type (
 type Config struct {
 	LogConfig
 	SlackConfig
-	MuxConfig
 	EveAPIConfig
+	Port        int    `split_words:"true" default:"8080"`
+	MetricsPort int    `split_words:"true" default:"3001"`
+	ServiceName string `split_words:"true" default:"eve"`
 }
 
 // Load loads the config reading it from the environment

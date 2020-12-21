@@ -5,8 +5,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-
-	"gitlab.unanet.io/devops/eve/pkg/mux"
 )
 
 // PingController is the Controller/Handler for ping routes
@@ -26,6 +24,6 @@ func (c PingController) Setup(r chi.Router) {
 func (c PingController) ping(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, render.M{
 		"message": "pong",
-		"version": mux.Version,
+		"version": Version,
 	})
 }

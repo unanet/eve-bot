@@ -8,7 +8,7 @@ MODCACHE ?= ${GOPATH}/pkg/mod
 SONARQUBE_TOKEN := ${SONARQUBE_TOKEN}
 
 VERSION_MAJOR := 0
-VERSION_MINOR := 5
+VERSION_MINOR := 6
 VERSION_PATCH := 0
 BUILD_NUMBER := ${CI_PIPELINE_IID}
 PATCH_VERSION := ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
@@ -56,7 +56,7 @@ build:
 	docker pull ${BUILD_IMAGE}
 	docker pull unanet-docker.jfrog.io/alpine-base
 	mkdir -p bin
-	$(docker-exec) go build -ldflags="-X 'gitlab.unanet.io/devops/eve/pkg/mux.Version=${VERSION}'" \
+	$(docker-exec) go build -ldflags="-X 'gitlab.unanet.io/devops/eve-bot/internal/api/api.Version=${VERSION}'" \
 		-o ./bin/eve-bot ./cmd/eve-bot/main.go
 	docker build . -t ${IMAGE_NAME}:${PATCH_VERSION}
 	$(docker-helm-exec) package --version ${PATCH_VERSION} --app-version ${VERSION} ./.helm

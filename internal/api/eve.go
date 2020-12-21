@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"gitlab.unanet.io/devops/eve-bot/internal/service"
-	"gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"gitlab.unanet.io/devops/go/pkg/errors"
 )
 
 // EveController for slack routes

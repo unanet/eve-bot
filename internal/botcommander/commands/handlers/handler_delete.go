@@ -11,7 +11,7 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/eve/pkg/log"
+	"gitlab.unanet.io/devops/go/pkg/log"
 	"go.uber.org/zap"
 )
 
