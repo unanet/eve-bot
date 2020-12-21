@@ -3,21 +3,17 @@ package main
 import (
 	"net/http"
 
-	evehttp "gitlab.unanet.io/devops/eve/pkg/http"
-
 	"gitlab.unanet.io/devops/eve-bot/internal/api"
 	"gitlab.unanet.io/devops/eve-bot/internal/config"
-
-	//_ "gitlab.unanet.io/devops/eve/pkg/http/global"
-	"gitlab.unanet.io/devops/eve/pkg/log"
-	"gitlab.unanet.io/devops/eve/pkg/mux"
+	evehttp "gitlab.unanet.io/devops/go/pkg/http"
+	"gitlab.unanet.io/devops/go/pkg/log"
 	"go.uber.org/zap"
 )
 
 func main() {
 	cfg := config.Load()
 
-	app, err := mux.NewApi(api.InitController(&cfg), cfg.MuxConfig)
+	app, err := api.NewApi(api.InitController(&cfg), cfg)
 	if err != nil {
 		log.Logger.Panic("Failed to Create Api App", zap.Error(err))
 	}

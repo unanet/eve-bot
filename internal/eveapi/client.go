@@ -11,11 +11,11 @@ import (
 
 	"github.com/dghubble/sling"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	eveerror "gitlab.unanet.io/devops/eve/pkg/errors"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
-	evehttp "gitlab.unanet.io/devops/eve/pkg/http"
-	evejson "gitlab.unanet.io/devops/eve/pkg/json"
-	"gitlab.unanet.io/devops/eve/pkg/log"
+	eveerror "gitlab.unanet.io/devops/go/pkg/errors"
+	evehttp "gitlab.unanet.io/devops/go/pkg/http"
+	evejson "gitlab.unanet.io/devops/go/pkg/json"
+	"gitlab.unanet.io/devops/go/pkg/log"
 	"go.uber.org/zap"
 )
 

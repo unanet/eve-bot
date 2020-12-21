@@ -9,7 +9,7 @@ import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/errors"
+	"gitlab.unanet.io/devops/go/pkg/errors"
 )
 
 // ShowHandler is the handler for the ShowCmd

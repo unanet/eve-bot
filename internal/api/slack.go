@@ -15,8 +15,8 @@ import (
 	"github.com/go-chi/render"
 	"github.com/slack-go/slack"
 	"gitlab.unanet.io/devops/eve-bot/internal/service"
-	"gitlab.unanet.io/devops/eve/pkg/errors"
-	"gitlab.unanet.io/devops/eve/pkg/log"
+	"gitlab.unanet.io/devops/go/pkg/errors"
+	"gitlab.unanet.io/devops/go/pkg/log"
 	"go.uber.org/zap"
 )
 

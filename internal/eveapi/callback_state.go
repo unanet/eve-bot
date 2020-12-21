@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/eve/pkg/log"
+	"gitlab.unanet.io/devops/go/pkg/log"
 )
 
 const (
