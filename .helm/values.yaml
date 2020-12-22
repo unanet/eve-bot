@@ -9,4 +9,3 @@ eveSlackVerificationToken: ""
 vaultAddr: "https://vault.unanet.io"
 vaultK8sMount: "kubernetes"
 vaultRole: "k8s-devops"
-
