@@ -12,7 +12,7 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/slack-go/slack v0.6.5
-	gitlab.unanet.io/devops/eve v0.5.1-0.20201217234615-52ce60bce87a
+	gitlab.unanet.io/devops/eve v0.6.0
 	gitlab.unanet.io/devops/go v0.2.0
 	go.uber.org/zap v1.16.0
 	golang.org/x/tools v0.0.0-20200807224323-c05a0f5be48b // indirect

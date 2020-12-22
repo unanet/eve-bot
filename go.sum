@@ -493,6 +493,8 @@ gitlab.unanet.io/devops/eve v0.5.0 h1:WoaQqnIjpQmP7mt9y+bETebgKV/rd7aJQcYedR8YHY
 gitlab.unanet.io/devops/eve v0.5.0/go.mod h1:PutgRYcVN/mtYYyMfU/gh4mx4gy0F8mhhdvpWuIWB2A=
 gitlab.unanet.io/devops/eve v0.5.1-0.20201217234615-52ce60bce87a h1:BT93t2OxSUiD7uuXo0IgmSxLtzSPyNY0vtuBsuhC9t0=
 gitlab.unanet.io/devops/eve v0.5.1-0.20201217234615-52ce60bce87a/go.mod h1:NAQ6XyhSjKcfmuO7A47KXd9Vv0hrfooRqMRRMYWWDGA=
+gitlab.unanet.io/devops/eve v0.6.0 h1:XSpLFvt/UNmc48BTaRHZp/LG6+1mYhtJifKWsJwVjmc=
+gitlab.unanet.io/devops/eve v0.6.0/go.mod h1:Y50DsuejUnAsRqWaOYoT+lUI2idzbGCMa9/oW8WA2rM=
 gitlab.unanet.io/devops/go v0.2.0 h1:Fi0fVfdbsAQTArbh1aH3Nv/6BSwxvJIt54wsthHt4sE=
 gitlab.unanet.io/devops/go v0.2.0/go.mod h1:4mOA9RxmdSHnHCh7wZ4cSSJC756VmFA4AjNOLfNhtPk=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
