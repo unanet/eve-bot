@@ -51,7 +51,10 @@ func ToChatMessage(model interface{}) string {
 }
 
 func deployJobMsg(j eve.DeployJob) string {
-	return fmt.Sprintf("Name: %s\nArtifact: %s\nVersion (requested): %s\nVersion (deployed): %s\nVersion (available): %s", j.JobName, j.ArtifactName, j.RequestedVersion, j.DeployedVersion, j.AvailableVersion)
+	if j.ArtifactName == j.JobName {
+		return fmt.Sprintf("\n%s:%s", j.JobName, j.AvailableVersion)
+	}
+	return fmt.Sprintf("\n%s (%s):%s", j.JobName, j.ArtifactName, j.AvailableVersion)
 }
 
 func deployJobsMsg(v eve.DeployJobs) string {
@@ -64,11 +67,18 @@ func deployJobsMsg(v eve.DeployJobs) string {
 	return msg
 }
 
+func jobMsg(v eve.Job) string {
+	if v.ArtifactName == v.Name {
+		return fmt.Sprintf("\n%s:%s", v.Name, v.DeployedVersion)
+	}
+	return fmt.Sprintf("\n%s (%s):%s", v.Name, v.ArtifactName, v.DeployedVersion)
+}
+
 func jobsMsg(v []eve.Job) string {
 	msg := ""
 	if msg = initListString(v, "jobs"); len(msg) == 0 {
 		for _, val := range v {
-			msg += "Name: " + "`" + val.Name + "`" + "\n" + "Artifact: " + "_" + val.ArtifactName + "_" + "\n" + "Namespace: " + "_" + val.NamespaceName + "_" + "\n"
+			msg += jobMsg(val)
 		}
 	}
 	return msg
