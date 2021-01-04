@@ -79,7 +79,7 @@ func (cmd *showCmd) resolveDynamicOptions() {
 	}
 
 	switch cmd.opts["resource"] {
-	case resources.JobName:
+	case resources.JobName, "jobs":
 		// show jobs in {{namespace}} {{environment}}
 		if len(cmd.input) != 5 {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid show jobs: %v", cmd.input))

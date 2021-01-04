@@ -29,7 +29,7 @@ func NewShowHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) 
 // Handle handles the ShowCmd
 func (h ShowHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	switch cmd.Options()["resource"] {
-	case resources.JobName:
+	case resources.JobName, "jobs":
 		h.showJobs(ctx, cmd, &timestamp)
 	case resources.EnvironmentName:
 		h.showEnvironments(ctx, cmd, &timestamp)
