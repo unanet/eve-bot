@@ -488,10 +488,13 @@ github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxt
 gitlab.com/nyarla/go-crypt v0.0.0-20160106005555-d9a5dc2b789b/go.mod h1:T3BPAOm2cqquPa0MKWeNkmOM5RQsRhkrwMWonFMN7fE=
 gitlab.unanet.io/devops/eve v0.6.0 h1:XSpLFvt/UNmc48BTaRHZp/LG6+1mYhtJifKWsJwVjmc=
 gitlab.unanet.io/devops/eve v0.6.0/go.mod h1:Y50DsuejUnAsRqWaOYoT+lUI2idzbGCMa9/oW8WA2rM=
+gitlab.unanet.io/devops/eve v0.6.1-0.20210106223116-5fa68a2f0b19 h1:k+XeCuxx7Qy2Dbft6pbXE7GLMkJ0bt2Egfn3gp4wnLE=
+gitlab.unanet.io/devops/eve v0.6.1-0.20210106223116-5fa68a2f0b19/go.mod h1:8aUcwULncKD2b706qEVGimjKcYv6HgACkd6FUDebz3s=
 gitlab.unanet.io/devops/go v0.2.0 h1:Fi0fVfdbsAQTArbh1aH3Nv/6BSwxvJIt54wsthHt4sE=
 gitlab.unanet.io/devops/go v0.2.0/go.mod h1:4mOA9RxmdSHnHCh7wZ4cSSJC756VmFA4AjNOLfNhtPk=
 gitlab.unanet.io/devops/go v0.4.0 h1:ojLdbd0JgRnLGbV2offaHkTuswBYNbFE0GaR+Fj00Vs=
 gitlab.unanet.io/devops/go v0.4.0/go.mod h1:4mOA9RxmdSHnHCh7wZ4cSSJC756VmFA4AjNOLfNhtPk=
+gitlab.unanet.io/devops/go v0.6.0/go.mod h1:4mOA9RxmdSHnHCh7wZ4cSSJC756VmFA4AjNOLfNhtPk=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738/go.mod h1:dnLIgRNXwCJa5e+c6mIZCrds/GIG4ncV9HhK5PX7jPg=
 go.mongodb.org/mongo-driver v1.1.0/go.mod h1:u7ryQJ+DOzQmeO7zB6MHyr8jkEQvC8vH7qLUO4lqsUM=

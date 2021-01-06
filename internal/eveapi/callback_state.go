@@ -186,6 +186,8 @@ func (cbs *CallbackState) initMsg() string {
 		ackMessage = "here's your *dryrun* results"
 	case eve.DeploymentPlanStatusPending:
 		ackMessage = fmt.Sprintf("your %s deployment is pending, here's the plan", cbs.Payload.DeploymentPlanType())
+	case eve.DeploymentPlanStatusMessage:
+		ackMessage = fmt.Sprintf("your %s deployment is complete", cbs.Payload.DeploymentPlanType())
 	}
 
 	var result string

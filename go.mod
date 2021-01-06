@@ -15,8 +15,8 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/slack-go/slack v0.7.4
 	github.com/stretchr/testify v1.5.1 // indirect
-	gitlab.unanet.io/devops/eve v0.6.0
-	gitlab.unanet.io/devops/go v0.4.0
+	gitlab.unanet.io/devops/eve v0.6.1-0.20210106223116-5fa68a2f0b19
+	gitlab.unanet.io/devops/go v0.6.0
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/sys v0.0.0-20201221093633-bc327ba9c2f0 // indirect
