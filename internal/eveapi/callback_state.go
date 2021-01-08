@@ -29,7 +29,7 @@ func (cbs *CallbackState) ToChatMsg() string {
 
 	cbs.cleanUser()
 
-	if cbs.Payload.NothingToDeploy() {
+	if cbs.Payload.NothingToDeploy() && cbs.Payload.Status != eve.DeploymentPlanStatusMessage {
 		return cbs.nothingToDeployResponse()
 	}
 
