@@ -215,6 +215,7 @@ func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release,
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted, http.StatusPartialContent:
 		return success, nil
 	default:
+		log.Logger.Warn("failed to release artifact", zap.Error(err), zap.Any("failure", failure))
 		return success, fmt.Errorf(failure.Message)
 	}
 }
