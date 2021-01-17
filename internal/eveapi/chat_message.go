@@ -168,16 +168,10 @@ func environmentsMsg(v []eve.Environment) string {
 }
 
 func nsDeployPlanMsg(v *eve.NSDeploymentPlan) string {
-	if v == nil {
-		return "nil eve.NSDeploymentPlan"
+	if v == nil || v.Status == eve.DeploymentPlanStatusMessage || v.Namespace == nil {
+		return ""
 	}
-	ns := "unknown"
-	cluster := "unknown"
-	if v.Namespace != nil {
-		ns = v.Namespace.Alias
-		cluster = v.Namespace.ClusterName
-	}
-	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s\nCluster: %s```", ns, v.EnvironmentName, cluster)
+	return fmt.Sprintf("```Namespace: %s\nEnvironment: %s\nCluster: %s```", v.Namespace.Alias, v.EnvironmentName, v.Namespace.ClusterName)
 }
 
 func releaseMsg(v eve.Release) string {
