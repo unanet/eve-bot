@@ -48,22 +48,22 @@ func resolveServiceNamespace(
 	ns, err = resolveNamespace(ctx, eveAPIClient, cmd)
 	if err != nil {
 		chatSvc.UserNotificationThread(ctx, err.Error(), cmd.Info().User, cmd.Info().Channel, *ts)
-		return &ns, &svc
+		return nil, nil
 	}
 	svcs, err = eveAPIClient.GetServicesByNamespace(ctx, ns.Name)
 	if err != nil {
 		chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
-		return &ns, &svc
+		return nil, nil
 	}
 	if svcs == nil {
 		chatSvc.UserNotificationThread(ctx, "no services", cmd.Info().User, cmd.Info().Channel, *ts)
-		return &ns, &svc
+		return nil, nil
 	}
 	var requestedSvcName string
 	var valid bool
 	if requestedSvcName, valid = cmd.Options()[params.ServiceName].(string); !valid {
 		chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, fmt.Errorf("invalid ServiceName Param"))
-		return &ns, &svc
+		return nil, nil
 	}
 	for _, s := range svcs {
 		if strings.ToLower(s.Name) == strings.ToLower(requestedSvcName) {
@@ -73,13 +73,8 @@ func resolveServiceNamespace(
 	}
 	if svc.ID == 0 {
 		chatSvc.UserNotificationThread(ctx, fmt.Sprintf("invalid requested service: %s", requestedSvcName), cmd.Info().User, cmd.Info().Channel, *ts)
-		return &ns, &svc
+		return nil, nil
 	}
-	//svc, err = eveAPIClient.GetServiceByID(ctx, svc.ID)
-	//if err != nil {
-	//	chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
-	//	return &ns, &svc
-	//}
 	return &ns, &svc
 }
 
