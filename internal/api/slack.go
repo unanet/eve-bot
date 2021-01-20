@@ -114,7 +114,7 @@ func parseSlackEvent(vToken string, body []byte) (slackevents.EventsAPIEvent, er
 }
 
 func botError(oerr error, msg string, status int) error {
-	return &errors.RestError{Code: status, Message: msg, OriginalError: oerr}
+	return errors.RestError{Code: status, Message: msg, OriginalError: oerr}
 }
 
 func validateSlackRequest(req *http.Request, signingSecret string) ([]byte, error) {

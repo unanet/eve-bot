@@ -17,7 +17,7 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	var payload slack.InteractionCallback
 	err := json.Unmarshal([]byte(req.FormValue("payload")), &payload)
 	if err != nil {
-		return &errors.RestError{Code: http.StatusBadRequest, Message: "failed to parse interactive slack message payload", OriginalError: err}
+		return errors.RestError{Code: http.StatusBadRequest, Message: "failed to parse interactive slack message payload", OriginalError: err}
 	}
 	log.Logger.Info(fmt.Sprintf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value))
 	return nil

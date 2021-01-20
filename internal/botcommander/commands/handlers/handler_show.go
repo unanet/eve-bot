@@ -122,7 +122,7 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 }
 
 func resourceNotFoundError(err error) bool {
-	if e, ok := err.(*errors.RestError); ok {
+	if e, ok := err.(errors.RestError); ok {
 		if e.Code == 404 {
 			return true
 		}
