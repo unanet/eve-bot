@@ -140,11 +140,7 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 
 	metadata, err := h.eveAPIClient.GetMetadata(ctx, mdKey)
 	if err != nil {
-		if resourceNotFoundError(err) {
-			h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("no metadata found for: %s", mdKey), cmd.Info().User, cmd.Info().Channel, *ts)
-			return
-		}
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, *ts, err)
+		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("no metadata found for: %s", mdKey), cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
 
