@@ -191,7 +191,7 @@ func (c *client) GetMetadata(ctx context.Context, key string) (eve.Metadata, err
 	case http.StatusOK:
 		return success, nil
 	default:
-		return success, fmt.Errorf(failure.Message)
+		return success, failure
 	}
 }
 
