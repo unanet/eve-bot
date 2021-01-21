@@ -4,24 +4,14 @@ CI_PROJECT_ID ?= 0
 CI_PIPELINE_IID ?= 0
 GOPATH ?= ${HOME}/go
 MODCACHE ?= ${GOPATH}/pkg/mod
-
-SONARQUBE_TOKEN := ${SONARQUBE_TOKEN}
-
-VERSION_MAJOR := 0
-VERSION_MINOR := 10
-VERSION_PATCH := 4
 BUILD_NUMBER := ${CI_PIPELINE_IID}
-PATCH_VERSION := ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+PATCH_VERSION := $(shell cat VERSION)
 VERSION := ${PATCH_VERSION}.${BUILD_NUMBER}
-
 DOCKER_UID = $(shell id -u)
 DOCKER_GID = $(shell id -g)
-
 CUR_DIR := $(shell pwd)
-
 BUILD_IMAGE := unanet-docker.jfrog.io/golang
 IMAGE_NAME := unanet-docker-int.jfrog.io/ops/eve-bot-v1
-
 LABEL_PREFIX := com.unanet
 IMAGE_LABELS := \
 	--label "${LABEL_PREFIX}.git_commit_sha=${CI_COMMIT_SHORT_SHA}" \
@@ -34,7 +24,7 @@ docker-scanner-exec = docker run --rm \
 	-e SONAR_HOST_URL=https://sonarqube.unanet.io \
 	-v $(CUR_DIR):/usr/src \
 	--user="${DOCKER_UID}:${DOCKER_GID}" \
-	sonarsource/sonar-scanner-cli
+	sonarsource/sonar-scanner-cli sonar-scanner -Dsonar.projectKey=eve-bot -Dsonar.exclusions=**/*_test.go,**/*mock*.go
 
 docker-exec = docker run --rm \
 	-e DOCKER_UID=${DOCKER_UID} \
@@ -52,8 +42,6 @@ docker-helm-exec = docker run --rm --user ${DOCKER_UID}:${DOCKER_UID} \
 
 check-tag = !(git rev-parse -q --verify "refs/tags/v${PATCH_VERSION}" > /dev/null 2>&1) || \
 	(echo "the version: ${PATCH_VERSION} has been released already" && exit 1)
-
-
 
 .PHONY: build dist test check_version
 
