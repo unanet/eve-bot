@@ -18,7 +18,6 @@ func NewFactory() Factory {
 	return &factory{
 		Map: map[string]func(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler{
 			commands.DeployCmdName:  NewDeployHandler,
-			commands.MigrateCmdName: NewMigrateHandler,
 			commands.ShowCmdName:    NewShowHandler,
 			commands.SetCmdName:     NewSetHandler,
 			commands.DeleteCmdName:  NewDeleteHandler,

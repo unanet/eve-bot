@@ -21,7 +21,6 @@ func NewFactory() Factory {
 		Map: map[string]func(cmdFields []string, channel string, user string) EvebotCommand{
 			helpCmdName:    NewHelpCommand,
 			DeployCmdName:  NewDeployCommand,
-			MigrateCmdName: NewMigrateCommand,
 			ShowCmdName:    NewShowCommand,
 			SetCmdName:     NewSetCommand,
 			DeleteCmdName:  NewDeleteCommand,
