@@ -1,6 +1,6 @@
 module gitlab.unanet.io/devops/eve-bot
 
-go 1.15
+go 1.16
 
 // replace gitlab.unanet.io/devops/eve => ../eve
 // replace gitlab.unanet.io/devops/go => ../go
@@ -16,7 +16,7 @@ require (
 	github.com/prometheus/procfs v0.3.0 // indirect
 	github.com/slack-go/slack v0.8.0
 	gitlab.unanet.io/devops/eve v0.12.1-0.20210315181023-5b0a535764d1
-	gitlab.unanet.io/devops/go v1.3.1-0.20210311225929-947329a02b73
+	gitlab.unanet.io/devops/go v1.4.0
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4 // indirect
