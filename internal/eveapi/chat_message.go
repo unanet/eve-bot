@@ -25,12 +25,6 @@ func ToChatMessage(model interface{}) string {
 		return deployServiceMsg(&v)
 	case eve.DeployServices:
 		return deployServicesMsg(v)
-	case *eve.DeployMigration:
-		return deployMigrationMsg(v)
-	case eve.DeployMigration:
-		return deployMigrationMsg(&v)
-	case eve.DeployMigrations:
-		return deployMigrationsMsg(v)
 	case *eve.NSDeploymentPlan:
 		return nsDeployPlanMsg(v)
 	case eve.Release:
@@ -99,27 +93,6 @@ func deployServicesMsg(v eve.DeployServices) string {
 				msg = ToChatMessage(svc)
 			} else {
 				msg += ToChatMessage(svc)
-			}
-		}
-	}
-	return msg
-}
-
-func deployMigrationMsg(v *eve.DeployMigration) string {
-	if v.ArtifactName == v.DatabaseName {
-		return fmt.Sprintf("\n%s:%s", v.DatabaseName, v.AvailableVersion)
-	}
-	return fmt.Sprintf("\n%s (%s):%s", v.DatabaseName, v.ArtifactName, v.AvailableVersion)
-}
-
-func deployMigrationsMsg(v eve.DeployMigrations) string {
-	msg := ""
-	if msg = initListString(v, "migrations"); len(msg) == 0 {
-		for _, mig := range v {
-			if len(msg) == 0 {
-				msg = ToChatMessage(mig)
-			} else {
-				msg += ToChatMessage(mig)
 			}
 		}
 	}
