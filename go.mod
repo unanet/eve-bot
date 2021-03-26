@@ -15,7 +15,7 @@ require (
 	github.com/lib/pq v1.9.0 // indirect
 	github.com/prometheus/procfs v0.3.0 // indirect
 	github.com/slack-go/slack v0.8.0
-	gitlab.unanet.io/devops/eve v0.15.1
+	gitlab.unanet.io/devops/eve v0.15.2
 	gitlab.unanet.io/devops/go v1.4.0
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
