@@ -24,11 +24,3 @@ func (e Artifact) Description() string {
 func (e Artifact) Value() string {
 	return e.value
 }
-
-// DefaultArtifact is the default Artifact (used for help/init)
-func DefaultArtifact() Artifact {
-	return Artifact{baseParam{
-		name:        ArtifactName,
-		description: "the name of the artifact",
-	}}
-}

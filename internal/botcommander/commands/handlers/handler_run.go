@@ -4,24 +4,24 @@ import (
 	"context"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 // RunHandler is the handler for the RunCmd
 type RunHandler struct {
-	eveAPIClient eveapi.Client
-	chatSvc      chatservice.Provider
+	eveAPIClient interfaces.EveAPI
+	chatSvc      interfaces.ChatProvider
 }
 
 // NewRunHandler creates a RunHandler
-func NewRunHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+func NewRunHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
 	return RunHandler{
-		eveAPIClient: *eveAPIClient,
-		chatSvc:      *chatSvc,
+		eveAPIClient: eveAPIClient,
+		chatSvc:      chatSvc,
 	}
 }
 

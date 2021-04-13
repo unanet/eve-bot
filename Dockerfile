@@ -1,7 +1,7 @@
 FROM unanet-docker.jfrog.io/alpine-base
 
-ENV EVE_SERVICE_NAME eve-bot
-ENV EVE_LOG_LEVEL debug
+ENV SERVICE_NAME eve-bot
+ENV LOG_LEVEL debug
 ENV EVEBOT_PORT 3000
 ENV EVEBOT_METRICS_PORT 3001
 ENV EVEBOT_EVEAPI_BASE_URL http://eve-api-v1:3000

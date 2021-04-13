@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 func deployHandler(
 	ctx context.Context,
-	eveAPIClient eveapi.Client,
-	chatSvc chatservice.Provider,
+	eveAPIClient interfaces.EveAPI,
+	chatSvc interfaces.ChatProvider,
 	cmd commands.EvebotCommand,
 	timestamp string,
 	deployOpts eve.DeploymentPlanOptions) {
@@ -36,8 +36,8 @@ func deployHandler(
 
 func resolveServiceNamespace(
 	ctx context.Context,
-	eveAPIClient eveapi.Client,
-	chatSvc chatservice.Provider,
+	eveAPIClient interfaces.EveAPI,
+	chatSvc interfaces.ChatProvider,
 	cmd commands.EvebotCommand, ts *string) (*eve.Namespace, *eve.Service) {
 
 	var ns eve.Namespace
@@ -82,7 +82,7 @@ func metaDataServiceKey(service, namespace string) string {
 	return fmt.Sprintf("eve-bot:%s:%s", service, namespace)
 }
 
-func resolveNamespace(ctx context.Context, api eveapi.Client, cmd commands.EvebotCommand) (eve.Namespace, error) {
+func resolveNamespace(ctx context.Context, api interfaces.EveAPI, cmd commands.EvebotCommand) (eve.Namespace, error) {
 	var nv eve.Namespace
 
 	dynamicOpts := cmd.Options()

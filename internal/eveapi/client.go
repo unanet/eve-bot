@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"github.com/dghubble/sling"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
@@ -29,36 +31,14 @@ type Config struct {
 	EveapiCallbackURL string        `split_words:"true" required:"true"`
 }
 
-// Client interface for Eve API
-// TODO: clean up this interface with more generic calls (GET,PUT,POST,DELETE,PATCH with interfaces{})
-type Client interface {
-	Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, slackUser, slackChannel, ts string) (*eve.DeploymentPlanOptions, error)
-	GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error)
-	GetEnvironments(ctx context.Context) ([]eve.Environment, error)
-	GetNamespacesByEnvironment(ctx context.Context, environmentName string) ([]eve.Namespace, error)
-	GetServicesByNamespace(ctx context.Context, namespace string) ([]eve.Service, error)
-	GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error)
-	GetServiceByID(ctx context.Context, id int) (eve.Service, error)
-	DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error)
-	SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error)
-	SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error)
-	GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error)
-	Release(ctx context.Context, payload eve.Release) (eve.Release, error)
-	GetMetadata(ctx context.Context, key string) (eve.Metadata, error)
-	UpsertMergeMetadata(context.Context, eve.Metadata) (eve.Metadata, error)
-	UpsertMetadataServiceMap(context.Context, eve.MetadataServiceMap) (eve.MetadataServiceMap, error)
-	DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error)
-	GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve.Job, error)
-}
-
-// client data structure
-type client struct {
+// Client data structure
+type Client struct {
 	cfg   *Config
 	sling *sling.Sling
 }
 
-// New creates a new eve api client
-func New(cfg Config) Client {
+// New creates a new eve api Client
+func New(cfg Config) interfaces.EveAPI {
 	var httpClient = &http.Client{
 		Timeout:   cfg.EveapiTimeout,
 		Transport: evehttp.LoggingTransport,
@@ -68,7 +48,7 @@ func New(cfg Config) Client {
 		cfg.EveapiBaseURL += "/"
 	}
 
-	return &client{
+	return &Client{
 		cfg: &cfg,
 		sling: sling.New().
 			Base(cfg.EveapiBaseURL).
@@ -78,7 +58,7 @@ func New(cfg Config) Client {
 	}
 }
 
-func (c *client) GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve.Job, error) {
+func (c *Client) GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve.Job, error) {
 	var success []eve.Job
 	var failure eveerror.RestError
 
@@ -100,7 +80,7 @@ func (c *client) GetNamespaceJobs(ctx context.Context, ns *eve.Namespace) ([]eve
 }
 
 // DeleteMetadataKey calls the API to delete the metadata KEY (leaves empty {} is no metadata)
-func (c *client) DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error) {
+func (c *Client) DeleteMetadataKey(ctx context.Context, id int, key string) (eve.Metadata, error) {
 	var success eve.Metadata
 	var failure eveerror.RestError
 
@@ -124,7 +104,7 @@ func (c *client) DeleteMetadataKey(ctx context.Context, id int, key string) (eve
 }
 
 // UpsertMetadataServiceMap calls the API to upsert (insert/update) the metadata service map record
-func (c *client) UpsertMetadataServiceMap(ctx context.Context, payload eve.MetadataServiceMap) (eve.MetadataServiceMap, error) {
+func (c *Client) UpsertMetadataServiceMap(ctx context.Context, payload eve.MetadataServiceMap) (eve.MetadataServiceMap, error) {
 	var success eve.MetadataServiceMap
 	var failure eveerror.RestError
 
@@ -148,7 +128,7 @@ func (c *client) UpsertMetadataServiceMap(ctx context.Context, payload eve.Metad
 }
 
 // UpsertMergeMetadata calls the API to upsert (insert/update) the metadata record
-func (c *client) UpsertMergeMetadata(ctx context.Context, payload eve.Metadata) (eve.Metadata, error) {
+func (c *Client) UpsertMergeMetadata(ctx context.Context, payload eve.Metadata) (eve.Metadata, error) {
 	var success eve.Metadata
 	var failure eveerror.RestError
 
@@ -172,7 +152,7 @@ func (c *client) UpsertMergeMetadata(ctx context.Context, payload eve.Metadata) 
 }
 
 // GetMetadata calls the API to retrieve metadata by key
-func (c *client) GetMetadata(ctx context.Context, key string) (eve.Metadata, error) {
+func (c *Client) GetMetadata(ctx context.Context, key string) (eve.Metadata, error) {
 	var success eve.Metadata
 	var failure eveerror.RestError
 
@@ -196,7 +176,7 @@ func (c *client) GetMetadata(ctx context.Context, key string) (eve.Metadata, err
 }
 
 // Release method calls the API to move artifacts in feeds
-func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release, error) {
+func (c *Client) Release(ctx context.Context, payload eve.Release) (eve.Release, error) {
 	var success eve.Release
 	var failure eveerror.RestError
 
@@ -221,7 +201,7 @@ func (c *client) Release(ctx context.Context, payload eve.Release) (eve.Release,
 }
 
 // GetServiceByName returns a service by name and namespace name
-func (c *client) GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error) {
+func (c *Client) GetServiceByName(ctx context.Context, namespace, service string) (eve.Service, error) {
 	var success eve.Service
 	var failure eveerror.RestError
 
@@ -243,7 +223,7 @@ func (c *client) GetServiceByName(ctx context.Context, namespace, service string
 }
 
 // SetNamespaceVersion sets the version on the namespace
-func (c *client) SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error) {
+func (c *Client) SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error) {
 	var success eve.Namespace
 	var failure eveerror.RestError
 
@@ -275,7 +255,7 @@ func (c *client) SetNamespaceVersion(ctx context.Context, version string, id int
 }
 
 // SetServiceVersion sets the version on the service
-func (c *client) SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error) {
+func (c *Client) SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error) {
 	var success eve.Service
 	var failure eveerror.RestError
 
@@ -307,7 +287,7 @@ func (c *client) SetServiceVersion(ctx context.Context, version string, id int) 
 }
 
 // DeleteServiceMetadata deletes a metadata key on a service
-func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error) {
+func (c *Client) DeleteServiceMetadata(ctx context.Context, m string, id int) (params.MetadataMap, error) {
 	var success params.MetadataMap
 	var failure eveerror.RestError
 
@@ -343,7 +323,7 @@ func (c *client) DeleteServiceMetadata(ctx context.Context, m string, id int) (p
 }
 
 // GetServiceByID returns a service by an ID
-func (c *client) GetServiceByID(ctx context.Context, id int) (eve.Service, error) {
+func (c *Client) GetServiceByID(ctx context.Context, id int) (eve.Service, error) {
 	var success eve.Service
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get(fmt.Sprintf("services/%v", id)).Request()
@@ -365,7 +345,7 @@ func (c *client) GetServiceByID(ctx context.Context, id int) (eve.Service, error
 }
 
 // GetServicesByNamespace returns all of the services for a given namespace
-func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) ([]eve.Service, error) {
+func (c *Client) GetServicesByNamespace(ctx context.Context, namespace string) ([]eve.Service, error) {
 	var success []eve.Service
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get(fmt.Sprintf("namespaces/%s/services", namespace)).Request()
@@ -387,7 +367,7 @@ func (c *client) GetServicesByNamespace(ctx context.Context, namespace string) (
 }
 
 // GetEnvironmentByID returns an environment by ID
-func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error) {
+func (c *Client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Environment, error) {
 	var success eve.Environment
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get(fmt.Sprintf("environments/%s", id)).Request()
@@ -409,7 +389,7 @@ func (c *client) GetEnvironmentByID(ctx context.Context, id string) (*eve.Enviro
 }
 
 // GetEnvironments returns all of the environments
-func (c *client) GetEnvironments(ctx context.Context) ([]eve.Environment, error) {
+func (c *Client) GetEnvironments(ctx context.Context) ([]eve.Environment, error) {
 	var success []eve.Environment
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get("environments").Request()
@@ -431,7 +411,7 @@ func (c *client) GetEnvironments(ctx context.Context) ([]eve.Environment, error)
 }
 
 // GetNamespacesByEnvironment returns all of the namespaces for an environment
-func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName string) ([]eve.Namespace, error) {
+func (c *Client) GetNamespacesByEnvironment(ctx context.Context, environmentName string) ([]eve.Namespace, error) {
 	var success []eve.Namespace
 	var failure eveerror.RestError
 	r, err := c.sling.New().Get("namespaces").Request()
@@ -454,7 +434,7 @@ func (c *client) GetNamespacesByEnvironment(ctx context.Context, environmentName
 }
 
 // Deploy calls the eve api to deploy resources
-func (c *client) Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, user, channel, ts string) (*eve.DeploymentPlanOptions, error) {
+func (c *Client) Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, user, channel, ts string) (*eve.DeploymentPlanOptions, error) {
 	var success eve.DeploymentPlanOptions
 	var failure eveerror.RestError
 
@@ -486,7 +466,7 @@ func (c *client) Deploy(ctx context.Context, dp eve.DeploymentPlanOptions, user,
 }
 
 // GetNamespaceByID returns the namespace by an ID
-func (c *client) GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error) {
+func (c *Client) GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error) {
 	var success eve.Namespace
 	var failure eveerror.RestError
 

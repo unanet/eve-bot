@@ -14,7 +14,7 @@ type deployCmd struct {
 }
 
 const (
-	// DeployCmdName is used as key/id for the delete command
+	// DeployCmdName is used as key/id for the deploy command
 	DeployCmdName = "deploy"
 )
 

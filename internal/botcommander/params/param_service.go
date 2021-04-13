@@ -24,11 +24,3 @@ func (e Service) Description() string {
 func (e Service) Value() string {
 	return e.value
 }
-
-// DefaultService is the default Service (used for help/init)
-func DefaultService() Service {
-	return Service{baseParam{
-		name:        ServiceName,
-		description: "the service param (ex: unaneta, unanetb, platform)",
-	}}
-}

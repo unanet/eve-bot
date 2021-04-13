@@ -8,9 +8,7 @@ import (
 	"gitlab.unanet.io/devops/go/pkg/log"
 )
 
-const (
-	allCaughtUpMsg = "We're all caught up! There is nothing to deploy..."
-)
+const allCaughtUpMsg = "We're all caught up! There is nothing to deploy..."
 
 // CallbackState data structure
 type CallbackState struct {
@@ -90,7 +88,7 @@ func (cbs *CallbackState) nothingToDeployResponse() string {
 	}
 
 	if len(cbs.Payload.EnvironmentAlias) > 0 {
-		details = details + fmt.Sprintf("Environment: %s\n", cbs.Payload.EnvironmentAlias)
+		details = details + fmt.Sprintf("Environment: %s\n", cbs.Payload.EnvironmentName)
 	}
 
 	if (cbs.Payload.Namespace != nil) && len(cbs.Payload.Namespace.ClusterName) > 0 {
@@ -113,11 +111,11 @@ func (cbs *CallbackState) appendDeployServicesResult(result *string) {
 		for svcResult, svcs := range cbs.Payload.Services.ToResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployServicesResults = "\n```" + ToChatMessage(svcs) + "```"
+				deployServicesResults = "\n```" + ChatMessage(svcs) + "```"
 				break
 			}
 
-			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + ToChatMessage(svcs) + "```"
+			svcResultMessage := headerMsg(svcResult.String()) + "\n```" + ChatMessage(svcs) + "```"
 
 			if len(deployServicesResults) == 0 {
 				deployServicesResults = svcResultMessage
@@ -135,11 +133,11 @@ func (cbs *CallbackState) appendDeployJobsResult(result *string) {
 		for jobResult, jobs := range cbs.Payload.Jobs.ToResultMap() {
 			// Let's break out early when this is a pending/dryrun result
 			if cbs.Payload.Status == eve.DeploymentPlanStatusPending || cbs.Payload.Status == eve.DeploymentPlanStatusDryrun {
-				deployJobsResults = "\n```" + ToChatMessage(jobs) + "```"
+				deployJobsResults = "\n```" + ChatMessage(jobs) + "```"
 				break
 			}
 
-			jobResultMessage := headerMsg(jobResult.String()) + "\n```" + ToChatMessage(jobs) + "```"
+			jobResultMessage := headerMsg(jobResult.String()) + "\n```" + ChatMessage(jobs) + "```"
 
 			if len(deployJobsResults) == 0 {
 				deployJobsResults = jobResultMessage
@@ -168,9 +166,9 @@ func (cbs *CallbackState) initMsg() string {
 
 	var result string
 	if len(cbs.User) > 0 {
-		result = fmt.Sprintf("\n<%s>, %s...\n\n%s", cbs.User, ackMessage, ToChatMessage(&cbs.Payload))
+		result = fmt.Sprintf("\n<%s>, %s...\n\n%s", cbs.User, ackMessage, ChatMessage(&cbs.Payload))
 	} else {
-		result = fmt.Sprintf("\n%s...\n\n%s", ackMessage, ToChatMessage(&cbs.Payload))
+		result = fmt.Sprintf("\n%s...\n\n%s", ackMessage, ChatMessage(&cbs.Payload))
 	}
 	return result
 }

@@ -3,16 +3,13 @@ package resolver
 import (
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/go/pkg/log"
 	"go.uber.org/zap"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 )
-
-// Resolver resolves the input and returns an EvebotCommand (Invalid command instead of an error for error cases)
-type Resolver interface {
-	Resolve(input, channel, user string) commands.EvebotCommand
-}
 
 // EvebotResolver implements the Resolver interface
 type EvebotResolver struct {
@@ -20,7 +17,7 @@ type EvebotResolver struct {
 }
 
 // New instantiates the Resolver
-func New(commandFactory commands.Factory) Resolver {
+func New(commandFactory commands.Factory) interfaces.CommandResolver {
 	return &EvebotResolver{
 		commandFactory,
 	}

@@ -7,9 +7,9 @@ import (
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
-// ToChatMessage takes in an eve API Model (as an interface)
+// ChatMessage takes in an eve API Model (as an interface)
 // and returns a formatted string for a Chat Message response/result
-func ToChatMessage(model interface{}) string {
+func ChatMessage(model interface{}) string {
 	if model == nil {
 		return ""
 	}
@@ -90,9 +90,9 @@ func deployServicesMsg(v eve.DeployServices) string {
 	if msg = initListString(v, "services"); len(msg) == 0 {
 		for _, svc := range v {
 			if len(msg) == 0 {
-				msg = ToChatMessage(svc)
+				msg = ChatMessage(svc)
 			} else {
-				msg += ToChatMessage(svc)
+				msg += ChatMessage(svc)
 			}
 		}
 	}

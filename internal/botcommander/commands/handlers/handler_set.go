@@ -5,28 +5,29 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 // SetHandler is the handler for the SetCmd
 type SetHandler struct {
-	eveAPIClient eveapi.Client
-	chatSvc      chatservice.Provider
+	eveAPIClient interfaces.EveAPI
+	chatSvc      interfaces.ChatProvider
 }
 
 // We use this stacking order as the default for all user (eve-bot) metadata
 const stackingOrder = 400
 
 // NewSetHandler creates a SetHandler
-func NewSetHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+func NewSetHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
 	return SetHandler{
-		eveAPIClient: *eveAPIClient,
-		chatSvc:      *chatSvc,
+		eveAPIClient: eveAPIClient,
+		chatSvc:      chatSvc,
 	}
 }
 
@@ -108,7 +109,7 @@ func (h SetHandler) setSvcMetadata(ctx context.Context, cmd commands.EvebotComma
 		return
 	}
 
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(md), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ChatMessage(md), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h SetHandler) setSvcVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string, svc eve.Service) {
