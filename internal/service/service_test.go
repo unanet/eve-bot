@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
@@ -39,10 +41,10 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 	mockAPI := eveapi.NewMockClient(gomock.NewController(t))
 
 	type fields struct {
-		ChatService       chatservice.Provider
-		CommandResolver   resolver.Resolver
-		CommandExecutor   executor.Executor
-		EveAPI            eveapi.Client
+		ChatService       interfaces.ChatProvider
+		CommandResolver   interfaces.CommandResolver
+		CommandExecutor   interfaces.CommandExecutor
+		EveAPI            interfaces.EveAPI
 		Cfg               *config.Config
 		allowedChannelMap map[string]interface{}
 	}

@@ -24,11 +24,3 @@ func (e Environment) Description() string {
 func (e Environment) Value() string {
 	return e.value
 }
-
-// DefaultEnvironment returns the Default Environment
-func DefaultEnvironment() Environment {
-	return Environment{baseResource{
-		name:        EnvironmentName,
-		description: "the environment resource (i.e. una-dev,una-int,una-qa)",
-	}}
-}

@@ -2,30 +2,23 @@ package executor
 
 import (
 	"context"
-	"fmt"
+	"errors"
+
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
 
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands/handlers"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/go/pkg/log"
-	"go.uber.org/zap"
 )
-
-// Executor interface takes an EvebotCommand and Executes a matching handler
-type Executor interface {
-	Execute(ctx context.Context, cmd commands.EvebotCommand, timestamp string)
-}
 
 // EvebotCommandExecutor is the data structure that implements the Executor
 type EvebotCommandExecutor struct {
-	eveAPIClient eveapi.Client
-	chatSvc      chatservice.Provider
+	eveAPIClient interfaces.EveAPI
+	chatSvc      interfaces.ChatProvider
 	cmdFactory   handlers.Factory
 }
 
 // New creates a new executor
-func New(eveAPIClient eveapi.Client, chatSVC chatservice.Provider, handlerFactor handlers.Factory) Executor {
+func New(eveAPIClient interfaces.EveAPI, chatSVC interfaces.ChatProvider, handlerFactor handlers.Factory) interfaces.CommandExecutor {
 	return &EvebotCommandExecutor{
 		eveAPIClient: eveAPIClient,
 		chatSvc:      chatSVC,
@@ -36,19 +29,9 @@ func New(eveAPIClient eveapi.Client, chatSVC chatservice.Provider, handlerFactor
 // Execute satisfies the Executor.Execute interface
 func (h *EvebotCommandExecutor) Execute(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 	if cmdHandlerFunc := h.cmdFactory.Items()[cmd.Info().CommandName]; cmdHandlerFunc != nil {
-		cmdHandlerFunc(&h.eveAPIClient, &h.chatSvc).Handle(ctx, cmd, timestamp)
+		cmdHandlerFunc(h.eveAPIClient, h.chatSvc).Handle(ctx, cmd, timestamp)
 		return
 	}
-	h.invalidCommandHandlerErr(ctx, "nil handler", cmd.Info().Channel, timestamp)
+	h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, errors.New("failed to execute command; invalid command handler"))
 	return
-}
-
-func cleanSlackMsg(msg string) string {
-	return fmt.Sprintf("\n\n ```%s```\n\n", msg)
-}
-
-func (h *EvebotCommandExecutor) invalidCommandHandlerErr(ctx context.Context, msg, channel, ts string) {
-	err := fmt.Errorf("invalid command handler: %s", msg)
-	log.Logger.Error("invalid command handler", zap.Error(err))
-	h.chatSvc.PostMessageThread(ctx, cleanSlackMsg(err.Error()), channel, ts)
 }

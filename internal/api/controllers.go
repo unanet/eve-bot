@@ -16,8 +16,8 @@ type Controller interface {
 	Setup(chi.Router)
 }
 
-// InitController initializes the controller (handlers)
-func InitController(cfg *config.Config) []Controller {
+// initController initializes the controller (handlers)
+func initController(cfg *config.Config) []Controller {
 
 	cmdResolver := resolver.New(commands.NewFactory())
 

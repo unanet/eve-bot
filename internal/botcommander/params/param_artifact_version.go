@@ -24,11 +24,3 @@ func (e ArtifactVersion) Description() string {
 func (e ArtifactVersion) Value() string {
 	return e.value
 }
-
-// DefaultArtifactVersion is the default Artifact Version (used for help/init)
-func DefaultArtifactVersion() ArtifactVersion {
-	return ArtifactVersion{baseParam{
-		name:        ArtifactVersionName,
-		description: "the version of the artifact",
-	}}
-}

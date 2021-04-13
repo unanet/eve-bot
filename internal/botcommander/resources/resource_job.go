@@ -24,11 +24,3 @@ func (e Job) Description() string {
 func (e Job) Value() string {
 	return e.value
 }
-
-// DefaultMetadata returns the Default Metadata
-func DefaultJob() Job {
-	return Job{baseResource{
-		name:        JobName,
-		description: "the job to run",
-	}}
-}

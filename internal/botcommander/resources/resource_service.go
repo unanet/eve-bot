@@ -24,11 +24,3 @@ func (e Service) Description() string {
 func (e Service) Value() string {
 	return e.value
 }
-
-// DefaultService returns the Default Service
-func DefaultService() Service {
-	return Service{baseResource{
-		name:        ServiceName,
-		description: "the service resource (i.e. platform, unanetbi, auto, subcontractor, unanet-analytics)",
-	}}
-}

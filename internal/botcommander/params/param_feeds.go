@@ -26,19 +26,3 @@ func (e Feed) Description() string {
 func (e Feed) Value() string {
 	return e.value
 }
-
-// DefaultFromFeed is the default ToFeed (used for help/init)
-func DefaultFromFeed() Feed {
-	return Feed{baseParam{
-		name:        FromFeedName,
-		description: "the name of the source feed",
-	}}
-}
-
-// DefaultToFeed is the default FromFeed (used for help/init)
-func DefaultToFeed() Feed {
-	return Feed{baseParam{
-		name:        ToFeedName,
-		description: "the name of the destination feed",
-	}}
-}

@@ -24,11 +24,3 @@ func (e Namespace) Description() string {
 func (e Namespace) Value() string {
 	return e.value
 }
-
-// DefaultNamespace returns the Default Namespace
-func DefaultNamespace() Namespace {
-	return Namespace{baseResource{
-		name:        NamespaceName,
-		description: "the namespace resource (i.e. current, prev, prev-1)",
-	}}
-}

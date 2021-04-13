@@ -24,11 +24,3 @@ func (e Metadata) Description() string {
 func (e Metadata) Value() string {
 	return e.value
 }
-
-// DefaultMetadata returns the Default Metadata
-func DefaultMetadata() Metadata {
-	return Metadata{baseResource{
-		name:        MetadataName,
-		description: "the metadata resource (ex: the config for a service)",
-	}}
-}

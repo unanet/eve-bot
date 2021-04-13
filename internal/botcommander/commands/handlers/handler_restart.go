@@ -4,24 +4,24 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 // ReleaseHandler is the handler for the ReleaseCmd
 type RestartHandler struct {
-	eveAPIClient eveapi.Client
-	chatSvc      chatservice.Provider
+	eveAPIClient interfaces.EveAPI
+	chatSvc      interfaces.ChatProvider
 }
 
 // NewReleaseHandler creates a ReleaseHandler
-func NewRestartHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+func NewRestartHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
 	return RestartHandler{
-		eveAPIClient: *eveAPIClient,
-		chatSvc:      *chatSvc,
+		eveAPIClient: eveAPIClient,
+		chatSvc:      chatSvc,
 	}
 }
 

@@ -2,21 +2,20 @@ package handlers
 
 import (
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
 )
 
 type Factory interface {
-	Items() map[string]func(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler
+	Items() map[string]func(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler
 }
 
 type factory struct {
-	Map map[string]func(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler
+	Map map[string]func(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler
 }
 
 func NewFactory() Factory {
 	return &factory{
-		Map: map[string]func(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler{
+		Map: map[string]func(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler{
 			commands.DeployCmdName:  NewDeployHandler,
 			commands.ShowCmdName:    NewShowHandler,
 			commands.SetCmdName:     NewSetHandler,
@@ -28,6 +27,6 @@ func NewFactory() Factory {
 	}
 }
 
-func (f *factory) Items() map[string]func(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+func (f *factory) Items() map[string]func(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
 	return f.Map
 }

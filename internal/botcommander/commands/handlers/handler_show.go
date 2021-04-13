@@ -4,25 +4,26 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/go/pkg/errors"
 )
 
 // ShowHandler is the handler for the ShowCmd
 type ShowHandler struct {
-	eveAPIClient eveapi.Client
-	chatSvc      chatservice.Provider
+	eveAPIClient interfaces.EveAPI
+	chatSvc      interfaces.ChatProvider
 }
 
 // NewShowHandler creates a ShowHandler
-func NewShowHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+func NewShowHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
 	return ShowHandler{
-		eveAPIClient: *eveAPIClient,
-		chatSvc:      *chatSvc,
+		eveAPIClient: eveAPIClient,
+		chatSvc:      chatSvc,
 	}
 }
 
@@ -58,7 +59,7 @@ func (h ShowHandler) showEnvironments(ctx context.Context, cmd commands.EvebotCo
 		h.chatSvc.UserNotificationThread(ctx, "no environments", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(envs), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ChatMessage(envs), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
@@ -75,7 +76,7 @@ func (h ShowHandler) showNamespaces(ctx context.Context, cmd commands.EvebotComm
 		h.chatSvc.UserNotificationThread(ctx, "no namespaces", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(ns), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ChatMessage(ns), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h ShowHandler) showJobs(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
@@ -96,7 +97,7 @@ func (h ShowHandler) showJobs(ctx context.Context, cmd commands.EvebotCommand, t
 	if nsJobs == nil || len(nsJobs) == 0 {
 		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("no jobs found for namespace: %s", ns.Alias), cmd.Info().User, cmd.Info().Channel, *ts)
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(nsJobs), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ChatMessage(nsJobs), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
@@ -118,7 +119,7 @@ func (h ShowHandler) showServices(ctx context.Context, cmd commands.EvebotComman
 		h.chatSvc.UserNotificationThread(ctx, "no services", cmd.Info().User, cmd.Info().Channel, *ts)
 		return
 	}
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(svcs), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ChatMessage(svcs), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func resourceNotFoundError(err error) bool {
@@ -144,5 +145,5 @@ func (h ShowHandler) showMetadata(ctx context.Context, cmd commands.EvebotComman
 		return
 	}
 
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(metadata), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ChatMessage(metadata), cmd.Info().User, cmd.Info().Channel, *ts)
 }

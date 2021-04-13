@@ -33,17 +33,19 @@ type Api struct {
 	onShutdown  []func()
 }
 
-func NewApi(controllers []Controller, c config.Config) (*Api, error) {
+func NewApi() (*Api, error) {
+	cfg := config.Load()
 	router := chi.NewMux()
+
 	return &Api{
 		r:           router,
-		config:      c,
-		controllers: controllers,
+		config:      cfg,
+		controllers: initController(&cfg),
 		server: &http.Server{
 			ReadTimeout:  time.Duration(5) * time.Second,
 			WriteTimeout: time.Duration(30) * time.Second,
 			IdleTimeout:  time.Duration(90) * time.Second,
-			Addr:         fmt.Sprintf(":%d", c.Port),
+			Addr:         fmt.Sprintf(":%d", cfg.Port),
 			Handler:      router,
 		},
 		done:       make(chan bool),

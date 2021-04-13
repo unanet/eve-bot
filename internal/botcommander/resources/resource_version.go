@@ -24,11 +24,3 @@ func (e Version) Description() string {
 func (e Version) Value() string {
 	return e.value
 }
-
-// DefaultVersion returns the Default Version
-func DefaultVersion() Version {
-	return Version{baseResource{
-		name:        VersionName,
-		description: "the version resource",
-	}}
-}

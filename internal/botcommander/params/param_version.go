@@ -24,11 +24,3 @@ func (e Version) Description() string {
 func (e Version) Value() string {
 	return e.value
 }
-
-// DefaultVersion is the default Version (used for help/init)
-func DefaultVersion() Version {
-	return Version{baseParam{
-		name:        VersionName,
-		description: "the version param (ex: 20.1, 20.2, 0.0)",
-	}}
-}

@@ -4,24 +4,25 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 )
 
 // ReleaseHandler is the handler for the ReleaseCmd
 type ReleaseHandler struct {
-	eveAPIClient eveapi.Client
-	chatSvc      chatservice.Provider
+	eveAPIClient interfaces.EveAPI
+	chatSvc      interfaces.ChatProvider
 }
 
 // NewReleaseHandler creates a ReleaseHandler
-func NewReleaseHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+func NewReleaseHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
 	return ReleaseHandler{
-		eveAPIClient: *eveAPIClient,
-		chatSvc:      *chatSvc,
+		eveAPIClient: eveAPIClient,
+		chatSvc:      chatSvc,
 	}
 }
 
@@ -41,5 +42,5 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 		return
 	}
 
-	h.chatSvc.ReleaseResultsMessageThread(ctx, eveapi.ToChatMessage(release), cmd.Info().User, cmd.Info().Channel, timestamp)
+	h.chatSvc.ReleaseResultsMessageThread(ctx, eveapi.ChatMessage(release), cmd.Info().User, cmd.Info().Channel, timestamp)
 }

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
 	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
 	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
 	"gitlab.unanet.io/devops/eve/pkg/eve"
 	"gitlab.unanet.io/devops/go/pkg/log"
@@ -17,15 +18,15 @@ import (
 
 // DeleteHandler is the handler for the DeleteCmd
 type DeleteHandler struct {
-	eveAPIClient eveapi.Client
-	chatSvc      chatservice.Provider
+	eveAPIClient interfaces.EveAPI
+	chatSvc      interfaces.ChatProvider
 }
 
 // NewDeleteHandler creates a DeleteHandler
-func NewDeleteHandler(eveAPIClient *eveapi.Client, chatSvc *chatservice.Provider) CommandHandler {
+func NewDeleteHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
 	return DeleteHandler{
-		eveAPIClient: *eveAPIClient,
-		chatSvc:      *chatSvc,
+		eveAPIClient: eveAPIClient,
+		chatSvc:      chatSvc,
 	}
 }
 
@@ -79,7 +80,7 @@ func (h DeleteHandler) deleteMetadata(ctx context.Context, cmd commands.EvebotCo
 		}
 	}
 
-	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ToChatMessage(md), cmd.Info().User, cmd.Info().Channel, *ts)
+	h.chatSvc.ShowResultsMessageThread(ctx, eveapi.ChatMessage(md), cmd.Info().User, cmd.Info().Channel, *ts)
 }
 
 func (h DeleteHandler) deleteVersion(ctx context.Context, cmd commands.EvebotCommand, ts *string) {
