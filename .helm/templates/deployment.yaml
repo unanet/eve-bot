@@ -17,6 +17,7 @@ spec:
       labels:
         app: eve-bot-v1
     spec:
+      serviceAccountName: {{ .Values.serviceAccount }}
       securityContext:
         runAsUser: 9001
         runAsGroup: 9001
