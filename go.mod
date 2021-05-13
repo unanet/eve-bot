@@ -16,7 +16,7 @@ require (
 	github.com/prometheus/procfs v0.3.0 // indirect
 	github.com/slack-go/slack v0.8.0
 	gitlab.unanet.io/devops/eve v0.17.3
-	gitlab.unanet.io/devops/go v1.4.0
+	gitlab.unanet.io/devops/go v1.6.0
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4 // indirect
