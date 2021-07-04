@@ -25,10 +25,12 @@ import (
 // EVEBOT_EVEAPI_BASE_URL
 // EVEBOT_EVEAPI_TIMEOUT
 // EVEBOT_EVEAPI_CALLBACK_URL
+// EVEBOT_EVEAPI_ADMIN_TOKEN
 type Config struct {
 	EveapiBaseURL     string        `split_words:"true" required:"true"`
 	EveapiTimeout     time.Duration `split_words:"true" default:"20s"`
 	EveapiCallbackURL string        `split_words:"true" required:"true"`
+	EveapiAdminToken  string        `split_words:"true" required:"true"`
 }
 
 // Client data structure
@@ -54,6 +56,7 @@ func New(cfg Config) interfaces.EveAPI {
 			Base(cfg.EveapiBaseURL).
 			Client(httpClient).
 			Add("User-Agent", "eve-bot").
+			Add("Authorization", fmt.Sprintf("Bearer %s", cfg.EveapiAdminToken)).
 			ResponseDecoder(evejson.NewJsonDecoder()),
 	}
 }
