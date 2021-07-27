@@ -1,6 +1,6 @@
 # eve-bot
 
-![pipeline status](https://gitlab.unanet.io/devops/eve-bot/badges/master/pipeline.svg)]
+![pipeline status](https://gitlab.unanet.io/devops/eve-bot/badges/master/pipeline.svg)
 
 ## Summary
 
