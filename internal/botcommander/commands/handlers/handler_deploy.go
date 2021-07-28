@@ -42,7 +42,6 @@ func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, t
 		DryRun:           commands.ExtractBoolOpt(args.DryrunName, cmdAPIOpts),
 		Environment:      commands.ExtractStringOpt(params.EnvironmentName, cmdAPIOpts),
 		NamespaceAliases: commands.ExtractStringListOpt(params.NamespaceName, cmdAPIOpts),
-		Messages:         nil,
 		Type:             eve.DeploymentPlanTypeApplication,
 	})
 }
