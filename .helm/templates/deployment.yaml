@@ -40,8 +40,6 @@ spec:
               value: {{ .Values.eveSlackOAuthAccessToken }}
             - name: EVEBOT_SLACK_SIGNING_SECRET
               value: {{ .Values.eveSlackSigningSecret }}
-            - name: EVEBOT_SLACK_USER_OAUTH_ACCESS_TOKEN
-              value: {{ .Values.eveSlackUserOAuthAccessToken }}
             - name: EVEBOT_SLACK_VERIFICATION_TOKEN
               value: {{ .Values.eveSlackVerificationToken }}
             - name: VAULT_ROLE

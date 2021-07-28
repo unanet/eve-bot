@@ -20,7 +20,7 @@ const (
 func New(pt ProviderType, cfg *config.Config) interfaces.ChatProvider {
 	switch pt {
 	case Slack:
-		return slackservice.New(slack.New(cfg.SlackUserOauthAccessToken))
+		return slackservice.New(slack.New(cfg.SlackOauthAccessToken))
 	default:
 		return nil
 	}

@@ -125,7 +125,7 @@ func validateSlackRequest(req *http.Request, signingSecret string) ([]byte, erro
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return []byte{}, botError(err, "failed readAll req body", http.StatusBadRequest)
+		return []byte{}, botError(err, "failed read req body", http.StatusBadRequest)
 	}
 
 	_, err = verifier.Write(body)
