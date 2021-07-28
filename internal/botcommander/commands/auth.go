@@ -14,7 +14,7 @@ import (
 func validChannelAuthCheck(channel string, channelMap map[string]interface{}, fn chatChannelInfoFn) bool {
 	incomingChannelInfo, err := fn(context.TODO(), channel)
 	if err != nil {
-		log.Logger.Error("failed to get channel info", zap.Error(err))
+		log.Logger.Error("failed to get channel info auth check", zap.Error(err))
 		return false
 	}
 

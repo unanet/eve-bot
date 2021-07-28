@@ -31,7 +31,7 @@ func (sp Provider) handleDevOpsErrorNotification(ctx context.Context, err error)
 func (sp Provider) GetChannelInfo(ctx context.Context, channelID string) (chatmodels.Channel, error) {
 	slackChannel, err := sp.client.GetConversationInfoContext(ctx, channelID, false)
 	if err != nil {
-		log.Logger.Error("failed to get channel info", zap.Error(err))
+		log.Logger.Error("failed to get channel info from provider", zap.Error(err))
 	}
 
 	return chatmodels.Channel{
