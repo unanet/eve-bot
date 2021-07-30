@@ -9,15 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
 	"github.com/dghubble/sling"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve/pkg/eve"
-	eveerror "gitlab.unanet.io/devops/go/pkg/errors"
-	evehttp "gitlab.unanet.io/devops/go/pkg/http"
-	evejson "gitlab.unanet.io/devops/go/pkg/json"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve/pkg/eve"
+	eveerror "github.com/unanet/go/pkg/errors"
+	evehttp "github.com/unanet/go/pkg/http"
+	evejson "github.com/unanet/go/pkg/json"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
 

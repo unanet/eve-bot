@@ -3,9 +3,9 @@ package service
 import (
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/config"
+	"github.com/unanet/eve-bot/internal/config"
 )
 
 // Provider provides access to the Slack Client

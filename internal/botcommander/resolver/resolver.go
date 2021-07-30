@@ -3,12 +3,12 @@ package resolver
 import (
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
 )
 
 // EvebotResolver implements the Resolver interface

@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	chatmodels "gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
+	chatmodels "github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 )
 
 // MockProvider is a mock of Provider interface

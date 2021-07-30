@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"github.com/unanet/eve-bot/internal/eveapi"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"gitlab.unanet.io/devops/eve-bot/internal/service"
-	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/go/pkg/errors"
+	"github.com/unanet/eve-bot/internal/service"
+	"github.com/unanet/eve/pkg/eve"
+	"github.com/unanet/go/pkg/errors"
 )
 
 // EveController for slack routes

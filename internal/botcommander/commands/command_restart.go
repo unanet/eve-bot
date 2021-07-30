@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
+	"github.com/unanet/eve-bot/internal/botcommander/help"
 )
 
 type restartCmd struct {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/slack-go/slack"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
 

@@ -3,9 +3,9 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
+	"github.com/unanet/eve-bot/internal/botcommander/help"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/botcommander/resources"
 )
 
 type showCmd struct {

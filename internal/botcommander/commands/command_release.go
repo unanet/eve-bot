@@ -3,8 +3,8 @@ package commands
 import (
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/botcommander/help"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
 )
 
 type releaseCmd struct {

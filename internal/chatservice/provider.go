@@ -1,11 +1,11 @@
 package chatservice
 
 import (
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
 	"github.com/slack-go/slack"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/slackservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/config"
+	"github.com/unanet/eve-bot/internal/chatservice/slackservice"
+	"github.com/unanet/eve-bot/internal/config"
 )
 
 // ProviderType data structure

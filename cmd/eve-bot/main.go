@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/api"
-	evehttp "gitlab.unanet.io/devops/go/pkg/http"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve-bot/internal/api"
+	evehttp "github.com/unanet/go/pkg/http"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
 

@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
+	"github.com/unanet/eve-bot/internal/botcommander/help"
 )
 
 type factory struct {

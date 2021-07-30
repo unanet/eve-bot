@@ -2,14 +2,14 @@ package api
 
 import (
 	"github.com/go-chi/chi"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands/handlers"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/executor"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resolver"
-	chat "gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/config"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve-bot/internal/service"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/commands/handlers"
+	"github.com/unanet/eve-bot/internal/botcommander/executor"
+	"github.com/unanet/eve-bot/internal/botcommander/resolver"
+	chat "github.com/unanet/eve-bot/internal/chatservice"
+	"github.com/unanet/eve-bot/internal/config"
+	"github.com/unanet/eve-bot/internal/eveapi"
+	"github.com/unanet/eve-bot/internal/service"
 )
 
 type Controller interface {

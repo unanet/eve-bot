@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	params "gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	eve "gitlab.unanet.io/devops/eve/pkg/eve"
+	params "github.com/unanet/eve-bot/internal/botcommander/params"
+	eve "github.com/unanet/eve/pkg/eve"
 )
 
 // MockClient is a mock of Client interface

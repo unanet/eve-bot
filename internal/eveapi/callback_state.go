@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve/pkg/eve"
+	"github.com/unanet/go/pkg/log"
 )
 
 const allCaughtUpMsg = "We're all caught up! There is nothing to deploy..."

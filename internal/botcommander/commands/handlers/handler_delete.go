@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/eve"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/botcommander/resources"
+	"github.com/unanet/eve-bot/internal/eveapi"
+	"github.com/unanet/eve/pkg/eve"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
 

@@ -12,10 +12,10 @@ import (
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/config"
-	"gitlab.unanet.io/devops/go/pkg/log"
-	"gitlab.unanet.io/devops/go/pkg/metrics"
-	"gitlab.unanet.io/devops/go/pkg/middleware"
+	"github.com/unanet/eve-bot/internal/config"
+	"github.com/unanet/go/pkg/log"
+	"github.com/unanet/go/pkg/metrics"
+	"github.com/unanet/go/pkg/middleware"
 )
 
 var (

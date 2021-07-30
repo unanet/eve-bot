@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 )
 
 type Factory interface {

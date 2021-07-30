@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"github.com/unanet/eve/pkg/eve"
 )
 
 var fakeServices = Services{Service{Name: "fake-service", Version: "1.0.0"}}

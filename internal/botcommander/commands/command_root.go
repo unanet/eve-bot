@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/help"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/botcommander/args"
+	"github.com/unanet/eve-bot/internal/botcommander/help"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
 )
 
 type rootCmd struct {

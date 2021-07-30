@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
 

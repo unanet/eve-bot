@@ -14,9 +14,9 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/slack-go/slack"
-	"gitlab.unanet.io/devops/eve-bot/internal/service"
-	"gitlab.unanet.io/devops/go/pkg/errors"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve-bot/internal/service"
+	"github.com/unanet/go/pkg/errors"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
 

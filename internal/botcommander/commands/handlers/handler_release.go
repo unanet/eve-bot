@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/eveapi"
+	"github.com/unanet/eve/pkg/eve"
 )
 
 // ReleaseHandler is the handler for the ReleaseCmd

@@ -8,8 +8,8 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
-	"gitlab.unanet.io/devops/go/pkg/errors"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/go/pkg/errors"
+	"github.com/unanet/go/pkg/log"
 )
 
 // HandleSlackInteraction handles the interactive callbacks (buttons, dropdowns, etc.)

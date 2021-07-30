@@ -3,10 +3,10 @@ package interfaces
 import (
 	"context"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
-	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
+	"github.com/unanet/eve/pkg/eve"
 )
 
 // ChatProvider interface used to interface with a Chat Provider (i.e. Slack)

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
 )
 
 func TestEvebotResolver_Resolve(t *testing.T) {

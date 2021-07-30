@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"github.com/unanet/eve/pkg/eve"
 )
 
 // ChatMessage takes in an eve API Model (as an interface)

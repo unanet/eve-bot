@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	commands "gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
+	commands "github.com/unanet/eve-bot/internal/botcommander/commands"
 )
 
 // MockResolver is a mock of Resolver interface

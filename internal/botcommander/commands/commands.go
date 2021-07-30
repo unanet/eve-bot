@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/args"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/params"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resources"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
+	"github.com/unanet/eve-bot/internal/botcommander/args"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/botcommander/resources"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 )
 
 // CommandOptions is the dynamic command options that become Key:Value pairs

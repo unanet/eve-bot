@@ -7,20 +7,20 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/chatmodels"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
 
 	"github.com/golang/mock/gomock"
 
 	"github.com/slack-go/slack/slackevents"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/executor"
-	"gitlab.unanet.io/devops/eve-bot/internal/botcommander/resolver"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/config"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
+	"github.com/unanet/eve-bot/internal/botcommander/executor"
+	"github.com/unanet/eve-bot/internal/botcommander/resolver"
+	"github.com/unanet/eve-bot/internal/chatservice"
+	"github.com/unanet/eve-bot/internal/config"
+	"github.com/unanet/eve-bot/internal/eveapi"
 )
 
 func TestProvider_HandleSlackInteraction(t *testing.T) {

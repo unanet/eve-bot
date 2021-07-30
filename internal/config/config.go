@@ -4,9 +4,9 @@ import (
 	"sync"
 
 	"github.com/kelseyhightower/envconfig"
-	"gitlab.unanet.io/devops/eve-bot/internal/chatservice/slackservice"
-	"gitlab.unanet.io/devops/eve-bot/internal/eveapi"
-	"gitlab.unanet.io/devops/go/pkg/log"
+	"github.com/unanet/eve-bot/internal/chatservice/slackservice"
+	"github.com/unanet/eve-bot/internal/eveapi"
+	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
 

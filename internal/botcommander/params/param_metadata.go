@@ -3,7 +3,7 @@ package params
 import (
 	"encoding/json"
 
-	"gitlab.unanet.io/devops/eve/pkg/eve"
+	"github.com/unanet/eve/pkg/eve"
 )
 
 const (
