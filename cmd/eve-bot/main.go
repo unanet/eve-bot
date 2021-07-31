@@ -5,16 +5,10 @@ import (
 
 	"github.com/unanet/eve-bot/internal/api"
 	evehttp "github.com/unanet/go/pkg/http"
-	"github.com/unanet/go/pkg/log"
-	"go.uber.org/zap"
 )
 
 func main() {
-	app, err := api.NewApi()
-	if err != nil {
-		log.Logger.Panic("Failed to Create Api App", zap.Error(err))
-	}
-	app.Start()
+	api.NewApi().Start()
 }
 
 // This is required for the HTTP Client Request/Response Logging

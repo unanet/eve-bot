@@ -1,21 +1,75 @@
-FROM unanet-docker.jfrog.io/alpine-base
+##########################################
+# STEP 1 build binary in Build Stage Image
+##########################################
+FROM golang:alpine AS builder
 
-ENV SERVICE_NAME eve-bot
-ENV LOG_LEVEL debug
-ENV EVEBOT_PORT 3000
-ENV EVEBOT_METRICS_PORT 3001
-ENV EVEBOT_EVEAPI_BASE_URL http://eve-api-v1:3000
-ENV EVEBOT_EVEAPI_CALLBACK_URL http://eve-bot-v1:3000/eve-callback
-ENV EVEBOT_SLACK_CHANNELS_AUTH my-evebot,evebot-tests,hydra,admin-ci
-ENV EVEBOT_SLACK_CHANNELS_MAINTENANCE my-evebot,evebot-tests
-ENV EVEBOT_SLACK_AUTH_ENABLED true
-ENV VAULT_ADDR https://vault.unanet.io
-ENV VAULT_ROLE k8s-devops
-ENV VAULT_K8S_MOUNT kubernetes
+# Build ARGS
+ARG VERSION=0.0.0
+ARG SHA=""
+ARG SHORT_SHA=""
+ARG AUTHOR=""
+ARG BUILD_HOST=""
+ARG BRANCH=""
+ARG BUILD_DATE=""
+ARG PRERELEASE=""
 
-ADD ./bin/eve-bot /app/eve-bot
-WORKDIR /app
-CMD ["/app/eve-bot"]
 
-HEALTHCHECK --interval=1m --timeout=2s --start-period=10s \
+ENV LDFLAGS "-X 'github.com/unanet/go/pkg/version.Version=${VERSION}' \
+               -X 'github.com/unanet/go/pkg/version.SHA=${SHA}' \ 
+               -X 'github.com/unanet/go/pkg/version.ShortSHA=${SHORT_SHA}' \
+               -X 'github.com/unanet/go/pkg/version.Author=${AUTHOR}' \
+               -X 'github.com/unanet/go/pkg/version.BuildHost=${BUILD_HOST}' \
+               -X 'github.com/unanet/go/pkg/version.Branch=${BRANCH}' \
+               -X 'github.com/unanet/go/pkg/version.Date=${BUILD_DATE}' \
+               -X 'github.com/unanet/go/pkg/version.Prerelease=${PRERELEASE}'"
+
+# Install git + SSL ca certificates.
+# Git is required for fetching the dependencies.
+# Ca-certificates is required to call HTTPS endpoints.
+# tzdata is for timezone data
+RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
+
+# create appuser.
+RUN adduser -D -g '' appuser
+
+# set app working dir
+WORKDIR /src
+
+COPY go.mod go.sum ./
+
+RUN \
+    go mod tidy && \
+    go mod download
+
+COPY . .
+
+RUN \
+    CGO_ENABLED=0 \
+    GOOS=linux GOARCH=amd64 \
+    go build -ldflags="${LDFLAGS}" -o /bin/eve-bot ./cmd/eve-bot/main.go
+
+######################################
+# STEP 2 build a smaller runtime image
+######################################
+FROM scratch
+
+ENV EVE_PORT 3000
+ENV EVE_METRICS_PORT 3001
+
+# Import assets from the build stage image
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /bin/eve-bot /bin/eve-bot
+
+WORKDIR /bin
+
+# Use the unprivileged user (created in the build stage image)
+USER appuser
+
+# Set the entrypoint to the golang executable binary
+ENTRYPOINT ["/bin/eve-bot"]
+
+
+HEALTHCHECK --interval=1m --timeout=2s --start-period=60s \
     CMD curl -f http://localhost:${EVE_METRICS_PORT}/ || exit 1
