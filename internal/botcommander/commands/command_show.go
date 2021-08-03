@@ -28,10 +28,10 @@ var (
 	}
 	showCmdHelpExample = help.Examples{
 		"show environments",
-		"show namespaces in una-int",
-		"show services in current una-int",
-		"show metadata for unaneta in current una-int",
-		"show jobs in current una-int",
+		"show namespaces in int",
+		"show services in current int",
+		"show metadata for billing in current int",
+		"show jobs in current int",
 	}
 )
 

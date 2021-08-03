@@ -17,7 +17,7 @@ const (
 var (
 	restartCmdHelpSummary = help.Summary("The `restart` command is used to restart a service in a namespace")
 	restartCmdHelpUsage   = help.Usage{"restart {{ service }} in {{ namespace }} {{ environment }}"}
-	restartCmdHelpExample = help.Examples{"restart platform in current una-int"}
+	restartCmdHelpExample = help.Examples{"restart api in current int"}
 )
 
 // NewRestartCommand creates a New RestartCmd that implements the EvebotCommand interface

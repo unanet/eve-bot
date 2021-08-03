@@ -23,10 +23,8 @@ var (
 	}
 
 	runCmdHelpExample = help.Examples{
-		"run migration in current una-int key=value key2=value2 keyN=valN",
-		"run auto-migration:2020.4 in current una-int key=value key2=value2 keyN=valN",
-		"run cvs-migration in current una-int key=value key2=value2 keyN=valN",
-		"run hello-world:1 in current una-int key=value key2=value2 keyN=valN",
+		"run migration in current int key=value key2=value2 keyN=valN",
+		"run cool-job:1.2 in current int key=value key2=value2 keyN=valN",
 	}
 )
 

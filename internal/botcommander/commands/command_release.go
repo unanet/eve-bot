@@ -23,10 +23,10 @@ var (
 		"release {{ artifact }}:{{ optional_version }} from {{ required_feed }} to {{ optional_feed }}",
 	}
 	releaseCmdHelpExample = help.Examples{
-		"release unanet-analytics from int",
-		"release unanet-app:20.3 from int",
-		"release unanet-analytics:20.2.5 from int to prod",
-		"release unanet-analytics:20.2.5.43 from prod to int",
+		"release api from int",
+		"release api:1.3 from int",
+		"release billing:1.2.4 from int to prod",
+		"release billing:1.2.4 from prod to int",
 	}
 )
 

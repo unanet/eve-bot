@@ -23,9 +23,9 @@ var (
 		"delete {{ resources }} for {{ service }} in {{ namespace }} {{ environment }}",
 	}
 	deleteCmdHelpExample = help.Examples{
-		"delete metadata for unaneta in current una-int key",
-		"delete metadata for unaneta in current una-int key key2 key3 keyN",
-		"delete version for unaneta in current una-int",
+		"delete metadata for api in current int key",
+		"delete metadata for api in current int key key2 key3 keyN",
+		"delete version for api in current int",
 	}
 )
 

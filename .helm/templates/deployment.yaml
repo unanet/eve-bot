@@ -48,6 +48,18 @@ spec:
               value: {{ .Values.vaultAddr }}
             - name: VAULT_K8S_MOUNT
               value: {{ .Values.vaultK8sMount }}
+            - name: EVEBOT_SLACK_CHANNELS_AUTH
+              value: "eve-admin"
+            - name: EVEBOT_SLACK_AUTH_ENABLED
+              value: "true"
+            - name: EVEBOT_SLACK_CHANNELS_MAINTENANCE
+              value: "eve-maintenance"
+            - name: EVEBOT_SLACK_MAINTENANCE_ENABLED
+              value: "false"
+            - name: EVEBOT_EVEAPI_ADMIN_TOKEN
+              value: {{ .Values.adminToken }}
+            - name: EVEBOT_PORT
+              value: "3000"
           ports:
             - containerPort: 3000
               name: api

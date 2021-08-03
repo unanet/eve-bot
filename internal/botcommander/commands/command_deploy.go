@@ -27,10 +27,10 @@ var (
 		"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }} force={{ true }}",
 	}
 	deployCmdHelpExample = help.Examples{
-		"deploy current in una-int",
-		"deploy current in una-int services=unanetbi dryrun=true",
-		"deploy current in una-int services=unanetbi,unaneta dryrun=true force=true",
-		"deploy current in una-int services=unanetbi:20.2,unaneta",
+		"deploy current in int",
+		"deploy current in int services=api dryrun=true",
+		"deploy current in int services=api,billing dryrun=true force=true",
+		"deploy current in int services=api:1.0,billing",
 	}
 )
 
