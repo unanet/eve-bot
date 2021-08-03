@@ -30,7 +30,7 @@ func (c EveController) Setup(r chi.Router) {
 }
 
 func logLink(ns string) string {
-	return "https://grafana.unanet.io/explore?left=%5B%22now-1h%22,%22now%22,%22Loki%22,%7B%22refId%22:%22A%22,%22expr%22:%22%7Bjob%3D~%5C%22" + ns + ".*%5C%22%7D%22,%22key%22:%22Q-1591690807784-0.2580443768677896-0%22,%22hide%22:false%7D,%7B%22mode%22:%22Logs%22%7D,%7B%22ui%22:%5Btrue,true,true,null%5D%7D%5D"
+	return "https://www.google.com/search?q=todo"
 }
 
 func (c EveController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {

@@ -13,8 +13,7 @@ const (
 )
 
 const (
-	// https://clearview.slack.com/archives/CUK5MSMPU
-	devOpsMonitoringChannel = "CUK5MSMPU"
+	devOpsMonitoringChannel = "C029ZH0BQSZ"
 )
 
 func userErrMessage(user string, err error) string {
