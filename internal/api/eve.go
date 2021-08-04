@@ -30,7 +30,7 @@ func (c EveController) Setup(r chi.Router) {
 }
 
 func logLink(ns string) string {
-	return "https://www.google.com/search?q=todo"
+	return "https://grafana.plainsight.biz/"
 }
 
 func (c EveController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
