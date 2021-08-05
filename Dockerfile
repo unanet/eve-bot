@@ -69,7 +69,7 @@ WORKDIR /bin
 USER appuser
 
 # Set the entrypoint to the golang executable binary
-ENTRYPOINT ["/bin/eve-bot"]
+CMD ["/bin/eve-bot"]
 
 
 HEALTHCHECK --interval=1m --timeout=2s --start-period=60s \
