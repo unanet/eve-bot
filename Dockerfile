@@ -51,7 +51,8 @@ RUN \
 ######################################
 # STEP 2 build a smaller runtime image
 ######################################
-FROM scratch
+# FROM scratch
+FROM plainsight.jfrog.io/docker/alpine:3.1
 
 ENV EVE_PORT 3000
 ENV EVE_METRICS_PORT 3001
