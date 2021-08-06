@@ -60,6 +60,10 @@ spec:
               value: {{ .Values.adminToken }}
             - name: EVEBOT_PORT
               value: "3000"
+            - name: PROVIDER_TYPE
+              value: {{ .Values.secretsProviderType }}
+            - name: DYNAMIC_SECRETS_ENABLED
+              value: {{ .Values.dynamicSecretsEnabled }}              
           ports:
             - containerPort: 3000
               name: api
