@@ -33,13 +33,7 @@ jobs:
       - name: Test 🧠
         run: |
           go get ./...
-          go test ./... -v -race
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1 
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}          
+          go test ./... -v -race       
 
       - name: Set up Docker Buildx 🐳
         id: buildx
@@ -86,8 +80,6 @@ jobs:
             BUILD_DATE='${{ env.BUILD_TIME }}' 
             PRERELEASE=''            
           tags: |
-            tjsampson/eve-bot:latest
-            tjsampson/eve-bot:${{ env.VERSION }}
             plainsight.jfrog.io/docker-int/ops/eve-bot-v1:${{ env.VERSION }}
 
       - name: Add JFrog Props 🐸

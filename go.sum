@@ -197,6 +197,7 @@ github.com/gogo/protobuf v1.2.0/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7a
 github.com/gogo/protobuf v1.2.1/go.mod h1:hp+jE20tsWTFYpLwKvXlhS1hjn+gTNwPg2I6zVXpSg4=
 github.com/gogo/protobuf v1.3.1 h1:DqDEcV5aeaTmdFBePNpYsp3FlcVH/2ISVVM9Qf8PSls=
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
+github.com/golang-jwt/jwt v3.2.1+incompatible h1:73Z+4BJcrTC+KczS6WvTPvRGOp1WmfEP4Q1lOd9Z/+c=
 github.com/golang-jwt/jwt v3.2.1+incompatible/go.mod h1:8pz2t5EyA70fFQQSrl6XZXzqecmYZeUEB8OUGHkxJ+I=
 github.com/golang-migrate/migrate/v4 v4.14.1 h1:qmRd/rNGjM1r3Ve5gHd5ZplytrD02UcItYNxJ3iUHHE=
 github.com/golang-migrate/migrate/v4 v4.14.1/go.mod h1:l7Ks0Au6fYHuUIxUhQ0rcVX1uLlJg54C/VvW7tvxSz0=
@@ -551,7 +552,6 @@ github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51/go.mod h1:XNkn88O1C
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/unanet/eve v0.0.0-20210727233527-18eb447b118d h1:Sp2A5yY2P1AsVgKErrQlyT4MfdLd7POycbrGOCl4GVo=
 github.com/unanet/eve v0.0.0-20210727233527-18eb447b118d/go.mod h1:jqrAfdd+U1LoRgPoEnWVOKvwyFnv+FTX94N42IX3ZTg=
-github.com/unanet/go v0.0.0-20210727232642-d1689ad91e74 h1:cUJovO/bQ01J64clDJSBflsvOFP9KS8Yv0rD1fct6IU=
 github.com/unanet/go v0.0.0-20210727232642-d1689ad91e74/go.mod h1:QgpmwTpYCpfAImG1a3X1nEMYNzopB3q3VK7EYYDsstQ=
 github.com/unanet/go v0.0.0-20210731164003-a222e7bdc32c h1:0mGUfsVRqEkI/mxCiFa1+fdtlac+aWmM39NTjcC8+Mc=
 github.com/unanet/go v0.0.0-20210731164003-a222e7bdc32c/go.mod h1:4B9Frfq4D04S6/umRsVgOEp+QAzD/KpQ+IWYWUO0E1M=
