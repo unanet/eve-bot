@@ -134,15 +134,15 @@ func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
 	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", bc.info.User, bc.info.CommandName), true
 }
 
-type chatChannelInfoFn func(context.Context, string) (chatmodels.Channel, error)
+type ChatChannelInfoFn func(context.Context, string) (chatmodels.Channel, error)
 
-type chatUserInfoFn func(context.Context, string) (*chatmodels.ChatUser, error)
+type ChatUserInfoFn func(context.Context, string) (*chatmodels.ChatUser, error)
 
 // EvebotCommand interface (each evebot command needs to implement this interface)
 type EvebotCommand interface {
 	Info() ChatInfo
 	Options() CommandOptions
 	AckMsg() (string, bool)
-	IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool
-	IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool
+	IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool
+	IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool
 }

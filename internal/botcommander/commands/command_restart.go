@@ -33,7 +33,7 @@ func NewRestartCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd restartCmd) IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd restartCmd) IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return true
 }
 
@@ -47,7 +47,7 @@ func (cmd restartCmd) AckMsg() (string, bool) {
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd restartCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd restartCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return cmd.IsHelpRequest() ||
 		validChannelAuthCheck(cmd.info.Channel, allowedChannel, chatChanFn) ||
 		lowerEnvAuthCheck(cmd.opts) ||

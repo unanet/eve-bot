@@ -28,7 +28,7 @@ func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd rootCmd) IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd rootCmd) IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return true
 }
 
@@ -38,7 +38,7 @@ func (cmd rootCmd) AckMsg() (string, bool) {
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd rootCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn, chatUserInfoFn, *dynamodb.DynamoDB) bool {
+func (cmd rootCmd) IsAuthorized(map[string]interface{}, ChatChannelInfoFn, ChatUserInfoFn, *dynamodb.DynamoDB) bool {
 	return true
 }
 

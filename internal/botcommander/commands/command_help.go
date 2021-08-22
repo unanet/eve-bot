@@ -47,13 +47,13 @@ func (cmd helpCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd helpCmd)  IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd helpCmd)  IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return true
 }
 
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd helpCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn, chatUserInfoFn, *dynamodb.DynamoDB) bool {
+func (cmd helpCmd) IsAuthorized(map[string]interface{}, ChatChannelInfoFn, ChatUserInfoFn, *dynamodb.DynamoDB) bool {
 	return true
 }
 

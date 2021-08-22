@@ -43,7 +43,7 @@ func NewReleaseCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd releaseCmd) IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd releaseCmd) IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return true
 }
 
@@ -57,7 +57,7 @@ func (cmd releaseCmd) AckMsg() (string, bool) {
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd releaseCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd releaseCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return cmd.IsHelpRequest() ||
 		validChannelAuthCheck(cmd.info.Channel, allowedChannel, chatChanFn) ||
 		validUserRoleCheck(ReleaseCmdName, cmd, chatUserFn, db)

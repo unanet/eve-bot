@@ -51,12 +51,12 @@ func (cmd deleteCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd deleteCmd)  IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd deleteCmd)  IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return true
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd deleteCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd deleteCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return cmd.IsHelpRequest() ||
 		validChannelAuthCheck(cmd.info.Channel, allowedChannel, chatChanFn) ||
 		lowerEnvAuthCheck(cmd.opts) ||

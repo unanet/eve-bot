@@ -64,7 +64,7 @@ func (mr *MockEvebotCommandMockRecorder) Info() *gomock.Call {
 }
 
 // IsAuthenticated mocks base method.
-func (m *MockEvebotCommand) IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (m *MockEvebotCommand) IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsAuthenticated", chatUserFn, db)
 	ret0, _ := ret[0].(bool)
@@ -78,7 +78,7 @@ func (mr *MockEvebotCommandMockRecorder) IsAuthenticated(chatUserFn, db interfac
 }
 
 // IsAuthorized mocks base method.
-func (m *MockEvebotCommand) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (m *MockEvebotCommand) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsAuthorized", allowedChannel, chatChanFn, chatUserFn, db)
 	ret0, _ := ret[0].(bool)
