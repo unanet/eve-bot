@@ -4,7 +4,9 @@ go 1.16
 
 require (
 	github.com/dghubble/sling v1.3.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v4.1.0+incompatible
+	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0

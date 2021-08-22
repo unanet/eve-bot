@@ -9,7 +9,11 @@ import (
 	chat "github.com/unanet/eve-bot/internal/chatservice"
 	"github.com/unanet/eve-bot/internal/config"
 	"github.com/unanet/eve-bot/internal/eveapi"
+	"github.com/unanet/eve-bot/internal/manager"
 	"github.com/unanet/eve-bot/internal/service"
+	"github.com/unanet/go/pkg/identity"
+	"github.com/unanet/go/pkg/log"
+	"go.uber.org/zap"
 )
 
 type Controller interface {
@@ -25,6 +29,16 @@ func initController(cfg *config.Config) []Controller {
 	chatSvc := chat.New(chat.Slack, cfg)
 	cmdExecutor := executor.New(eveAPI, chatSvc, handlers.NewFactory())
 
+	// Create the Service Deps here
+	idSvc, err := identity.NewService(cfg.Identity)
+	if err != nil {
+		log.Logger.Panic("Unable to Initialize the Identity Service Provider", zap.Error(err))
+	}
+
+	// Create the Service Manager here
+	// ...wire up the deps and pass the manager to the Controller Init
+	mgr := manager.NewService(cfg, manager.OpenIDConnectOpt(idSvc))
+
 	svc := service.New(
 		cfg,
 		cmdResolver,
@@ -37,5 +51,6 @@ func initController(cfg *config.Config) []Controller {
 		NewPingController(),
 		NewSlackController(svc),
 		NewEveController(svc),
+		NewAuthController(mgr),
 	}
 }

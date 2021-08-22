@@ -6,6 +6,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/unanet/eve-bot/internal/chatservice/slackservice"
 	"github.com/unanet/eve-bot/internal/eveapi"
+	"github.com/unanet/go/pkg/identity"
 	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
@@ -23,6 +24,8 @@ type (
 
 	// EveAPIConfig is the config for the Eve API
 	EveAPIConfig = eveapi.Config
+
+	IdentityConfig = identity.Config
 )
 
 // Config is the top level application config
@@ -30,9 +33,11 @@ type Config struct {
 	LogConfig
 	SlackConfig
 	EveAPIConfig
+	Identity    IdentityConfig
 	Port        int    `split_words:"true" default:"8080"`
 	MetricsPort int    `split_words:"true" default:"3001"`
 	ServiceName string `split_words:"true" default:"eve"`
+	ReadOnly    bool   `split_words:"true" default:"false"`
 }
 
 // Load loads the config reading it from the environment
