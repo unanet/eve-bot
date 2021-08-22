@@ -9,11 +9,6 @@ import (
 	"go.uber.org/zap"
 )
 
-
-
-
-
-
 func validUserRoleCheck(commandName string, cmd EvebotCommand, chatUserFn chatUserInfoFn) bool {
 	user, err := chatUserFn(context.TODO(), cmd.Info().User)
 	if err != nil {
