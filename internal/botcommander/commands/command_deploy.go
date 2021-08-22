@@ -59,8 +59,11 @@ func (cmd deployCmd) AckMsg() (string, bool) {
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd deployCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
+func (cmd deployCmd) IsAuthorized(allowedChannelMap map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn) bool {
+	return cmd.IsHelpRequest() ||
+		validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, chatChanFn) ||
+		lowerEnvAuthCheck(cmd.opts) ||
+		validUserRoleCheck(DeployCmdName, cmd, chatUserFn)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

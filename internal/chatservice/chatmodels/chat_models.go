@@ -2,6 +2,7 @@ package chatmodels
 
 // ChatUser data structure
 type ChatUser struct {
+	ID string
 	Name string
 }
 

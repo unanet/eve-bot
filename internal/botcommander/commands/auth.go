@@ -9,6 +9,23 @@ import (
 	"go.uber.org/zap"
 )
 
+
+
+
+
+
+func validUserRoleCheck(commandName string, cmd EvebotCommand, chatUserFn chatUserInfoFn) bool {
+	user, err := chatUserFn(context.TODO(), cmd.Info().User)
+	if err != nil {
+		log.Logger.Error("failed to get user info auth check", zap.Error(err))
+		return false
+	}
+	log.Logger.Info("fetched slack user", zap.Any("user", user), zap.String("cmd", commandName))
+	return true
+}
+
+
+
 // validChannelAuthCheck validates/confirm if the incoming channel matches one of the "approved" channels
 // approved channels configured via Environment Variable: EVEBOT_SLACK_CHANNELS_AUTH
 func validChannelAuthCheck(channel string, channelMap map[string]interface{}, fn chatChannelInfoFn) bool {

@@ -6,5 +6,8 @@ import (
 )
 
 func mapSlackUser(slackUser *slack.User) *chatmodels.ChatUser {
-	return &chatmodels.ChatUser{Name: slackUser.Name}
+	return &chatmodels.ChatUser{
+		Name: slackUser.Name,
+		ID: slackUser.ID,
+	}
 }

@@ -47,7 +47,7 @@ func (cmd helpCmd) AckMsg() (string, bool) {
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd helpCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
+func (cmd helpCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn, chatUserInfoFn) bool {
 	return true
 }
 

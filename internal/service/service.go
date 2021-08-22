@@ -29,17 +29,17 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
 	// SlackAuthEnabled is like a "feature flag"
-	// set to true and we will check auth
-	// set to false and we will skip the auth check
+	// set to true we will check auth
+	// set to false we will skip the auth check
 	if p.Cfg.SlackAuthEnabled {
-		if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo) == false {
+		if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo, p.ChatService.GetUser) == false {
 			_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
 			return
 		}
 	}
 
 	// SlackMaintenanceEnabled is like a "feature flag"
-	// set to true and we are in Maintenance Mode
+	// set to true, and we are in Maintenance Mode
 	// Only Channels set to the EVEBOT_SLACK_CHANNELS_MAINTENANCE environment variable are allowed to issue commands
 	// ex:  EVEBOT_SLACK_CHANNELS_MAINTENANCE=my-evebot,evebot-tests
 	if p.Cfg.SlackMaintenanceEnabled {
@@ -57,14 +57,14 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 		}
 	}
 
-	// Hydrate the Acknowledgement Message and whether or not we should continue...
+	// Hydrate the Acknowledgement Message and whether we should continue...
 	ackMsg, cont := cmd.AckMsg()
-	// Send the AckMsg and get the Timestamp back so we can thread it later on...
+	// Send the AckMsg and get the Timestamp back, so we can thread it later on...
 	timeStamp := p.ChatService.PostMessageThread(ctx, ackMsg, cmd.Info().Channel, ev.ThreadTimeStamp)
 	// If the AckMessage needs to continue (no errors)...
 	if cont {
 		// Asynchronous CommandExecutor call
-		// which maps an EvebotCommand to and CommandHandler
+		// which maps an EveBotCommand to a CommandHandler
 		go p.CommandExecutor.Execute(context.TODO(), cmd, timeStamp)
 	}
 }

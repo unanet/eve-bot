@@ -135,10 +135,12 @@ func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
 
 type chatChannelInfoFn func(context.Context, string) (chatmodels.Channel, error)
 
+type chatUserInfoFn func(context.Context, string) (*chatmodels.ChatUser, error)
+
 // EvebotCommand interface (each evebot command needs to implement this interface)
 type EvebotCommand interface {
 	Info() ChatInfo
 	Options() CommandOptions
 	AckMsg() (string, bool)
-	IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn) bool
+	IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn) bool
 }
