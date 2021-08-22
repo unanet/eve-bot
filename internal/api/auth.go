@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/go-chi/jwtauth"
 	"github.com/unanet/go/pkg/log"
+	"github.com/unanet/go/pkg/middleware"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -30,11 +32,39 @@ func NewAuthController(mgr *manager.Service) *AuthController {
 // Setup satisfies the EveController interface for setting up the
 func (c AuthController) Setup(r chi.Router) {
 	r.Get("/oidc/callback", c.callback)
-	r.Get("/oidc/refresh", c.refresh)
+	r.Get("/auth", c.auth)
 }
 
-func (c AuthController) refresh(w http.ResponseWriter, r *http.Request) {
-	//c.oidc.Verify()
+func (c AuthController) auth(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	unknownToken := jwtauth.TokenFromHeader(r)
+
+	if len(unknownToken) == 0 {
+		middleware.Log(ctx).Debug("unknown token")
+		http.Redirect(w, r, c.oidc.AuthCodeURL(c.state), http.StatusFound)
+		return
+	}
+
+	verifiedToken, err := c.oidc.Verify(ctx, unknownToken)
+	if err != nil {
+		middleware.Log(ctx).Debug("invalid token")
+		http.Redirect(w, r, c.oidc.AuthCodeURL(c.state), http.StatusFound)
+		return
+	}
+
+	var idTokenClaims = new(json.RawMessage)
+	if err := verifiedToken.Claims(&idTokenClaims); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	render.JSON(w, r, TokenResponse{
+		AccessToken: unknownToken,
+		Expiry:      verifiedToken.Expiry,
+		Claims:      idTokenClaims,
+	})
+
+	//render.Respond(w, r, fmt.Sprintf("hello %s %s", verifiedToken.Subject, verifiedToken.Audience))
 }
 
 func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
