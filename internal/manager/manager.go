@@ -51,8 +51,9 @@ func NewService(cfg *config.Config, opts ...Option) *Service {
 
 }
 
-func (s *Service) AuthCodeURL() string {
-	return s.oidc.AuthCodeURL(s.cbstate)
+func (s *Service) AuthCodeURL(chatUser string) string {
+	return s.oidc.AuthCodeURL(chatUser)
+	//return s.oidc.AuthCodeURL(s.cbstate)
 }
 
 func (s *Service) AuthenticationMiddleware() func(http.Handler) http.Handler {

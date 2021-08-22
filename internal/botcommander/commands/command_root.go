@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/eve-bot/internal/botcommander/args"
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -27,13 +28,17 @@ func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
+func (cmd rootCmd) IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+	return true
+}
+
 // AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
 func (cmd rootCmd) AckMsg() (string, bool) {
 	return cmd.BaseAckMsg(help.New(help.HeaderOpt(rootCmdHelpSummary.String())).String())
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd rootCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn, chatUserInfoFn) bool {
+func (cmd rootCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn, chatUserInfoFn, *dynamodb.DynamoDB) bool {
 	return true
 }
 

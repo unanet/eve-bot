@@ -15,6 +15,12 @@ type Provider struct {
 	client *slack.Client
 }
 
+func (sp Provider) PostPrivateMessage(ctx context.Context, msg string, user string) {
+	slackUser, err := sp.client.GetUserInfoContext(ctx, user)
+	sp.handleDevOpsErrorNotification(ctx,err)
+	_ = sp.PostMessage(ctx,msg,slackUser.ID)
+}
+
 // New returns a new Slack provider
 func New(c *slack.Client) Provider {
 	return Provider{client: c}

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/unanet/eve-bot/internal/manager"
 	"strings"
 
 	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
@@ -15,7 +17,9 @@ type Provider struct {
 	CommandResolver              interfaces.CommandResolver
 	CommandExecutor              interfaces.CommandExecutor
 	EveAPI                       interfaces.EveAPI
+	UserDB                       *dynamodb.DynamoDB
 	Cfg                          *config.Config
+	MgrSvc                       *manager.Service
 	allowedChannelMap            map[string]interface{}
 	allowedMaintenanceChannelMap map[string]interface{}
 }
@@ -35,9 +39,12 @@ func New(
 	ea interfaces.EveAPI,
 	cs interfaces.ChatProvider,
 	ce interfaces.CommandExecutor,
-) *Provider {
+	svc *dynamodb.DynamoDB,
+	mgr *manager.Service) *Provider {
 
 	return &Provider{
+		MgrSvc:          mgr,
+		UserDB:          svc,
 		CommandResolver: cr,
 		EveAPI:          ea,
 		Cfg:             cfg,

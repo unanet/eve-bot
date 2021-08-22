@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 
 	"github.com/unanet/eve-bot/internal/botcommander/help"
@@ -32,6 +33,10 @@ func NewRestartCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
+func (cmd restartCmd) IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+	return true
+}
+
 // AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
 func (cmd restartCmd) AckMsg() (string, bool) {
 	return cmd.BaseAckMsg(help.New(
@@ -42,11 +47,11 @@ func (cmd restartCmd) AckMsg() (string, bool) {
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd restartCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn, chatUserFn chatUserInfoFn) bool {
+func (cmd restartCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	return cmd.IsHelpRequest() ||
-		validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) ||
+		validChannelAuthCheck(cmd.info.Channel, allowedChannel, chatChanFn) ||
 		lowerEnvAuthCheck(cmd.opts) ||
-		validUserRoleCheck(RestartCmdName,cmd,chatUserFn)
+		validUserRoleCheck(RestartCmdName, cmd, chatUserFn, db)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

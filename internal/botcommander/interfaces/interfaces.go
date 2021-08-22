@@ -23,6 +23,7 @@ type ChatProvider interface {
 	PostLinkMessageThread(ctx context.Context, msg string, user string, channel string, ts string)
 	ShowResultsMessageThread(ctx context.Context, msg, user, channel, ts string)
 	ReleaseResultsMessageThread(ctx context.Context, msg, user, channel, ts string)
+	PostPrivateMessage(ctx context.Context, msg string, user string)
 }
 
 // EveAPI interface used to interface with eve/pipeline API

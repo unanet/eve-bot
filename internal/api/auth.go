@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/go-chi/jwtauth"
 	"github.com/unanet/go/pkg/log"
 	"github.com/unanet/go/pkg/middleware"
@@ -17,15 +18,17 @@ import (
 
 // AuthController is the Controller/Handler for ping routes
 type AuthController struct {
-	state string
-	oidc  *identity.Service
+	state    string
+	oidc     *identity.Service
+	dynamoDB *dynamodb.DynamoDB
 }
 
 // NewAuthController creates a new OIDC controller
-func NewAuthController(mgr *manager.Service) *AuthController {
+func NewAuthController(mgr *manager.Service, svc *dynamodb.DynamoDB) *AuthController {
 	return &AuthController{
-		state: "somestate",
-		oidc:  mgr.OpenIDService(),
+		state:    "somestate",
+		oidc:     mgr.OpenIDService(),
+		dynamoDB: svc,
 	}
 }
 
@@ -63,14 +66,16 @@ func (c AuthController) auth(w http.ResponseWriter, r *http.Request) {
 		Expiry:      verifiedToken.Expiry,
 		Claims:      idTokenClaims,
 	})
-
-	//render.Respond(w, r, fmt.Sprintf("hello %s %s", verifiedToken.Subject, verifiedToken.Audience))
 }
 
 func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("state") != c.state {
-		http.Error(w, "state did not match", http.StatusBadRequest)
-		return
+		log.Logger.Info("mismatching state",
+			zap.Any("incoming_state", r.URL.Query().Get("state")),
+			zap.Any("expected_state", c.state),
+		)
+		//http.Error(w, "state did not match", http.StatusBadRequest)
+		//return
 	}
 
 	ctx := r.Context()
@@ -99,6 +104,15 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create struct to hold info about new item
+	type UserEntry struct {
+		UserID string
+		Email  string
+		Name   string
+		Roles  []string
+		Groups []string
+	}
+
 	//"roles":["default-roles-devops","admin"],
 	//"name":"Troy Sampson",
 	//"groups":["default-roles-devops","admin"],
@@ -107,12 +121,12 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 	//"family_name":"Sampson",
 	//"email":"tsampson@plainsight.ai",}
 	var claims = make(map[string]interface{})
-	b,err := idTokenClaims.MarshalJSON()
+	b, err := idTokenClaims.MarshalJSON()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = json.Unmarshal(b,&claims)
+	err = json.Unmarshal(b, &claims)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,11 +140,11 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 	email := claims["email"]
 
 	log.Logger.Info("user data",
-		zap.Any("name",name),
-		zap.Any("groups",groups),
-		zap.Any("roles",roles),
-		zap.Any("username",username),
-		zap.Any("email",email),
+		zap.Any("name", name),
+		zap.Any("groups", groups),
+		zap.Any("roles", roles),
+		zap.Any("username", username),
+		zap.Any("email", email),
 	)
 
 	render.JSON(w, r, TokenResponse{
@@ -141,7 +155,6 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		Claims:       idTokenClaims,
 	})
 }
-
 
 type TokenResponse struct {
 	AccessToken  string           `json:"access_token"`

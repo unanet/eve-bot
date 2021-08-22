@@ -7,6 +7,7 @@ import (
 
 func mapSlackUser(slackUser *slack.User) *chatmodels.ChatUser {
 	return &chatmodels.ChatUser{
+		Provider: "slack",
 		Name: slackUser.Name,
 		ID: slackUser.ID,
 	}

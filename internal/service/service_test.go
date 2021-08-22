@@ -188,7 +188,7 @@ func TestProvider_HandleSlackAppMentionEvent(t *testing.T) {
 			if tt.setupMocks != nil {
 				tt.setupMocks(m)
 			}
-			New(m.mockCfg, m.mockResolver, m.mockAPI, m.mockChat, m.mockExecutor).HandleSlackAppMentionEvent(tt.args.ctx, tt.args.ev)
+			New(m.mockCfg, m.mockResolver, m.mockAPI, m.mockChat, m.mockExecutor, nil, nil).HandleSlackAppMentionEvent(tt.args.ctx, tt.args.ev)
 		})
 	}
 }

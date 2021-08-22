@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -56,8 +57,17 @@ func (cmd showCmd) AckMsg() (string, bool) {
 	).String())
 }
 
+func (cmd showCmd) IsAuthenticated(chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+	return false
+}
+
+
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd showCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn, chatUserInfoFn) bool {
+func (cmd showCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn chatChannelInfoFn, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
+	if validUserRoleCheck(ShowCmdName, cmd, chatUserFn, db){
+		return true
+	}
+
 	return true
 }
 

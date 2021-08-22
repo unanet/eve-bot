@@ -28,15 +28,26 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// Resolve the input and return an EvebotCommand object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
+	if cmd.IsAuthenticated(p.ChatService.GetUser, p.UserDB) == false {
+		p.ChatService.PostPrivateMessage(ctx, p.MgrSvc.AuthCodeURL(ev.User), cmd.Info().User)
+		_ = p.ChatService.PostMessageThread(ctx, "You need to login. Please Check your Private DM's for an auth link", cmd.Info().Channel, ev.ThreadTimeStamp)
+		return
+	}
+
+	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo, p.ChatService.GetUser, p.UserDB) == false {
+		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
+		return
+	}
+
 	// SlackAuthEnabled is like a "feature flag"
 	// set to true we will check auth
 	// set to false we will skip the auth check
-	if p.Cfg.SlackAuthEnabled {
-		if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo, p.ChatService.GetUser) == false {
-			_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
-			return
-		}
-	}
+	//if p.Cfg.SlackAuthEnabled {
+	//	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo, p.ChatService.GetUser, p.UserDB) == false {
+	//		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
+	//		return
+	//	}
+	//}
 
 	// SlackMaintenanceEnabled is like a "feature flag"
 	// set to true, and we are in Maintenance Mode

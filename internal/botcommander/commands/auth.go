@@ -2,6 +2,8 @@ package commands
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"strings"
 
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -9,17 +11,39 @@ import (
 	"go.uber.org/zap"
 )
 
-func validUserRoleCheck(commandName string, cmd EvebotCommand, chatUserFn chatUserInfoFn) bool {
+type UserItem struct {
+	UserID string
+	Email  string
+	Name   string
+	Roles  []string
+	Groups []string
+}
+
+const userTableName = "eve-bot-users"
+
+func validUserRoleCheck(commandName string, cmd EvebotCommand, chatUserFn chatUserInfoFn, db *dynamodb.DynamoDB) bool {
 	user, err := chatUserFn(context.TODO(), cmd.Info().User)
 	if err != nil {
 		log.Logger.Error("failed to get user info auth check", zap.Error(err))
 		return false
 	}
 	log.Logger.Info("fetched slack user", zap.Any("user", user), zap.String("cmd", commandName))
+
+	_, err = db.GetItem(&dynamodb.GetItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"UserID": {
+				S: aws.String(user.FullyQualifiedName()),
+			},
+		},
+		TableName: aws.String(userTableName),
+	})
+	if err != nil {
+		log.Logger.Error("failed to get fully qualified user auth record", zap.Error(err))
+		return false
+	}
+
 	return true
 }
-
-
 
 // validChannelAuthCheck validates/confirm if the incoming channel matches one of the "approved" channels
 // approved channels configured via Environment Variable: EVEBOT_SLACK_CHANNELS_AUTH
