@@ -77,7 +77,7 @@ func (mr *MockEvebotCommandMockRecorder) AckMsg() *gomock.Call {
 }
 
 // IsAuthorized mocks base method
-func (m *MockEvebotCommand) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn) bool {
+func (m *MockEvebotCommand) IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn, ccfn chatUserInfoFn) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsAuthorized", allowedChannel, fn)
 	ret0, _ := ret[0].(bool)
