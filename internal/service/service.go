@@ -40,7 +40,7 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 		return
 	}
 
-	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo, p.ChatService.GetUser, p.UserDB) == false {
+	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo) == false {
 		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
 	}

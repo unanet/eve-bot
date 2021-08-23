@@ -136,13 +136,11 @@ func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
 
 type ChatChannelInfoFn func(context.Context, string) (chatmodels.Channel, error)
 
-type ChatUserInfoFn func(context.Context, string) (*chatmodels.ChatUser, error)
-
 // EvebotCommand interface (each evebot command needs to implement this interface)
 type EvebotCommand interface {
 	Info() ChatInfo
 	Options() CommandOptions
 	AckMsg() (string, bool)
-	IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool
-	IsAuthenticated(chatUserFn *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool
+	IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn) bool
+	IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool
 }

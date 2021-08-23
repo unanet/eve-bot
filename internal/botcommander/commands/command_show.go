@@ -64,12 +64,8 @@ func (cmd showCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.D
 
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd showCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
-	if validUserRoleCheck(ShowCmdName, cmd, chatUserFn, db){
-		return true
-	}
-
-	return true
+func (cmd showCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn) bool {
+	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannel, chatChanFn) || lowerEnvAuthCheck(cmd.opts)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

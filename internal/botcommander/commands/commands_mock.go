@@ -79,17 +79,17 @@ func (mr *MockEvebotCommandMockRecorder) IsAuthenticated(chatUserFn, db interfac
 }
 
 // IsAuthorized mocks base method.
-func (m *MockEvebotCommand) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (m *MockEvebotCommand) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsAuthorized", allowedChannel, chatChanFn, chatUserFn, db)
+	ret := m.ctrl.Call(m, "IsAuthorized", allowedChannel, chatChanFn)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
 // IsAuthorized indicates an expected call of IsAuthorized.
-func (mr *MockEvebotCommandMockRecorder) IsAuthorized(allowedChannel, chatChanFn, chatUserFn, db interface{}) *gomock.Call {
+func (mr *MockEvebotCommandMockRecorder) IsAuthorized(allowedChannel, chatChanFn interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthorized", reflect.TypeOf((*MockEvebotCommand)(nil).IsAuthorized), allowedChannel, chatChanFn, chatUserFn, db)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthorized", reflect.TypeOf((*MockEvebotCommand)(nil).IsAuthorized), allowedChannel, chatChanFn)
 }
 
 // Options mocks base method.

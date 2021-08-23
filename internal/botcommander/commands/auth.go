@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 	"strings"
 
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -21,18 +22,12 @@ type UserItem struct {
 
 const userTableName = "eve-bot-users"
 
-func validUserRoleCheck(commandName string, cmd EvebotCommand, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
-	user, err := chatUserFn(context.TODO(), cmd.Info().User)
-	if err != nil {
-		log.Logger.Error("failed to get user info auth check", zap.Error(err))
-		return false
-	}
-	log.Logger.Info("fetched slack user", zap.Any("user", user), zap.String("cmd", commandName))
-
-	_, err = db.GetItem(&dynamodb.GetItemInput{
+func validUserRoleCheck(cmd EvebotCommand, chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
+	log.Logger.Info("fetched slack user", zap.Any("user", chatUser), zap.String("cmd", cmd.Info().CommandName))
+	_, err := db.GetItem(&dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"UserID": {
-				S: aws.String(user.FullyQualifiedName()),
+				S: aws.String(chatUser.FullyQualifiedName()),
 			},
 		},
 		TableName: aws.String(userTableName),
@@ -41,7 +36,6 @@ func validUserRoleCheck(commandName string, cmd EvebotCommand, chatUserFn ChatUs
 		log.Logger.Error("failed to get fully qualified user auth record", zap.Error(err))
 		return false
 	}
-
 	return true
 }
 

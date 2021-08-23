@@ -54,7 +54,7 @@ func (cmd helpCmd)  IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.
 
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd helpCmd) IsAuthorized(map[string]interface{}, ChatChannelInfoFn, ChatUserInfoFn, *dynamodb.DynamoDB) bool {
+func (cmd helpCmd) IsAuthorized(map[string]interface{}, ChatChannelInfoFn) bool {
 	return true
 }
 
