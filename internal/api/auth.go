@@ -1,11 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -146,8 +149,7 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		zap.Any("email", email),
 	)
 
-	render.SetContentType(render.ContentTypeHTML)
-	render.Respond(w,r, []byte(`
+	body := []byte(`
 <!doctype html>
 
 <html lang="en">
@@ -161,7 +163,18 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 	<p> You may <a href="#" onclick="close_window();return false;">close the tab</a>  </p>
 </body>
 </html>
-`))
+`)
+
+	bodyBytes := ioutil.NopCloser(bytes.NewReader(body))
+	r.Body = bodyBytes
+	r.ContentLength = int64(len(body))
+	r.Header.Set("Content-Length", strconv.Itoa(len(body)))
+	r.Header.Set("Content-Type", "text/html")
+	return
+	//r.Header.Set("Content-Length", len(body))
+	//
+	//render.SetContentType(render.ContentTypeHTML)
+	//render.Respond(w,r, )
 
 	//render.JSON(w, r, TokenResponse{
 	//	AccessToken:  oauth2Token.AccessToken,

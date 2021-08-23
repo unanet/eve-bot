@@ -21,6 +21,18 @@ func (sp Provider) PostPrivateMessage(ctx context.Context, msg string, user stri
 	_ = sp.PostMessage(ctx,msg,slackUser.ID)
 }
 
+func (sp Provider) postAuthLinkAccountButton(ctx context.Context, msg string, user string) {
+	slackUser, err := sp.client.GetUserInfoContext(ctx, user)
+	sp.handleDevOpsErrorNotification(ctx,err)
+	sp.client.Text
+
+
+	_ = sp.PostMessage(ctx,msg,slackUser.ID)
+}
+
+
+
+
 // New returns a new Slack provider
 func New(c *slack.Client) Provider {
 	return Provider{client: c}
