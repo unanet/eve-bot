@@ -148,7 +148,6 @@ var mockUserFunc = func(context.Context, string) (*chatmodels.ChatUser, error) {
 	}, nil
 }
 
-
 func TestProvider_HandleSlackAppMentionEvent(t *testing.T) {
 	t.Skip()
 	return
@@ -171,7 +170,7 @@ func TestProvider_HandleSlackAppMentionEvent(t *testing.T) {
 			name: "happy path here",
 			ctrl: ctrl,
 			setupMocks: func(t *serviceMocks) {
-				t.mockCmd.EXPECT().IsAuthenticated(mockUserFunc,nil)
+				t.mockCmd.EXPECT().IsAuthenticated(mockUserFunc, nil)
 				t.mockChat.EXPECT().PostPrivateMessage(context.Background(), "", mockChatInfo.User)
 				t.mockChat.EXPECT().PostMessageThread(context.Background(), "Ohhh yeah", mockSlackEvent.Channel, mockSlackEvent.ThreadTimeStamp).Return("2342342342")
 				t.mockCmd.EXPECT().Info().Return(mockChatInfo)

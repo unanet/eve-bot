@@ -3,9 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/go-chi/jwtauth"
 	"github.com/unanet/go/pkg/log"
-	"github.com/unanet/go/pkg/middleware"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -35,43 +33,44 @@ func NewAuthController(mgr *manager.Service, svc *dynamodb.DynamoDB) *AuthContro
 // Setup satisfies the EveController interface for setting up the
 func (c AuthController) Setup(r chi.Router) {
 	r.Get("/oidc/callback", c.callback)
-	r.Get("/auth", c.auth)
+	//r.Get("/auth", c.auth)
 }
 
-func (c AuthController) auth(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	unknownToken := jwtauth.TokenFromHeader(r)
-
-	if len(unknownToken) == 0 {
-		middleware.Log(ctx).Debug("unknown token")
-		http.Redirect(w, r, c.oidc.AuthCodeURL(c.state), http.StatusFound)
-		return
-	}
-
-	verifiedToken, err := c.oidc.Verify(ctx, unknownToken)
-	if err != nil {
-		middleware.Log(ctx).Debug("invalid token")
-		http.Redirect(w, r, c.oidc.AuthCodeURL(c.state), http.StatusFound)
-		return
-	}
-
-	var idTokenClaims = new(json.RawMessage)
-	if err := verifiedToken.Claims(&idTokenClaims); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	render.JSON(w, r, TokenResponse{
-		AccessToken: unknownToken,
-		Expiry:      verifiedToken.Expiry,
-		Claims:      idTokenClaims,
-	})
-}
+//func (c AuthController) auth(w http.ResponseWriter, r *http.Request) {
+//	ctx := r.Context()
+//	unknownToken := jwtauth.TokenFromHeader(r)
+//
+//	if len(unknownToken) == 0 {
+//		middleware.Log(ctx).Debug("unknown token")
+//		http.Redirect(w, r, c.oidc.AuthCodeURL(c.state), http.StatusFound)
+//		return
+//	}
+//
+//	verifiedToken, err := c.oidc.Verify(ctx, unknownToken)
+//	if err != nil {
+//		middleware.Log(ctx).Debug("invalid token")
+//		http.Redirect(w, r, c.oidc.AuthCodeURL(c.state), http.StatusFound)
+//		return
+//	}
+//
+//	var idTokenClaims = new(json.RawMessage)
+//	if err := verifiedToken.Claims(&idTokenClaims); err != nil {
+//		http.Error(w, err.Error(), http.StatusInternalServerError)
+//		return
+//	}
+//
+//	render.JSON(w, r, TokenResponse{
+//		AccessToken: unknownToken,
+//		Expiry:      verifiedToken.Expiry,
+//		Claims:      idTokenClaims,
+//	})
+//}
 
 func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Query().Get("state") != c.state {
+	incomingState := r.URL.Query().Get("state")
+	if incomingState != c.state {
 		log.Logger.Info("mismatching state",
-			zap.Any("incoming_state", r.URL.Query().Get("state")),
+			zap.Any("incoming_state", incomingState),
 			zap.Any("expected_state", c.state),
 		)
 		//http.Error(w, "state did not match", http.StatusBadRequest)
@@ -147,13 +146,30 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		zap.Any("email", email),
 	)
 
-	render.JSON(w, r, TokenResponse{
-		AccessToken:  oauth2Token.AccessToken,
-		RefreshToken: oauth2Token.RefreshToken,
-		TokenType:    oauth2Token.TokenType,
-		Expiry:       oauth2Token.Expiry,
-		Claims:       idTokenClaims,
-	})
+	render.SetContentType(render.ContentTypeHTML)
+	render.Respond(w,r, []byte(`
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Successful Auth</title>
+</head>
+<body>
+  	<p> You have successfully Logged In </p>
+	<p> You may <a href="#" onclick="close_window();return false;">close the tab</a>  </p>
+</body>
+</html>
+`))
+
+	//render.JSON(w, r, TokenResponse{
+	//	AccessToken:  oauth2Token.AccessToken,
+	//	RefreshToken: oauth2Token.RefreshToken,
+	//	TokenType:    oauth2Token.TokenType,
+	//	Expiry:       oauth2Token.Expiry,
+	//	Claims:       idTokenClaims,
+	//})
 }
 
 type TokenResponse struct {

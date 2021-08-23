@@ -30,7 +30,7 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 
 	if cmd.IsAuthenticated(p.ChatService.GetUser, p.UserDB) == false {
 		p.ChatService.PostPrivateMessage(ctx, p.MgrSvc.AuthCodeURL(ev.User), cmd.Info().User)
-		_ = p.ChatService.PostMessageThread(ctx, "You need to login. Please Check your Private DM's for an auth link", cmd.Info().Channel, ev.ThreadTimeStamp)
+		_ = p.ChatService.PostMessageThread(ctx, "You need to login. Please Check your Private DM from `evebot` for an auth link", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
 	}
 
