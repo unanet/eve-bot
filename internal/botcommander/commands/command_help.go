@@ -5,6 +5,7 @@ import (
 	"github.com/unanet/eve-bot/internal/botcommander/args"
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 )
 
 type helpCmd struct {
@@ -47,7 +48,7 @@ func (cmd helpCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd helpCmd)  IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd helpCmd)  IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
 	return true
 }
 

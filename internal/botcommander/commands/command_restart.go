@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 )
@@ -33,10 +34,6 @@ func NewRestartCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-func (cmd restartCmd) IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
-	return true
-}
-
 // AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
 func (cmd restartCmd) AckMsg() (string, bool) {
 	return cmd.BaseAckMsg(help.New(
@@ -44,6 +41,10 @@ func (cmd restartCmd) AckMsg() (string, bool) {
 		help.UsageOpt(restartCmdHelpUsage.String()),
 		help.ExamplesOpt(restartCmdHelpExample.String()),
 	).String())
+}
+
+func (cmd restartCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
+	return true
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth

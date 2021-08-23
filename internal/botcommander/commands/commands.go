@@ -144,5 +144,5 @@ type EvebotCommand interface {
 	Options() CommandOptions
 	AckMsg() (string, bool)
 	IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn, chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool
-	IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool
+	IsAuthenticated(chatUserFn *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 )
 
 type runCmd struct {
@@ -51,7 +52,7 @@ func (cmd runCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd runCmd) IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd runCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
 	return true
 }
 

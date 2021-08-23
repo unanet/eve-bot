@@ -5,6 +5,7 @@
 package commands
 
 import (
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 	reflect "reflect"
 
 	dynamodb "github.com/aws/aws-sdk-go/service/dynamodb"
@@ -64,7 +65,7 @@ func (mr *MockEvebotCommandMockRecorder) Info() *gomock.Call {
 }
 
 // IsAuthenticated mocks base method.
-func (m *MockEvebotCommand) IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (m *MockEvebotCommand) IsAuthenticated(chatUserFn *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsAuthenticated", chatUserFn, db)
 	ret0, _ := ret[0].(bool)

@@ -28,8 +28,14 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// Resolve the input and return an EvebotCommand object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
-	if cmd.IsAuthenticated(p.ChatService.GetUser, p.UserDB) == false {
-		p.ChatService.PostPrivateMessage(ctx, p.MgrSvc.AuthCodeURL(ev.User), cmd.Info().User)
+	slackUser, err := p.ChatService.GetUser(ctx, cmd.Info().User)
+	if err != nil {
+		p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
+		return
+	}
+
+	if cmd.IsAuthenticated(slackUser, p.UserDB) == false {
+		p.ChatService.PostPrivateMessage(ctx, p.MgrSvc.AuthCodeURL(slackUser.FullyQualifiedName()), cmd.Info().User)
 		_ = p.ChatService.PostMessageThread(ctx, "You need to login. Please Check your Private DM from `evebot` for an auth link", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
 	}

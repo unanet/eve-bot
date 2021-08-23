@@ -63,6 +63,6 @@ func initController(cfg *config.Config) []Controller {
 		NewPingController(),
 		NewSlackController(svc),
 		NewEveController(svc),
-		NewAuthController(mgr, dynamoDBSvc),
+		NewAuthController(svc),
 	}
 }

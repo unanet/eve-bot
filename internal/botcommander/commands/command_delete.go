@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -51,7 +52,7 @@ func (cmd deleteCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd deleteCmd)  IsAuthenticated(chatUserFn ChatUserInfoFn, db *dynamodb.DynamoDB) bool {
+func (cmd deleteCmd)  IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
 	return true
 }
 
