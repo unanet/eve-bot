@@ -1,14 +1,11 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
-	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -36,8 +33,13 @@ func NewAuthController(mgr *manager.Service, svc *dynamodb.DynamoDB) *AuthContro
 // Setup satisfies the EveController interface for setting up the
 func (c AuthController) Setup(r chi.Router) {
 	r.Get("/oidc/callback", c.callback)
-	//r.Get("/auth", c.auth)
+	r.Get("/signed-in", c.successfulSignIn)
 }
+
+func (c AuthController) successfulSignIn(w http.ResponseWriter, r *http.Request) {
+	_,_ =w.Write([]byte("<!doctype html>\n\n<html lang=\"en\">\n<head>\n <script language=\"javascript\" type=\"text/javascript\">\nfunction windowClose() {\nwindow.open('','_parent','');\nwindow.close();\n}\n</script> <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Successful Auth</title>\n</head>\n<body>\n  \t<p> You have successfully Signed In. You may close this windows</p>\n</body>\n</html>"))
+}
+
 
 //func (c AuthController) auth(w http.ResponseWriter, r *http.Request) {
 //	ctx := r.Context()
@@ -149,28 +151,12 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		zap.Any("email", email),
 	)
 
-	body := []byte(`
-<!doctype html>
-
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Successful Auth</title>
-</head>
-<body>
-  	<p> You have successfully Logged In </p>
-	<p> You may <a href="#" onclick="close_window();return false;">close the tab</a>  </p>
-</body>
-</html>
-`)
-
-	bodyBytes := ioutil.NopCloser(bytes.NewReader(body))
-	r.Body = bodyBytes
-	r.ContentLength = int64(len(body))
-	r.Header.Set("Content-Length", strconv.Itoa(len(body)))
-	r.Header.Set("Content-Type", "text/html")
-	render.Respond(w,r,"successful sign-in - close the window")
+	//bodyBytes := ioutil.NopCloser(bytes.NewReader(body))
+	//r.Body = bodyBytes
+	//r.ContentLength = int64(len(body))
+	//r.Header.Set("Content-Length", strconv.Itoa(len(body)))
+	//r.Header.Set("Content-Type", "text/html")
+	http.Redirect(w,r, "/signed-in", http.StatusFound)
 	return
 	//r.Header.Set("Content-Length", len(body))
 	//
