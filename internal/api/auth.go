@@ -170,6 +170,7 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 	r.ContentLength = int64(len(body))
 	r.Header.Set("Content-Length", strconv.Itoa(len(body)))
 	r.Header.Set("Content-Type", "text/html")
+	render.Respond(w,r,"successful sign-in - close the window")
 	return
 	//r.Header.Set("Content-Length", len(body))
 	//
