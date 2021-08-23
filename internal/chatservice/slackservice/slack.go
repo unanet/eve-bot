@@ -18,19 +18,22 @@ type Provider struct {
 func (sp Provider) PostPrivateMessage(ctx context.Context, msg string, user string) {
 	slackUser, err := sp.client.GetUserInfoContext(ctx, user)
 	sp.handleDevOpsErrorNotification(ctx,err)
-	_ = sp.PostMessage(ctx,msg,slackUser.ID)
+	sp.postAuthLinkMessage(ctx,msg,slackUser.ID)
 }
 
-func (sp Provider) postAuthLinkAccountButton(ctx context.Context, msg string, user string) {
-	slackUser, err := sp.client.GetUserInfoContext(ctx, user)
-	sp.handleDevOpsErrorNotification(ctx,err)
-	sp.client.Text
+// PostLinkMessageThread sends a threaded message with links
+func (sp Provider) postAuthLinkMessage(ctx context.Context, url string, user string) {
 
+	msgOptionBlocks := slack.MsgOptionBlocks(
+		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgLogLinks)),
+		slack.NewDividerBlock(),
+		sectionBlockOpt(fmt.Sprintf("<%s|Link Account>", url)),
+	)
 
-	_ = sp.PostMessage(ctx,msg,slackUser.ID)
+	linkOpt := slack.MsgOptionEnableLinkUnfurl()
+	_, _, err := sp.client.PostMessageContext(ctx, user, msgOptionBlocks, linkOpt)
+	sp.handleDevOpsErrorNotification(ctx, err)
 }
-
-
 
 
 // New returns a new Slack provider
