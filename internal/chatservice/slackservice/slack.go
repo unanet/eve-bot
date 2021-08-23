@@ -25,9 +25,9 @@ func (sp Provider) PostPrivateMessage(ctx context.Context, msg string, user stri
 func (sp Provider) postAuthLinkMessage(ctx context.Context, url string, user string) {
 
 	msgOptionBlocks := slack.MsgOptionBlocks(
-		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgLogLinks)),
+		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgAuthLink)),
 		slack.NewDividerBlock(),
-		sectionBlockOpt(fmt.Sprintf("<%s|Link Account>", url)),
+		sectionBlockOpt(fmt.Sprintf("<%s|Account Signin>", url)),
 	)
 
 	linkOpt := slack.MsgOptionEnableLinkUnfurl()

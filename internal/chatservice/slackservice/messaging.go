@@ -10,6 +10,7 @@ const (
 	msgLogLinks                  = "Here are the latest logs..."
 	msgResultsNotification       = "Here are your results..."
 	msgReleaseNotification       = "Successfully released...."
+	msgAuthLink       		     = "Here is your account auth link:"
 )
 
 const (
