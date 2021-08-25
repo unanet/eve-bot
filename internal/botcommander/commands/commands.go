@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/unanet/eve-bot/internal/botcommander/args"
@@ -55,7 +56,7 @@ type baseCommand struct {
 }
 
 func (bc *baseCommand) verifyInput() {
-	if bc.ValidInputLength() == false {
+	if !bc.ValidInputLength() {
 		bc.errs = append(bc.errs, fmt.Errorf("invalid input length: %v", bc.input))
 	}
 }
@@ -124,7 +125,7 @@ func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
 	if bc.IsHelpRequest() || bc.info.CommandName == "" {
 		return fmt.Sprintf("<@%s>...\n\n%s", bc.info.User, cmdHelp), false
 	}
-	if bc.ValidInputLength() == false {
+	if !bc.ValidInputLength() {
 		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", bc.info.User, bc.input, bc.info.CommandName), false
 	}
 	if len(bc.BaseErrMsg()) > 0 {

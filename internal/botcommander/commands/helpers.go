@@ -104,7 +104,7 @@ func CleanUrls(input string) string {
 }
 
 func hydrateMetadataMap(keyvals []string) params.MetadataMap {
-	result := make(params.MetadataMap, 0)
+	result := make(params.MetadataMap)
 	if len(keyvals) == 0 {
 		return nil
 	}

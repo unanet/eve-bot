@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 
@@ -84,7 +85,7 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 	case resources.MetadataName:
 		// delete metadata for unaneta in current una-int key key2 key3
 		// delete metadata for {{ service }} in {{ namespace }} {{ environment }} key key2 key3
-		if cmd.ValidInputLength() == false {
+		if !cmd.ValidInputLength() {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete metadata: %v", cmd.input))
 			return
 		}
@@ -96,7 +97,7 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 		return
 	case resources.VersionName:
 		// delete version for unaneta in current una-int
-		if cmd.ValidInputLength() == false {
+		if !cmd.ValidInputLength() {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete version: %v", cmd.input))
 			return
 		}

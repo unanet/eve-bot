@@ -1,9 +1,10 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
-	"strings"
 
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -97,6 +98,4 @@ func (cmd *releaseCmd) resolveDynamicOptions() {
 		cmd.opts[params.ToFeedName] = cmd.input[5]
 		return
 	}
-
-	return
 }
