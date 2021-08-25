@@ -48,10 +48,9 @@ func (cmd helpCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd helpCmd)  IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
+func (cmd helpCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
 	return true
 }
-
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
 func (cmd helpCmd) IsAuthorized(map[string]interface{}, ChatChannelInfoFn) bool {

@@ -52,7 +52,7 @@ func (cmd deleteCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd deleteCmd)  IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
+func (cmd deleteCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
 	return true
 }
 

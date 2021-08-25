@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 
@@ -59,9 +60,8 @@ func (cmd showCmd) AckMsg() (string, bool) {
 }
 
 func (cmd showCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
-	return false
+	return true
 }
-
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
 func (cmd showCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn) bool {

@@ -27,7 +27,6 @@ func NewInvalidCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return cmd
 }
 
-
 // AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
 func (cmd invalidCmd) AckMsg() (string, bool) {
 	summary := help.Summary(fmt.Sprintf("I don't know how to execute the `%s` command.\n\nTry running: ```@evebot help```\n", cmd.input)).String()

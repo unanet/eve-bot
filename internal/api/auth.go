@@ -15,13 +15,13 @@ import (
 
 // AuthController is the Controller/Handler for ping routes
 type AuthController struct {
-	svc   *service.Provider
+	svc *service.Provider
 }
 
 // NewAuthController creates a new OIDC controller
 func NewAuthController(svc *service.Provider) *AuthController {
 	return &AuthController{
-		svc:   svc,
+		svc: svc,
 	}
 }
 
@@ -139,9 +139,16 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 	//	Expiry:       oauth2Token.Expiry,
 	//	Claims:       idTokenClaims,
 	//}
+	render.JSON(w, r, TokenResponse{
+		AccessToken:  oauth2Token.AccessToken,
+		RefreshToken: oauth2Token.RefreshToken,
+		TokenType:    oauth2Token.TokenType,
+		Expiry:       oauth2Token.Expiry,
+		Claims:       idTokenClaims,
+	})
 
 	// Just redirecting to a different page to prevent id refresh (which throws an error)
-	http.Redirect(w, r, "/signed-in", http.StatusFound)
+	//http.Redirect(w, r, "/signed-in", http.StatusFound)
 	return
 
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/unanet/eve-bot/internal/config"
 	"github.com/unanet/go/pkg/errors"
 	"github.com/unanet/go/pkg/identity"
-	"github.com/unanet/go/pkg/log"
 	"github.com/unanet/go/pkg/middleware"
 	"go.uber.org/zap"
 )
@@ -102,23 +101,6 @@ func (s *Service) GetTokenClaims(ctx context.Context) jwt.MapClaims {
 	return nil
 }
 
-func (s *Service) ReadOnlyMiddleware() func(http.Handler) http.Handler {
-
-	return func(next http.Handler) http.Handler {
-		hfn := func(w http.ResponseWriter, r *http.Request) {
-
-			ctx := r.Context()
-			log.Logger.Info("API Listener", zap.String("in middleware", r.URL.String()))
-
-			if s.cfg.ReadOnly && r.Method != http.MethodGet {
-				err := errors.NewRestError(http.StatusServiceUnavailable, "Unable to perform action. API is in read only mode")
-				middleware.Log(ctx).Debug("invalid token", zap.Error(err))
-				http.Error(w, err.Error(), err.Code)
-				return
-			}
-
-			next.ServeHTTP(w, r)
-		}
-		return http.HandlerFunc(hfn)
-	}
-}
+//func (s *Service) ImpersonateUser(userAccessToken, userRefreshToken string) (string,error) {
+//	//s.oidc.ImpersonateUser()
+//}

@@ -60,7 +60,7 @@ func (cmd deployCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-func (cmd deployCmd)  IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
+func (cmd deployCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
 	return true
 }
 
