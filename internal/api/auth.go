@@ -208,7 +208,7 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func extractClaimSlice(input ...interface{}) []string {
+func extractClaimSlice(input []interface{}) []string {
 	var paramSlice []string
 	for _, param := range input {
 		paramSlice = append(paramSlice, param.(string))
