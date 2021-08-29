@@ -37,7 +37,7 @@ func (c AuthController) Setup(r chi.Router) {
 }
 
 func (c AuthController) successfulSignIn(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte("<!doctype html>\n\n<html lang=\"en\">\n<head>\n <script language=\"javascript\" type=\"text/javascript\">\nfunction windowClose() {\nwindow.open('','_parent','');\nwindow.close();\n}\n</script> <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Successful Auth</title>\n</head>\n<body>\n  \t<p> You have successfully Signed In. You may close this windows</p>\n</body>\n</html>"))
+	_, _ = w.Write([]byte("<!doctype html>\n\n<html lang=\"en\">\n<head>\n <script language=\"javascript\" type=\"text/javascript\">\nfunction windowClose() {\nwindow.open('','_parent','');\nwindow.close();\n}\n</script> <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Successful Auth</title>\n</head>\n<body>\n  \t<p> You have successfully Signed In. You may close this window</p>\n</body>\n</html>"))
 }
 
 func (c AuthController) auth(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +130,7 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 
 	switch v := claims["roles"].(type) {
 	case []string:
-		ue.Roles = v
+		log.Logger.Info("incoming claims roles slice of string", zap.Any("v", v))
 	case []interface{}:
 		log.Logger.Info("incoming claims roles slice of interfaces", zap.Any("v", v))
 	case interface{}:
@@ -141,7 +141,7 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 
 	switch g := claims["groups"].(type) {
 	case []string:
-		ue.Groups = g
+		log.Logger.Info("incoming claims group slice of string", zap.Any("v", g))
 	case []interface{}:
 		log.Logger.Info("incoming claims groups slice of interfaces", zap.Any("g", g))
 	case interface{}:
@@ -171,12 +171,13 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 
 	// User does not exist (lets create an entry)
 	if result == nil || result.Item == nil {
+		log.Logger.Info("bot user does not exist")
 		av, err := dynamodbattribute.MarshalMap(ue)
 		if err != nil {
 			render.Respond(w, r, errors.Wrap(err))
 			return
 		}
-		_, err = c.svc.UserDB.PutItem(&dynamodb.PutItemInput{
+		userEntry, err := c.svc.UserDB.PutItem(&dynamodb.PutItemInput{
 			Item:      av,
 			TableName: aws.String("eve-bot-users"),
 		})
@@ -184,13 +185,16 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 			render.Respond(w, r, errors.Wrap(err))
 			return
 		}
+		log.Logger.Info("saved bot user", zap.Any("user_entry", userEntry))
 	} else {
+		log.Logger.Info("bot user exists", zap.Any("res", result))
 		entry := UserEntry{}
 		err = dynamodbattribute.UnmarshalMap(result.Item, &entry)
 		if err != nil {
 			render.Respond(w, r, errors.Wrap(err))
 			return
 		}
+		log.Logger.Info("read bot user", zap.Any("user_entry", entry))
 	}
 
 	//render.JSON(w, r, TokenResponse{
