@@ -205,7 +205,6 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 	// Just redirecting to a different page to prevent id refresh (which throws an error)
 	http.Redirect(w, r, "/signed-in", http.StatusFound)
 	return
-
 }
 
 func extractClaimSlice(input interface{}) []string {
@@ -217,6 +216,7 @@ func extractClaimSlice(input interface{}) []string {
 		return paramSlice
 	}
 	log.Logger.Warn("invalid type on incoming claim slice", zap.Any("input", input), zap.Reflect("type", input))
+	return []string{}
 }
 
 type TokenResponse struct {
