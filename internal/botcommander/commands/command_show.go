@@ -60,7 +60,7 @@ func (cmd showCmd) AckMsg() (string, bool) {
 }
 
 func (cmd showCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
-	return true
+	return false
 }
 
 // IsAuthorized satisfies the EveBotCommand Interface and checks the auth
