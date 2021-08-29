@@ -100,14 +100,6 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create struct to hold info about new item
-	type UserEntry struct {
-		UserID string
-		Email  string
-		Name   string
-		Roles  []string
-		Groups []string
-	}
 
 	var claims = make(map[string]interface{})
 	b, err := idTokenClaims.MarshalJSON()
@@ -120,13 +112,43 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Logger.Info("incoming claims data", zap.Any("claims", claims))
+
+	// Create struct to hold info about new item
+	type UserEntry struct {
+		UserID string
+		Email  string
+		Name   string
+		Roles  []string
+		Groups []string
+	}
 
 	ue := &UserEntry{
 		UserID: incomingState,
 		Email:  claims["email"].(string),
 		Name:   claims["preferred_username"].(string),
-		Roles:  claims["roles"].([]string),
-		Groups: claims["groups"].([]string),
+	}
+
+	switch v := claims["roles"].(type) {
+	case []string:
+		ue.Roles = v
+	case []interface{}:
+		log.Logger.Info("incoming claims roles slice of interfaces", zap.Any("v", v))
+	case interface{}:
+		log.Logger.Info("incoming claims roles interface", zap.Any("v", v))
+	default:
+		log.Logger.Info("incoming claims roles unknown", zap.Any("v", v))
+	}
+
+	switch g := claims["groups"].(type) {
+	case []string:
+		ue.Groups = g
+	case []interface{}:
+		log.Logger.Info("incoming claims groups slice of interfaces", zap.Any("g", g))
+	case interface{}:
+		log.Logger.Info("incoming claims groups interface", zap.Any("g", g))
+	default:
+		log.Logger.Info("incoming claims groups unknown", zap.Any("g", g))
 	}
 
 	log.Logger.Info("user data", zap.Any("user_entry", ue))
