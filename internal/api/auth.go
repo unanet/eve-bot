@@ -208,12 +208,15 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func extractClaimSlice(input []interface{}) []string {
-	var paramSlice []string
-	for _, param := range input {
-		paramSlice = append(paramSlice, param.(string))
+func extractClaimSlice(input interface{}) []string {
+	if v, ok := input.([]interface{}); ok {
+		var paramSlice []string
+		for _, param := range v {
+			paramSlice = append(paramSlice, param.(string))
+		}
+		return paramSlice
 	}
-	return paramSlice
+	log.Logger.Warn("invalid type on incoming claim slice", zap.Any("input", input), zap.Reflect("type", input))
 }
 
 type TokenResponse struct {
