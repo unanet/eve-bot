@@ -128,7 +128,7 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		Email:  claims["email"].(string),
 		Name:   claims["preferred_username"].(string),
 		Roles:  extractClaimSlice(claims["roles"]),
-		Groups: extractClaimSlice(claims["group"]),
+		Groups: extractClaimSlice(claims["groups"]),
 	}
 
 	log.Logger.Debug("user entry data", zap.Any("user_entry", ue))
