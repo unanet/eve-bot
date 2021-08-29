@@ -2,10 +2,14 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"github.com/unanet/eve-bot/internal/service"
+	"github.com/unanet/go/pkg/errors"
 	"github.com/unanet/go/pkg/log"
 	"github.com/unanet/go/pkg/middleware"
 	"go.uber.org/zap"
@@ -117,28 +121,48 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Store these in Dynamo Table
-	name := claims["name"]
-	groups := claims["groups"]
-	roles := claims["roles"]
-	username := claims["preferred_username"]
-	email := claims["email"]
+	ue := &UserEntry{
+		UserID: incomingState,
+		Email:  claims["email"].(string),
+		Name:   claims["preferred_username"].(string),
+		Roles:  claims["roles"].([]string),
+		Groups: claims["groups"].([]string),
+	}
 
-	log.Logger.Info("user data",
-		zap.Any("name", name),
-		zap.Any("groups", groups),
-		zap.Any("roles", roles),
-		zap.Any("username", username),
-		zap.Any("email", email),
-	)
+	log.Logger.Info("user data", zap.Any("user_entry", ue))
 
-	//_ = TokenResponse{
-	//	AccessToken:  oauth2Token.AccessToken,
-	//	RefreshToken: oauth2Token.RefreshToken,
-	//	TokenType:    oauth2Token.TokenType,
-	//	Expiry:       oauth2Token.Expiry,
-	//	Claims:       idTokenClaims,
-	//}
+	result, err := c.svc.UserDB.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String("eve-bot-users"),
+		Key: map[string]*dynamodb.AttributeValue{
+			"UserID": {
+				N: aws.String(ue.UserID),
+			},
+			"Email": {
+				S: aws.String(ue.Email),
+			},
+		},
+	})
+	if err != nil {
+		log.Logger.Error("failed to get user db entry", zap.Any("user_entry", ue), zap.Error(err))
+	}
+
+	// User does not exist (lets create an entry)
+	if result == nil {
+		av, err := dynamodbattribute.MarshalMap(ue)
+		if err != nil {
+			render.Respond(w, r, errors.Wrap(err))
+			return
+		}
+		_, err = c.svc.UserDB.PutItem(&dynamodb.PutItemInput{
+			Item:      av,
+			TableName: aws.String("eve-bot-users"),
+		})
+		if err != nil {
+			render.Respond(w, r, errors.Wrap(err))
+			return
+		}
+	}
+
 	render.JSON(w, r, TokenResponse{
 		AccessToken:  oauth2Token.AccessToken,
 		RefreshToken: oauth2Token.RefreshToken,
