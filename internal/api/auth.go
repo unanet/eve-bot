@@ -100,7 +100,6 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	var claims = make(map[string]interface{})
 	b, err := idTokenClaims.MarshalJSON()
 	if err != nil {
@@ -168,8 +167,10 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		log.Logger.Error("failed to get user db entry", zap.Any("user_entry", ue), zap.Error(err))
 	}
 
+	log.Logger.Info("read bot user result", zap.Any("res", result))
+
 	// User does not exist (lets create an entry)
-	if result == nil {
+	if result == nil || result.Item == nil {
 		av, err := dynamodbattribute.MarshalMap(ue)
 		if err != nil {
 			render.Respond(w, r, errors.Wrap(err))
@@ -183,18 +184,25 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 			render.Respond(w, r, errors.Wrap(err))
 			return
 		}
+	} else {
+		entry := UserEntry{}
+		err = dynamodbattribute.UnmarshalMap(result.Item, &entry)
+		if err != nil {
+			render.Respond(w, r, errors.Wrap(err))
+			return
+		}
 	}
 
-	render.JSON(w, r, TokenResponse{
-		AccessToken:  oauth2Token.AccessToken,
-		RefreshToken: oauth2Token.RefreshToken,
-		TokenType:    oauth2Token.TokenType,
-		Expiry:       oauth2Token.Expiry,
-		Claims:       idTokenClaims,
-	})
+	//render.JSON(w, r, TokenResponse{
+	//	AccessToken:  oauth2Token.AccessToken,
+	//	RefreshToken: oauth2Token.RefreshToken,
+	//	TokenType:    oauth2Token.TokenType,
+	//	Expiry:       oauth2Token.Expiry,
+	//	Claims:       idTokenClaims,
+	//})
 
 	// Just redirecting to a different page to prevent id refresh (which throws an error)
-	//http.Redirect(w, r, "/signed-in", http.StatusFound)
+	http.Redirect(w, r, "/signed-in", http.StatusFound)
 	return
 
 }
