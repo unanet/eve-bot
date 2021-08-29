@@ -157,7 +157,7 @@ func (c AuthController) callback(w http.ResponseWriter, r *http.Request) {
 		TableName: aws.String("eve-bot-users"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"UserID": {
-				N: aws.String(ue.UserID),
+				S: aws.String(ue.UserID),
 			},
 			"Email": {
 				S: aws.String(ue.Email),
