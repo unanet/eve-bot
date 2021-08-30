@@ -2,6 +2,11 @@ package service
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/golang/mock/gomock"
 	"github.com/slack-go/slack/slackevents"
@@ -13,10 +18,6 @@ import (
 	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
 	"github.com/unanet/eve-bot/internal/config"
 	"github.com/unanet/eve-bot/internal/eveapi"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestProvider_HandleSlackInteraction(t *testing.T) {
@@ -74,7 +75,7 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 				CommandResolver: tt.fields.CommandResolver,
 				CommandExecutor: tt.fields.CommandExecutor,
 				EveAPI:          tt.fields.EveAPI,
-				Cfg:             tt.fields.Cfg,
+				cfg:             tt.fields.Cfg,
 			}
 			if err := p.HandleSlackInteraction(tt.args.req); (err != nil) != tt.wantErr {
 				t.Errorf("Provider.HandleSlackInteraction() error = %v, wantErr %v", err, tt.wantErr)

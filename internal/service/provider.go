@@ -1,9 +1,10 @@
 package service
 
 import (
+	"sync"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/go/pkg/identity"
-	"sync"
 
 	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
@@ -19,7 +20,6 @@ type Provider struct {
 	Cfg                          *config.Config
 	allowedMaintenanceChannelMap map[string]interface{}
 	mutex                        sync.Mutex
-	cfg                          *config.Config
 	oidc                         *identity.Service
 	userDB                       *dynamodb.DynamoDB
 	userCache                    map[string]UserEntry
@@ -63,10 +63,9 @@ func ExecutorParam(c interfaces.CommandExecutor) Option {
 
 type Option func(*Provider)
 
-
 func New(cfg *config.Config, opts ...Option) *Provider {
 	svc := &Provider{
-		cfg: cfg,
+		Cfg: cfg,
 		// Elevated Slack Channels that aren't blocked from maintenance mode
 		// i.e. ops still needs to be able to test and deploy even during maintenance
 		allowedMaintenanceChannelMap: extractChannelMap(cfg.SlackChannelsMaintenance),

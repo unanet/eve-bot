@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -11,7 +13,6 @@ import (
 	errs "github.com/unanet/go/pkg/errors"
 	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
-	"strings"
 )
 
 type UserStore interface {
@@ -66,7 +67,7 @@ func (p *Provider) ReadUser(userID string) (*UserEntry, error) {
 		return &u, nil
 	}
 	result, err := p.userDB.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(p.cfg.UserTableName),
+		TableName: aws.String(p.Cfg.UserTableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"UserID": {
 				S: aws.String(userID),
@@ -128,7 +129,6 @@ func (p *Provider) isAuthorized(cmd commands.EvebotCommand, userEntry *UserEntry
 	}
 	return false
 }
-
 
 // validEnvironment check
 // TODO: refactor this with better RBAC strategy
