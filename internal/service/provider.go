@@ -11,7 +11,7 @@ import (
 	"github.com/unanet/eve-bot/internal/config"
 )
 
-// Provider provides access to the Common Deps/Service required for this project
+// Provider provides access to the Common Deps/Services required for this project
 type Provider struct {
 	ChatService                  interfaces.ChatProvider
 	CommandResolver              interfaces.CommandResolver
@@ -70,6 +70,7 @@ func New(cfg *config.Config, opts ...Option) *Provider {
 		// i.e. ops still needs to be able to test and deploy even during maintenance
 		allowedMaintenanceChannelMap: extractChannelMap(cfg.SlackChannelsMaintenance),
 		mutex:                        sync.Mutex{},
+		userCache:                    make(map[string]UserEntry),
 	}
 
 	for _, opt := range opts {
