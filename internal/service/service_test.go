@@ -75,7 +75,7 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 				CommandResolver: tt.fields.CommandResolver,
 				CommandExecutor: tt.fields.CommandExecutor,
 				EveAPI:          tt.fields.EveAPI,
-				cfg:             tt.fields.Cfg,
+				Cfg:             tt.fields.Cfg,
 			}
 			if err := p.HandleSlackInteraction(tt.args.req); (err != nil) != tt.wantErr {
 				t.Errorf("Provider.HandleSlackInteraction() error = %v, wantErr %v", err, tt.wantErr)
