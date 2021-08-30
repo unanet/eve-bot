@@ -32,6 +32,7 @@ type Config struct {
 	LogConfig
 	SlackConfig
 	EveAPIConfig
+
 	Identity                IdentityConfig
 	Port                    int    `split_words:"true" default:"8080"`
 	MetricsPort             int    `split_words:"true" default:"3001"`
@@ -39,6 +40,7 @@ type Config struct {
 	ReadOnly                bool   `split_words:"true" default:"false"`
 	AWSRegion               string `split_words:"true" required:"true"`
 	LoggingDashboardBaseURL string `split_words:"true" required:"true"`
+	UserTableName           string `split_words:"true" required:"true"`
 }
 
 // Load loads the config reading it from the environment

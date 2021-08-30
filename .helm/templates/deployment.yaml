@@ -64,6 +64,8 @@ spec:
               value: {{ .Values.secretsProviderType }}
             - name: DYNAMIC_SECRETS_ENABLED
               value: {{ .Values.dynamicSecretsEnabled | quote }}
+            - name: EVEBOT_USER_TABLE_NAME
+              value: {{ .Values.eveUserTableName }}
           ports:
             - containerPort: 3000
               name: api

@@ -3,9 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-
 	"github.com/unanet/eve-bot/internal/botcommander/args"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -142,6 +139,4 @@ type EvebotCommand interface {
 	Info() ChatInfo
 	Options() CommandOptions
 	AckMsg() (string, bool)
-	IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn) bool
-	IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool
 }

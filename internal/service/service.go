@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"errors"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
-	"github.com/unanet/go/pkg/errors"
+	errs "github.com/unanet/go/pkg/errors"
 	"github.com/unanet/go/pkg/log"
 )
 
@@ -17,7 +18,7 @@ func (p *Provider) HandleSlackInteraction(req *http.Request) error {
 	var payload slack.InteractionCallback
 	err := json.Unmarshal([]byte(req.FormValue("payload")), &payload)
 	if err != nil {
-		return errors.RestError{Code: http.StatusBadRequest, Message: "failed to parse interactive slack message payload", OriginalError: err}
+		return errs.RestError{Code: http.StatusBadRequest, Message: "failed to parse interactive slack message payload", OriginalError: err}
 	}
 	log.Logger.Info(fmt.Sprintf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value))
 	return nil
@@ -28,32 +29,26 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// Resolve the input and return an EvebotCommand object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
-	slackUser, err := p.ChatService.GetUser(ctx, cmd.Info().User)
+	chatUser, err := p.ChatService.GetUser(ctx, cmd.Info().User)
 	if err != nil {
 		p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
 		return
 	}
 
-	if cmd.IsAuthenticated(slackUser, p.UserDB) == false {
-		p.ChatService.PostPrivateMessage(ctx, p.MgrSvc.AuthCodeURL(slackUser.FullyQualifiedName()), cmd.Info().User)
+	userEntry, err := p.ReadUser(chatUser.FullyQualifiedName())
+	if err != nil {
+		if !errors.Is(err, errs.ErrNotFound) {
+			p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
+		}
+		p.ChatService.PostPrivateMessage(ctx, p.oidc.AuthCodeURL(chatUser.FullyQualifiedName()), cmd.Info().User)
 		_ = p.ChatService.PostMessageThread(ctx, "You need to login. Please Check your Private DM from `evebot` for an auth link", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
 	}
 
-	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo) == false {
+	if p.isAuthorized(cmd,userEntry){
 		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
 	}
-
-	// SlackAuthEnabled is like a "feature flag"
-	// set to true we will check auth
-	// set to false we will skip the auth check
-	//if p.Cfg.SlackAuthEnabled {
-	//	if cmd.IsAuthorized(p.allowedChannelMap, p.ChatService.GetChannelInfo, p.ChatService.GetUser, p.UserDB) == false {
-	//		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
-	//		return
-	//	}
-	//}
 
 	// SlackMaintenanceEnabled is like a "feature flag"
 	// set to true, and we are in Maintenance Mode

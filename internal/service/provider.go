@@ -2,59 +2,80 @@ package service
 
 import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/unanet/eve-bot/internal/manager"
-	"strings"
+	"github.com/unanet/go/pkg/identity"
+	"sync"
 
 	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 
 	"github.com/unanet/eve-bot/internal/config"
 )
 
-// Provider provides access to the Slack Client
-// and the deps required for this package
+// Provider provides access to the Common Deps/Service required for this project
 type Provider struct {
 	ChatService                  interfaces.ChatProvider
 	CommandResolver              interfaces.CommandResolver
 	CommandExecutor              interfaces.CommandExecutor
 	EveAPI                       interfaces.EveAPI
-	UserDB                       *dynamodb.DynamoDB
 	Cfg                          *config.Config
-	MgrSvc                       *manager.Service
-	allowedChannelMap            map[string]interface{}
 	allowedMaintenanceChannelMap map[string]interface{}
+	mutex                        sync.Mutex
+	cfg                          *config.Config
+	oidc                         *identity.Service
+	userDB                       *dynamodb.DynamoDB
+	userCache                    map[string]UserEntry
 }
 
-func extractChannelMap(input string) map[string]interface{} {
-	chanMap := make(map[string]interface{})
-	for _, c := range strings.Split(input, ",") {
-		chanMap[c] = true
+func OpenIDConnectParam(id *identity.Service) Option {
+	return func(svc *Provider) {
+		svc.oidc = id
 	}
-	return chanMap
 }
 
-// New creates a new service provider
-func New(
-	cfg *config.Config,
-	cr interfaces.CommandResolver,
-	ea interfaces.EveAPI,
-	cs interfaces.ChatProvider,
-	ce interfaces.CommandExecutor,
-	svc *dynamodb.DynamoDB,
-	mgr *manager.Service) *Provider {
+func DynamoParam(db *dynamodb.DynamoDB) Option {
+	return func(svc *Provider) {
+		svc.userDB = db
+	}
+}
 
-	return &Provider{
-		MgrSvc:          mgr,
-		UserDB:          svc,
-		CommandResolver: cr,
-		EveAPI:          ea,
-		Cfg:             cfg,
-		ChatService:     cs,
-		CommandExecutor: ce,
-		// Elevated Slack Channels that can issue "special" commands
-		// release, deploy to prod, etc.
-		allowedChannelMap: extractChannelMap(cfg.SlackChannelsAuth),
+func ResolverParam(r interfaces.CommandResolver) Option {
+	return func(svc *Provider) {
+		svc.CommandResolver = r
+	}
+}
+
+func EveAPIParam(e interfaces.EveAPI) Option {
+	return func(svc *Provider) {
+		svc.EveAPI = e
+	}
+}
+
+func ChatProviderParam(c interfaces.ChatProvider) Option {
+	return func(svc *Provider) {
+		svc.ChatService = c
+	}
+}
+
+func ExecutorParam(c interfaces.CommandExecutor) Option {
+	return func(svc *Provider) {
+		svc.CommandExecutor = c
+	}
+}
+
+type Option func(*Provider)
+
+
+func New(cfg *config.Config, opts ...Option) *Provider {
+	svc := &Provider{
+		cfg: cfg,
 		// Elevated Slack Channels that aren't blocked from maintenance mode
 		// i.e. ops still needs to be able to test and deploy even during maintenance
 		allowedMaintenanceChannelMap: extractChannelMap(cfg.SlackChannelsMaintenance),
+		mutex:                        sync.Mutex{},
 	}
+
+	for _, opt := range opts {
+		opt(svc)
+	}
+
+	return svc
 }

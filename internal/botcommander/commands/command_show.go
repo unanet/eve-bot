@@ -2,10 +2,6 @@ package commands
 
 import (
 	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
-
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -57,15 +53,6 @@ func (cmd showCmd) AckMsg() (string, bool) {
 		help.UsageOpt(showCmdHelpUsage.String()),
 		help.ExamplesOpt(showCmdHelpExample.String()),
 	).String())
-}
-
-func (cmd showCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
-	return false
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd showCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannel, chatChanFn) || lowerEnvAuthCheck(cmd.opts)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

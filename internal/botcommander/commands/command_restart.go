@@ -1,11 +1,8 @@
 package commands
 
 import (
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/unanet/eve-bot/internal/botcommander/params"
-	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
-
 	"github.com/unanet/eve-bot/internal/botcommander/help"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
 )
 
 type restartCmd struct {
@@ -41,15 +38,6 @@ func (cmd restartCmd) AckMsg() (string, bool) {
 		help.UsageOpt(restartCmdHelpUsage.String()),
 		help.ExamplesOpt(restartCmdHelpExample.String()),
 	).String())
-}
-
-func (cmd restartCmd) IsAuthenticated(chatUser *chatmodels.ChatUser, db *dynamodb.DynamoDB) bool {
-	return true
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd restartCmd) IsAuthorized(allowedChannel map[string]interface{}, chatChanFn ChatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannel, chatChanFn) || lowerEnvAuthCheck(cmd.opts)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

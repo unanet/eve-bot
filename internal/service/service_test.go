@@ -3,26 +3,20 @@ package service
 import (
 	"context"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/unanet/eve-bot/internal/manager"
+	"github.com/golang/mock/gomock"
+	"github.com/slack-go/slack/slackevents"
+	"github.com/unanet/eve-bot/internal/botcommander/commands"
+	"github.com/unanet/eve-bot/internal/botcommander/executor"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/botcommander/resolver"
+	"github.com/unanet/eve-bot/internal/chatservice"
+	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
+	"github.com/unanet/eve-bot/internal/config"
+	"github.com/unanet/eve-bot/internal/eveapi"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
-
-	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
-
-	"github.com/unanet/eve-bot/internal/botcommander/commands"
-
-	"github.com/golang/mock/gomock"
-
-	"github.com/slack-go/slack/slackevents"
-	"github.com/unanet/eve-bot/internal/botcommander/executor"
-	"github.com/unanet/eve-bot/internal/botcommander/resolver"
-	"github.com/unanet/eve-bot/internal/chatservice"
-	"github.com/unanet/eve-bot/internal/config"
-	"github.com/unanet/eve-bot/internal/eveapi"
 )
 
 func TestProvider_HandleSlackInteraction(t *testing.T) {
@@ -43,12 +37,11 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 	mockAPI := eveapi.NewMockClient(gomock.NewController(t))
 
 	type fields struct {
-		ChatService       interfaces.ChatProvider
-		CommandResolver   interfaces.CommandResolver
-		CommandExecutor   interfaces.CommandExecutor
-		EveAPI            interfaces.EveAPI
-		Cfg               *config.Config
-		allowedChannelMap map[string]interface{}
+		ChatService     interfaces.ChatProvider
+		CommandResolver interfaces.CommandResolver
+		CommandExecutor interfaces.CommandExecutor
+		EveAPI          interfaces.EveAPI
+		Cfg             *config.Config
 	}
 	type args struct {
 		req *http.Request
@@ -62,12 +55,11 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 		{
 			name: "sad path - invalid post body",
 			fields: fields{
-				ChatService:       mockChatSvc,
-				CommandResolver:   mockResolver,
-				CommandExecutor:   mockExecutor,
-				EveAPI:            mockAPI,
-				Cfg:               &config.Config{},
-				allowedChannelMap: map[string]interface{}{},
+				ChatService:     mockChatSvc,
+				CommandResolver: mockResolver,
+				CommandExecutor: mockExecutor,
+				EveAPI:          mockAPI,
+				Cfg:             &config.Config{},
 			},
 			args: args{
 				req: httptest.NewRequest("POST", "/somewhere", nil),
@@ -78,12 +70,11 @@ func TestProvider_HandleSlackInteraction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
-				ChatService:       tt.fields.ChatService,
-				CommandResolver:   tt.fields.CommandResolver,
-				CommandExecutor:   tt.fields.CommandExecutor,
-				EveAPI:            tt.fields.EveAPI,
-				Cfg:               tt.fields.Cfg,
-				allowedChannelMap: tt.fields.allowedChannelMap,
+				ChatService:     tt.fields.ChatService,
+				CommandResolver: tt.fields.CommandResolver,
+				CommandExecutor: tt.fields.CommandExecutor,
+				EveAPI:          tt.fields.EveAPI,
+				Cfg:             tt.fields.Cfg,
 			}
 			if err := p.HandleSlackInteraction(tt.args.req); (err != nil) != tt.wantErr {
 				t.Errorf("Provider.HandleSlackInteraction() error = %v, wantErr %v", err, tt.wantErr)
@@ -101,7 +92,6 @@ type serviceMocks struct {
 	mockCfg               *config.Config
 	mockAllowedChannelMap map[string]interface{}
 	mockUserDB            *dynamodb.DynamoDB
-	mockMgr               *manager.Service
 }
 
 func newServiceMocks(ctrl *gomock.Controller) *serviceMocks {
@@ -204,7 +194,16 @@ func TestProvider_HandleSlackAppMentionEvent(t *testing.T) {
 			if tt.setupMocks != nil {
 				tt.setupMocks(m)
 			}
-			New(m.mockCfg, m.mockResolver, m.mockAPI, m.mockChat, m.mockExecutor, m.mockUserDB, m.mockMgr).HandleSlackAppMentionEvent(tt.args.ctx, tt.args.ev)
+
+			opts := []Option{
+				ResolverParam(m.mockResolver),
+				EveAPIParam(m.mockAPI),
+				ChatProviderParam(m.mockChat),
+				ExecutorParam(m.mockExecutor),
+				DynamoParam(m.mockUserDB),
+			}
+
+			New(m.mockCfg, opts...).HandleSlackAppMentionEvent(tt.args.ctx, tt.args.ev)
 		})
 	}
 }

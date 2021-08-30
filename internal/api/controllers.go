@@ -4,7 +4,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	//"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/go-chi/chi"
 	"github.com/unanet/eve-bot/internal/botcommander/commands"
 	"github.com/unanet/eve-bot/internal/botcommander/commands/handlers"
@@ -13,7 +12,6 @@ import (
 	chat "github.com/unanet/eve-bot/internal/chatservice"
 	"github.com/unanet/eve-bot/internal/config"
 	"github.com/unanet/eve-bot/internal/eveapi"
-	"github.com/unanet/eve-bot/internal/manager"
 	"github.com/unanet/eve-bot/internal/service"
 	"github.com/unanet/go/pkg/identity"
 	"github.com/unanet/go/pkg/log"
@@ -26,8 +24,6 @@ type Controller interface {
 
 // initController initializes the controller (handlers)
 func initController(cfg *config.Config) []Controller {
-
-	cmdResolver := resolver.New(commands.NewFactory())
 	eveAPI := eveapi.New(cfg.EveAPIConfig)
 	chatSvc := chat.New(chat.Slack, cfg)
 	cmdExecutor := executor.New(eveAPI, chatSvc, handlers.NewFactory())
@@ -37,26 +33,18 @@ func initController(cfg *config.Config) []Controller {
 		log.Logger.Panic("Unable to Initialize the AWS Session", zap.Error(err))
 	}
 
-	// Create the Service Deps here
 	idSvc, err := identity.NewService(cfg.Identity)
 	if err != nil {
 		log.Logger.Panic("Unable to Initialize the Identity Service Provider", zap.Error(err))
 	}
 
-	// Create the Service Managers here
-	mgr := manager.NewService(cfg, manager.OpenIDConnectOpt(idSvc))
-
-	// Create DynamoDB client
-	dynamoDBSvc := dynamodb.New(awsSession)
-
-	svc := service.New(
-		cfg,
-		cmdResolver,
-		eveAPI,
-		chatSvc,
-		cmdExecutor,
-		dynamoDBSvc,
-		mgr,
+	svc := service.New(cfg,
+		service.ChatProviderParam(chatSvc),
+		service.DynamoParam(dynamodb.New(awsSession)),
+		service.EveAPIParam(eveAPI),
+		service.ExecutorParam(cmdExecutor),
+		service.ResolverParam(resolver.New(commands.NewFactory())),
+		service.OpenIDConnectParam(idSvc),
 	)
 
 	return []Controller{
