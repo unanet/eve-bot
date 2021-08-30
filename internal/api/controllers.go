@@ -26,7 +26,6 @@ type Controller interface {
 func initController(cfg *config.Config) []Controller {
 	eveAPI := eveapi.New(cfg.EveAPIConfig)
 	chatSvc := chat.New(chat.Slack, cfg)
-	cmdExecutor := executor.New(eveAPI, chatSvc, handlers.NewFactory())
 
 	awsSession, err := session.NewSession(&aws.Config{Region: aws.String(cfg.AWSRegion)})
 	if err != nil {
@@ -42,7 +41,7 @@ func initController(cfg *config.Config) []Controller {
 		service.ChatProviderParam(chatSvc),
 		service.DynamoParam(dynamodb.New(awsSession)),
 		service.EveAPIParam(eveAPI),
-		service.ExecutorParam(cmdExecutor),
+		service.ExecutorParam(executor.New(eveAPI, chatSvc, handlers.NewFactory())),
 		service.ResolverParam(resolver.New(commands.NewFactory())),
 		service.OpenIDConnectParam(idSvc),
 	)

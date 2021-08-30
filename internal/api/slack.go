@@ -46,6 +46,12 @@ func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.
 }
 
 func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Request) {
+	if c.svc == nil {
+		log.Logger.Warn("test nil service")
+	}
+	if c.svc.Cfg == nil {
+		log.Logger.Warn("test nil cfg")
+	}
 	body, err := validateSlackRequest(r, c.svc.Cfg.SlackSigningSecret)
 	if err != nil {
 		render.Respond(w, r, errors.Wrap(err))
