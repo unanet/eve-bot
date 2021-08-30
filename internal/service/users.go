@@ -46,7 +46,9 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 	}
 	var idTokenClaims = new(json.RawMessage)
 	err = idToken.Claims(&idTokenClaims)
-
+	if err != nil {
+		return err
+	}
 	var claims = make(map[string]interface{})
 	b, err := idTokenClaims.MarshalJSON()
 	if err != nil {
@@ -61,9 +63,11 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 }
 
 func (p *Provider) ReadUser(userID string) (*UserEntry, error) {
+	log.Logger.Info("service provider read user", zap.String("user_id", userID))
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	if u, ok := p.userCache[userID]; ok {
+		log.Logger.Info("user in cache", zap.Any("user", u))
 		return &u, nil
 	}
 	result, err := p.userDB.GetItem(&dynamodb.GetItemInput{
@@ -75,6 +79,7 @@ func (p *Provider) ReadUser(userID string) (*UserEntry, error) {
 		},
 	})
 	if err != nil {
+		log.Logger.Error("failed to get user item", zap.Error(err))
 		return nil, err
 	}
 	if result != nil && result.Item != nil {
