@@ -3,10 +3,9 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-
-	"errors"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -30,6 +29,25 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	// Resolve the input and return an EvebotCommand object
 	cmd := p.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
+	// SlackMaintenanceEnabled is like a "feature flag"
+	// set to true, and we are in Maintenance Mode
+	// Only Channels set to the EVEBOT_SLACK_CHANNELS_MAINTENANCE environment variable are allowed to issue commands
+	// ex:  EVEBOT_SLACK_CHANNELS_MAINTENANCE=my-evebot,evebot-tests
+	if p.Cfg.SlackMaintenanceEnabled {
+		incomingChannel, err := p.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
+		if err != nil {
+			// This shouldn't happen, but if it does, we don't want to be locked out from deploying eve
+			// so we will show the error (which is logged) and DevOps will take care of the issue (hopefully...)
+			p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
+		} else {
+			// Not coming from an approved Maintenance channel Show the maintenance mode
+			if _, ok := p.allowedMaintenanceChannelMap[incomingChannel.Name]; !ok {
+				_ = p.ChatService.PostMessageThread(ctx, ":construction: Sorry, but we are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
+				return
+			}
+		}
+	}
+
 	chatUser, err := p.ChatService.GetUser(ctx, cmd.Info().User)
 	if err != nil {
 		p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
@@ -49,25 +67,6 @@ func (p *Provider) HandleSlackAppMentionEvent(ctx context.Context, ev *slackeven
 	if !p.isAuthorized(cmd, userEntry) {
 		_ = p.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
-	}
-
-	// SlackMaintenanceEnabled is like a "feature flag"
-	// set to true, and we are in Maintenance Mode
-	// Only Channels set to the EVEBOT_SLACK_CHANNELS_MAINTENANCE environment variable are allowed to issue commands
-	// ex:  EVEBOT_SLACK_CHANNELS_MAINTENANCE=my-evebot,evebot-tests
-	if p.Cfg.SlackMaintenanceEnabled {
-		incomingChannel, err := p.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
-		if err != nil {
-			// This shouldn't happen, but if it does, we don't want to be locked out from deploying eve
-			// so we will show the error (which is logged) and DevOps will take care of the issue (hopefully...)
-			p.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
-		} else {
-			// Not coming from an approved Maintenance channel Show the maintenance mode
-			if _, ok := p.allowedMaintenanceChannelMap[incomingChannel.Name]; !ok {
-				_ = p.ChatService.PostMessageThread(ctx, ":construction: Sorry, but we are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
-				return
-			}
-		}
 	}
 
 	// Hydrate the Acknowledgement Message and whether we should continue...

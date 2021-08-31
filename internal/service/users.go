@@ -123,6 +123,10 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 }
 
 func (p *Provider) isAuthorized(cmd commands.EvebotCommand, userEntry *UserEntry) bool {
+	// If the user wan't to authenticate explicitly (re-login)
+	if strings.ToLower(cmd.Info().CommandName) == "auth" {
+		return true
+	}
 	if userEntry.isAdmin() {
 		return true
 	}
