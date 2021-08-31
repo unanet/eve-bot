@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 
-	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/service"
 
 	"github.com/unanet/eve-bot/internal/botcommander/args"
 	"github.com/unanet/eve-bot/internal/botcommander/commands"
@@ -13,29 +13,25 @@ import (
 
 // DeployHandler is the handler for the DeployCmd
 type DeployHandler struct {
-	eveAPIClient interfaces.EveAPI
-	chatSvc      interfaces.ChatProvider
+	svc *service.Provider
 }
 
 // NewDeployHandler creates a DeployHandler
-func NewDeployHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
-	return DeployHandler{
-		eveAPIClient: eveAPIClient,
-		chatSvc:      chatSvc,
-	}
+func NewDeployHandler(svc *service.Provider) CommandHandler {
+	return DeployHandler{svc: svc}
 }
 
 // Handle handles the DeployCmd
 func (h DeployHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	chatUser, err := h.chatSvc.GetUser(ctx, cmd.Info().User)
+	chatUser, err := h.svc.ChatService.GetUser(ctx, cmd.Info().User)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
+		h.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
 		return
 	}
 
 	cmdAPIOpts := cmd.Options()
 
-	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
+	deployHandler(ctx, h.svc.EveAPI, h.svc.ChatService, cmd, timestamp, eve.DeploymentPlanOptions{
 		Artifacts:        commands.ExtractArtifactsDefinition(args.ServicesName, cmdAPIOpts),
 		ForceDeploy:      commands.ExtractBoolOpt(args.ForceDeployName, cmdAPIOpts),
 		User:             chatUser.Name,

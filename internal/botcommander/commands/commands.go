@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+
 	"github.com/unanet/eve-bot/internal/botcommander/args"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -78,6 +79,11 @@ func (bc *baseCommand) initializeResource() {
 
 // IsHelpRequest checks if the command is a request for help
 func (bc *baseCommand) IsHelpRequest() bool {
+	// There is no help for auth
+	// @evebot auth
+	if bc.info.CommandName == AuthCmdName {
+		return false
+	}
 	if len(bc.input) == 0 ||
 		bc.input[0] == helpCmdName ||
 		bc.input[len(bc.input)-1] == helpCmdName ||

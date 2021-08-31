@@ -41,14 +41,15 @@ func initController(cfg *config.Config) []Controller {
 		service.ChatProviderParam(chatSvc),
 		service.DynamoParam(dynamodb.New(awsSession)),
 		service.EveAPIParam(eveAPI),
-		service.ExecutorParam(executor.New(eveAPI, chatSvc, handlers.NewFactory())),
 		service.ResolverParam(resolver.New(commands.NewFactory())),
 		service.OpenIDConnectParam(idSvc),
 	)
 
+	exe := executor.New(svc, handlers.NewFactory())
+
 	return []Controller{
 		NewPingController(),
-		NewSlackController(svc),
+		NewSlackController(svc, exe),
 		NewEveController(svc),
 		NewAuthController(svc),
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/service"
 
 	"github.com/unanet/eve-bot/internal/botcommander/commands"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -13,38 +13,34 @@ import (
 
 // ReleaseHandler is the handler for the ReleaseCmd
 type RestartHandler struct {
-	eveAPIClient interfaces.EveAPI
-	chatSvc      interfaces.ChatProvider
+	svc *service.Provider
 }
 
 // NewReleaseHandler creates a ReleaseHandler
-func NewRestartHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
-	return RestartHandler{
-		eveAPIClient: eveAPIClient,
-		chatSvc:      chatSvc,
-	}
+func NewRestartHandler(svc *service.Provider) CommandHandler {
+	return RestartHandler{svc: svc}
 }
 
 // Handle handles the RestartCmd
 func (h RestartHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	ns, svc := resolveServiceNamespace(ctx, h.eveAPIClient, h.chatSvc, cmd, &timestamp)
+	ns, svc := resolveServiceNamespace(ctx, h.svc.EveAPI, h.svc.ChatService, cmd, &timestamp)
 	if ns == nil || svc == nil {
-		h.chatSvc.UserNotificationThread(ctx, "failed to resolve the restart command service and namespace params", cmd.Info().User, cmd.Info().Channel, timestamp)
+		h.svc.ChatService.UserNotificationThread(ctx, "failed to resolve the restart command service and namespace params", cmd.Info().User, cmd.Info().Channel, timestamp)
 		return
 	}
 
-	chatUser, err := h.chatSvc.GetUser(ctx, cmd.Info().User)
+	chatUser, err := h.svc.ChatService.GetUser(ctx, cmd.Info().User)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
+		h.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
 		return
 	}
 
 	if len(svc.DeployedVersion) == 0 {
-		h.chatSvc.UserNotificationThread(ctx, fmt.Sprintf("can't restart deployed_version: %s (empty)", svc.DeployedVersion), cmd.Info().User, cmd.Info().Channel, timestamp)
+		h.svc.ChatService.UserNotificationThread(ctx, fmt.Sprintf("can't restart deployed_version: %s (empty)", svc.DeployedVersion), cmd.Info().User, cmd.Info().Channel, timestamp)
 		return
 	}
 
-	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
+	deployHandler(ctx, h.svc.EveAPI, h.svc.ChatService, cmd, timestamp, eve.DeploymentPlanOptions{
 		Artifacts: eve.ArtifactDefinitions{
 			&eve.ArtifactDefinition{
 				Name:             commands.ExtractStringOpt(params.ServiceName, cmd.Options()),

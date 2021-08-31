@@ -1,9 +1,5 @@
 package commands
 
-import (
-	"github.com/unanet/eve-bot/internal/botcommander/help"
-)
-
 type authCmd struct {
 	baseCommand
 }
@@ -13,31 +9,20 @@ const (
 	AuthCmdName = "auth"
 )
 
-var (
-	authCmdHelpSummary = help.Summary("The `auth` command is used to authenticate")
-	authCmdHelpUsage   = help.Usage{
-		"auth",
-	}
-	authCmdHelpExample = help.Examples{}
-)
-
 // NewAuthCommand creates a New AuthCmd that implements the EvebotCommand interface
 func NewAuthCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return authCmd{baseCommand{
 		input:  cmdFields,
 		info:   ChatInfo{User: user, Channel: channel, CommandName: AuthCmdName},
 		opts:   make(CommandOptions),
-		bounds: InputLengthBounds{Min: 1, Max: 1},
+		bounds: InputLengthBounds{Min: -1, Max: -1},
 	}}
 }
 
 // AckMsg satisfies the EveBotCommand Interface and returns the acknowledgement message
+// ...and whether or not we should continue
 func (cmd authCmd) AckMsg() (string, bool) {
-	return cmd.BaseAckMsg(help.New(
-		help.HeaderOpt(authCmdHelpSummary.String()),
-		help.UsageOpt(authCmdHelpUsage.String()),
-		help.ExamplesOpt(authCmdHelpExample.String()),
-	).String())
+	return "Please Check your Private DM from `evebot` for an auth link", true
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options
