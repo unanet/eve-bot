@@ -7,14 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// func extractChannelMap(input string) map[string]interface{} {
-// 	chanMap := make(map[string]interface{})
-// 	for _, c := range strings.Split(input, ",") {
-// 		chanMap[c] = true
-// 	}
-// 	return chanMap
-// }
-
 func extractClaimSlice(input interface{}) []string {
 	if v, ok := input.([]interface{}); ok {
 		var paramSlice []string

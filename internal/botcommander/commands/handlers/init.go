@@ -23,6 +23,7 @@ func NewFactory() Factory {
 			commands.ReleaseCmdName: NewReleaseHandler,
 			commands.RestartCmdName: NewRestartHandler,
 			commands.RunCmdName:     NewRunHandler,
+			commands.AuthCmdName:    NewAuthHandler,
 		},
 	}
 }
