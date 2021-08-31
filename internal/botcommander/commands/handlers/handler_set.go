@@ -49,7 +49,7 @@ func (h SetHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 	if _, ok := cmd.Options()[params.ServiceName].(string); ok {
 		var svc eve.Service
 		for _, s := range svcs {
-			if strings.ToLower(s.Name) == strings.ToLower(cmd.Options()[params.ServiceName].(string)) {
+			if strings.EqualFold(s.Name, cmd.Options()[params.ServiceName].(string)) {
 				svc = s
 				break
 			}
