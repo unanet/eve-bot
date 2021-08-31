@@ -32,7 +32,6 @@ jobs:
 
       - name: Check SemVer Tag 🖖
         run: |
-          echo "${{ env.VERSION }}"
           make check_version          
 
       - name: Test 🧠
