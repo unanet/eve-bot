@@ -32,7 +32,7 @@ jobs:
 
       - name: Check SemVer Tag 🖖
         run: |
-          make check_version          
+          !(git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null 2>&1) || (echo "the version: ${VERSION} has been released already" && exit 1)
 
       - name: Test 🧠
         run: |
