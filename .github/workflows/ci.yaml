@@ -30,9 +30,12 @@ jobs:
           BUILD_HOST=$(hostname)
           echo "BUILD_HOST=$BUILD_HOST" >> $GITHUB_ENV
 
+      - name: Fetch tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*          
+
       - name: Check SemVer Tag 🖖
         run: |
-          !(git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null 2>&1) || (echo "the version: ${VERSION} has been released already" && exit 1)
+          make check_version
 
       - name: Test 🧠
         run: |
