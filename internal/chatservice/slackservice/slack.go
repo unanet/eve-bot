@@ -6,6 +6,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
+	"github.com/unanet/eve-bot/internal/config"
 	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
@@ -43,7 +44,7 @@ func New(c *slack.Client) Provider {
 func (sp Provider) handleDevOpsErrorNotification(ctx context.Context, err error) {
 	if err != nil {
 		log.Logger.Error("critical devops error", zap.Error(err))
-		_, _, _ = sp.client.PostMessageContext(ctx, devOpsMonitoringChannel, slack.MsgOptionText(errMessage(err), false))
+		_, _, _ = sp.client.PostMessageContext(ctx, config.Load().DevopsMonitoringChannel, slack.MsgOptionText(errMessage(err), false))
 	}
 }
 

@@ -41,6 +41,7 @@ type Config struct {
 	AWSRegion               string `split_words:"true" required:"true"`
 	LoggingDashboardBaseURL string `split_words:"true" required:"true"`
 	UserTableName           string `split_words:"true" required:"true"`
+	DevopsMonitoringChannel string `split_words:"true" required:"true"`
 }
 
 // Load loads the config reading it from the environment

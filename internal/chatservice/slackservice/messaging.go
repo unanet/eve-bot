@@ -13,10 +13,6 @@ const (
 	msgAuthLink                  = "Here is your account auth link:"
 )
 
-const (
-	devOpsMonitoringChannel = "C029ZH0BQSZ"
-)
-
 func userErrMessage(user string, err error) string {
 	return fmt.Sprintf("<@%s>! %s\n\n ```%s```\n\n%s", user, msgErrNotification, err, msgErrNotificationAssurance)
 }
