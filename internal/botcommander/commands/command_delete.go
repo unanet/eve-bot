@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -50,11 +49,6 @@ func (cmd deleteCmd) AckMsg() (string, bool) {
 	).String())
 }
 
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd deleteCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
-}
-
 // Options satisfies the EveBotCommand Interface and returns the dynamic options
 func (cmd deleteCmd) Options() CommandOptions {
 	return cmd.opts
@@ -76,7 +70,7 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 	case resources.MetadataName:
 		// delete metadata for unaneta in current una-int key key2 key3
 		// delete metadata for {{ service }} in {{ namespace }} {{ environment }} key key2 key3
-		if cmd.ValidInputLength() == false {
+		if !cmd.ValidInputLength() {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete metadata: %v", cmd.input))
 			return
 		}
@@ -88,7 +82,7 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 		return
 	case resources.VersionName:
 		// delete version for unaneta in current una-int
-		if cmd.ValidInputLength() == false {
+		if !cmd.ValidInputLength() {
 			cmd.errs = append(cmd.errs, fmt.Errorf("invalid delete version: %v", cmd.input))
 			return
 		}
@@ -101,3 +95,4 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 		return
 	}
 }
+

@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-
 	"github.com/unanet/eve-bot/internal/botcommander/args"
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -33,11 +32,6 @@ func (cmd invalidCmd) AckMsg() (string, bool) {
 		help.CommandsOpt(NewFactory().NonHelpCmds()),
 		help.ExamplesOpt(NewFactory().NonHelpExamples().String()),
 	).String())
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd invalidCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
-	return true
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

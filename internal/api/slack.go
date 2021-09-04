@@ -1,19 +1,20 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
+	goerror "errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"reflect"
-
-	"github.com/slack-go/slack/slackevents"
-
-	goerror "errors"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slackevents"
+	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
 	"github.com/unanet/eve-bot/internal/service"
 	"github.com/unanet/go/pkg/errors"
 	"github.com/unanet/go/pkg/log"
@@ -22,12 +23,18 @@ import (
 
 // SlackController for slack routes
 type SlackController struct {
-	svc *service.Provider
+	svc                          *service.Provider
+	exe                          interfaces.CommandExecutor
+	allowedMaintenanceChannelMap map[string]interface{}
 }
 
 // NewSlackController creates a new slack controller (route handler)
-func NewSlackController(svc *service.Provider) *SlackController {
-	return &SlackController{svc: svc}
+func NewSlackController(svc *service.Provider, exe interfaces.CommandExecutor) *SlackController {
+	return &SlackController{
+		svc:                          svc,
+		exe:                          exe,
+		allowedMaintenanceChannelMap: extractChannelMap(svc.Cfg.SlackChannelsMaintenance),
+	}
 }
 
 // Setup the routes
@@ -37,7 +44,7 @@ func (c SlackController) Setup(r chi.Router) {
 }
 
 func (c SlackController) slackInteractiveHandler(w http.ResponseWriter, r *http.Request) {
-	if err := c.svc.HandleSlackInteraction(r); err != nil {
+	if err := handleSlackInteraction(r); err != nil {
 		render.Respond(w, r, errors.Wrap(err))
 		return
 	}
@@ -83,7 +90,7 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 	case *slack.FileSharedEvent:
 		log.Logger.Info("File Uploaded", zap.Any("event", ev))
 	case *slackevents.AppMentionEvent:
-		c.svc.HandleSlackAppMentionEvent(r.Context(), ev)
+		c.handleSlackAppMentionEvent(r.Context(), ev)
 	default:
 		log.Logger.Info("slack innerEvent", zap.Any("event", innerEvent))
 		render.Respond(w, r, errors.Wrap(unknownSlackEventError(innerEvent)))
@@ -141,4 +148,79 @@ func validateSlackRequest(req *http.Request, signingSecret string) ([]byte, erro
 	}
 
 	return body, nil
+}
+
+// handleSlackInteraction handles the interactive callbacks (buttons, dropdowns, etc.)
+func handleSlackInteraction(req *http.Request) error {
+	var payload slack.InteractionCallback
+	err := json.Unmarshal([]byte(req.FormValue("payload")), &payload)
+	if err != nil {
+		return errors.RestError{Code: http.StatusBadRequest, Message: "failed to parse interactive slack message payload", OriginalError: err}
+	}
+	log.Logger.Info(fmt.Sprintf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value))
+	return nil
+}
+
+func (c SlackController) handleSlackAppMentionEvent(ctx context.Context, ev *slackevents.AppMentionEvent) {
+	// Resolve the input and return an EvebotCommand object
+	cmd := c.svc.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
+
+	// SlackMaintenanceEnabled is like a "feature flag"
+	// set to true, and we are in Maintenance Mode
+	// Only Channels set to the EVEBOT_SLACK_CHANNELS_MAINTENANCE environment variable are allowed to issue commands
+	// ex:  EVEBOT_SLACK_CHANNELS_MAINTENANCE=my-evebot,evebot-tests
+	if c.svc.Cfg.SlackMaintenanceEnabled {
+		incomingChannel, err := c.svc.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
+		if err != nil {
+			// This shouldn't happen, but if it does, we don't want to be locked out from deploying eve
+			// so we will show the error (which is logged) and DevOps will take care of the issue (hopefully...)
+			c.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
+		} else {
+			// Not coming from an approved Maintenance channel Show the maintenance mode
+			if _, ok := c.allowedMaintenanceChannelMap[incomingChannel.Name]; !ok {
+				_ = c.svc.ChatService.PostMessageThread(ctx, ":construction: Sorry, but we are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
+				return
+			}
+		}
+	}
+
+	chatUser, err := c.svc.ChatService.GetUser(ctx, cmd.Info().User)
+	if err != nil {
+		c.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
+		return
+	}
+
+	userEntry, err := c.svc.ReadUser(chatUser.FullyQualifiedName())
+	if err != nil {
+		if !goerror.Is(err, errors.ErrNotFound) {
+			c.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
+		}
+		c.svc.ChatService.PostPrivateMessage(ctx, c.svc.AuthCodeURL(chatUser.FullyQualifiedName()), cmd.Info().User)
+		_ = c.svc.ChatService.PostMessageThread(ctx, "You need to login. Please Check your Private DM from `evebot` for an auth link", cmd.Info().Channel, ev.ThreadTimeStamp)
+		return
+	}
+
+	if !c.svc.IsAuthorized(cmd, userEntry) {
+		_ = c.svc.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
+		return
+	}
+
+	// Hydrate the Acknowledgement Message and whether we should continue...
+	ackMsg, cont := cmd.AckMsg()
+	// Send the AckMsg and get the Timestamp back, so we can thread it later on...
+	timeStamp := c.svc.ChatService.PostMessageThread(ctx, ackMsg, cmd.Info().Channel, ev.ThreadTimeStamp)
+	// If the AckMessage needs to continue (no errors)...
+	if cont {
+		// Asynchronous CommandExecutor call
+		// which maps an EveBotCommand to a CommandHandler
+		go c.exe.Execute(context.TODO(), cmd, timeStamp)
+	}
+}
+
+func extractChannelMap(input string) map[string]interface{} {
+	chanMap := make(map[string]interface{})
+	for _, c := range strings.Split(input, ",") {
+		chanMap[c] = true
+	}
+	return chanMap
 }

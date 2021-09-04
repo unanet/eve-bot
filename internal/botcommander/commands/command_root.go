@@ -32,11 +32,6 @@ func (cmd rootCmd) AckMsg() (string, bool) {
 	return cmd.BaseAckMsg(help.New(help.HeaderOpt(rootCmdHelpSummary.String())).String())
 }
 
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd rootCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
-	return true
-}
-
 // Options satisfies the EveBotCommand Interface and returns the dynamic options
 func (cmd rootCmd) Options() CommandOptions {
 	return cmd.opts

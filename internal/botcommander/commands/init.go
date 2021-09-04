@@ -27,6 +27,7 @@ func NewFactory() Factory {
 			ReleaseCmdName: NewReleaseCommand,
 			RestartCmdName: NewRestartCommand,
 			RunCmdName:     NewRunCommand,
+			AuthCmdName:    NewAuthCommand,
 		},
 	}
 }

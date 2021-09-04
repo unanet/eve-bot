@@ -1,8 +1,16 @@
 package chatmodels
 
+import "fmt"
+
 // ChatUser data structure
 type ChatUser struct {
-	Name string
+	Provider string
+	ID       string
+	Name     string
+}
+
+func (u ChatUser) FullyQualifiedName() string {
+	return fmt.Sprintf("%s-%s-%s", u.Provider, u.Name, u.ID)
 }
 
 // Channel data structure

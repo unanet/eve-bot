@@ -50,6 +50,18 @@ func (mr *MockProviderMockRecorder) GetChannelInfo(ctx, channelID interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChannelInfo", reflect.TypeOf((*MockProvider)(nil).GetChannelInfo), ctx, channelID)
 }
 
+func (m *MockProvider) PostPrivateMessage(ctx context.Context, msg string, user string) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PostPrivateMessage", ctx, msg, user)
+	_, _ = ret[0].(string)
+	return
+}
+
+func (mr *MockProviderMockRecorder) PostPrivateMessage(ctx, msg, user interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostPrivateMessage", reflect.TypeOf((*MockProvider)(nil).PostPrivateMessage), ctx, msg, user)
+}
+
 // PostMessage mocks base method
 func (m *MockProvider) PostMessage(ctx context.Context, msg, channel string) string {
 	m.ctrl.T.Helper()

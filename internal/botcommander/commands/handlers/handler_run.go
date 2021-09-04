@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/unanet/eve-bot/internal/botcommander/interfaces"
+	"github.com/unanet/eve-bot/internal/service"
 
 	"github.com/unanet/eve-bot/internal/botcommander/commands"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -13,23 +13,19 @@ import (
 
 // RunHandler is the handler for the RunCmd
 type RunHandler struct {
-	eveAPIClient interfaces.EveAPI
-	chatSvc      interfaces.ChatProvider
+	svc *service.Provider
 }
 
 // NewRunHandler creates a RunHandler
-func NewRunHandler(eveAPIClient interfaces.EveAPI, chatSvc interfaces.ChatProvider) CommandHandler {
-	return RunHandler{
-		eveAPIClient: eveAPIClient,
-		chatSvc:      chatSvc,
-	}
+func NewRunHandler(svc *service.Provider) CommandHandler {
+	return RunHandler{svc: svc}
 }
 
 // Handle handles the RunCmd
 func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
-	chatUser, err := h.chatSvc.GetUser(ctx, cmd.Info().User)
+	chatUser, err := h.svc.ChatService.GetUser(ctx, cmd.Info().User)
 	if err != nil {
-		h.chatSvc.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
+		h.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, timestamp, err)
 		return
 	}
 
@@ -51,7 +47,7 @@ func (h RunHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, time
 		aDefs = append(aDefs, aDef)
 	}
 
-	deployHandler(ctx, h.eveAPIClient, h.chatSvc, cmd, timestamp, eve.DeploymentPlanOptions{
+	deployHandler(ctx, h.svc.EveAPI, h.svc.ChatService, cmd, timestamp, eve.DeploymentPlanOptions{
 		Artifacts:        aDefs,
 		ForceDeploy:      true,
 		User:             chatUser.Name,

@@ -84,7 +84,7 @@ func (a *Api) gracefulShutdown() {
 	a.server.SetKeepAlivesEnabled(false)
 	a.mServer.SetKeepAlivesEnabled(false)
 
-	// Attempt to shutdown cleanly
+	// Attempt to shut down cleanly
 	for _, x := range a.onShutdown {
 		x()
 	}
