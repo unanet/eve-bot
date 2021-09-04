@@ -1,9 +1,8 @@
 package commands
 
 import (
-	"github.com/unanet/eve-bot/internal/botcommander/params"
-
 	"github.com/unanet/eve-bot/internal/botcommander/help"
+	"github.com/unanet/eve-bot/internal/botcommander/params"
 )
 
 type restartCmd struct {
@@ -17,7 +16,7 @@ const (
 var (
 	restartCmdHelpSummary = help.Summary("The `restart` command is used to restart a service in a namespace")
 	restartCmdHelpUsage   = help.Usage{"restart {{ service }} in {{ namespace }} {{ environment }}"}
-	restartCmdHelpExample = help.Examples{"restart platform in current una-int"}
+	restartCmdHelpExample = help.Examples{"restart api in current int"}
 )
 
 // NewRestartCommand creates a New RestartCmd that implements the EvebotCommand interface
@@ -39,11 +38,6 @@ func (cmd restartCmd) AckMsg() (string, bool) {
 		help.UsageOpt(restartCmdHelpUsage.String()),
 		help.ExamplesOpt(restartCmdHelpExample.String()),
 	).String())
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd restartCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

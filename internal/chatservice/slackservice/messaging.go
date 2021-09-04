@@ -10,11 +10,7 @@ const (
 	msgLogLinks                  = "Here are the latest logs..."
 	msgResultsNotification       = "Here are your results..."
 	msgReleaseNotification       = "Successfully released...."
-)
-
-const (
-	// https://clearview.slack.com/archives/CUK5MSMPU
-	devOpsMonitoringChannel = "CUK5MSMPU"
+	msgAuthLink                  = "Here is your account auth link:"
 )
 
 func userErrMessage(user string, err error) string {

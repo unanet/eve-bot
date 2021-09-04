@@ -48,6 +48,38 @@ spec:
               value: {{ .Values.vaultAddr }}
             - name: VAULT_K8S_MOUNT
               value: {{ .Values.vaultK8sMount }}
+            - name: EVEBOT_SLACK_CHANNELS_MAINTENANCE
+              value: {{ .Values.evebotSlackChannelsMaintenance | quote }}
+            - name: EVEBOT_SLACK_MAINTENANCE_ENABLED
+              value: {{ .Values.evebotSlackChannelsMaintenanceEnabled | quote }}
+            - name: EVEBOT_EVEAPI_ADMIN_TOKEN
+              value: {{ .Values.adminToken }}
+            - name: EVEBOT_PORT
+              value: {{ .Values.evebotPort | quote }}
+            - name: PROVIDER_TYPE
+              value: {{ .Values.secretsProviderType }}
+            - name: DYNAMIC_SECRETS_ENABLED
+              value: {{ .Values.dynamicSecretsEnabled | quote }}
+            - name: EVEBOT_USER_TABLE_NAME
+              value: {{ .Values.eveUserTableName }}
+            - name: EVEBOT_IDENTITY_CONN_URL
+              value: {{ .Values.eveIdentityConnURL }}
+            - name: EVEBOT_IDENTITY_REDIRECT_URL
+              value: {{ .Values.eveIdentityRedirectURL }}
+            - name: EVEBOT_IDENTITY_CLIENT_ID
+              value: {{ .Values.eveIdentityClientID }}
+            - name: EVEBOT_IDENTITY_CLIENT_SECRET
+              value: {{ .Values.eveIdentityClientSecret }}
+            - name: EVEBOT_AWS_REGION
+              value: {{ .Values.eveAWSRegion }}
+            - name: AWS_REGION
+              value: {{ .Values.awsRegion }}            
+            - name: AWS_ACCESS_KEY
+              value: {{ .Values.awsAccessKey }}
+            - name: AWS_SECRET_KEY
+              value: {{ .Values.awsSecretKey }}
+            - name: EVEBOT_LOGGING_DASHBOARD_BASE_URL
+              value: {{ .Values.eveLoggingDashboard }}
           ports:
             - containerPort: 3000
               name: api

@@ -13,7 +13,7 @@ import (
 	"github.com/unanet/go/pkg/errors"
 )
 
-// EveController for slack routes
+// EveController for eve specific routes
 type EveController struct {
 	svc *service.Provider
 }
@@ -27,10 +27,6 @@ func NewEveController(svc *service.Provider) *EveController {
 func (c EveController) Setup(r chi.Router) {
 	r.Post("/eve-callback", c.eveCallbackHandler)
 	r.Post("/eve-cron-callback", c.eveCronCallbackHandler)
-}
-
-func logLink(ns string) string {
-	return "https://grafana.unanet.io/explore?left=%5B%22now-1h%22,%22now%22,%22Loki%22,%7B%22refId%22:%22A%22,%22expr%22:%22%7Bjob%3D~%5C%22" + ns + ".*%5C%22%7D%22,%22key%22:%22Q-1591690807784-0.2580443768677896-0%22,%22hide%22:false%7D,%7B%22mode%22:%22Logs%22%7D,%7B%22ui%22:%5Btrue,true,true,null%5D%7D%5D"
 }
 
 func (c EveController) eveCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +49,7 @@ func (c EveController) eveCallbackHandler(w http.ResponseWriter, r *http.Request
 	c.svc.ChatService.PostMessageThread(r.Context(), cbState.ToChatMsg(), cbState.Channel, cbState.TS)
 
 	if cbState.Payload.Status == eve.DeploymentPlanStatusErrors {
-		c.svc.ChatService.PostLinkMessageThread(r.Context(), logLink(cbState.Payload.Namespace.Name), user, channel, ts)
+		c.svc.ChatService.PostLinkMessageThread(r.Context(), c.svc.Cfg.LoggingDashboardBaseURL, user, channel, ts)
 	}
 
 	render.Respond(w, r, nil)
@@ -85,7 +81,7 @@ func (c EveController) eveCronCallbackHandler(w http.ResponseWriter, r *http.Req
 	}
 	ts := c.svc.ChatService.PostMessage(r.Context(), cbState.ToChatMsg(), cbState.Channel)
 	if cbState.Payload.Status == eve.DeploymentPlanStatusErrors {
-		c.svc.ChatService.PostLinkMessageThread(r.Context(), logLink(cbState.Payload.Namespace.Name), user, channel, ts)
+		c.svc.ChatService.PostLinkMessageThread(r.Context(), c.svc.Cfg.LoggingDashboardBaseURL, user, channel, ts)
 	}
 
 	render.Respond(w, r, nil)

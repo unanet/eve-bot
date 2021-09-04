@@ -23,10 +23,8 @@ var (
 	}
 
 	runCmdHelpExample = help.Examples{
-		"run migration in current una-int key=value key2=value2 keyN=valN",
-		"run auto-migration:2020.4 in current una-int key=value key2=value2 keyN=valN",
-		"run cvs-migration in current una-int key=value key2=value2 keyN=valN",
-		"run hello-world:1 in current una-int key=value key2=value2 keyN=valN",
+		"run migration in current int key=value key2=value2 keyN=valN",
+		"run cool-job:1.2 in current int key=value key2=value2 keyN=valN",
 	}
 )
 
@@ -50,11 +48,6 @@ func (cmd runCmd) AckMsg() (string, bool) {
 		help.UsageOpt(runCmdHelpUsage.String()),
 		help.ExamplesOpt(runCmdHelpExample.String()),
 	).String())
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd runCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

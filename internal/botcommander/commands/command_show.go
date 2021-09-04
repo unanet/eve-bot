@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -28,10 +27,10 @@ var (
 	}
 	showCmdHelpExample = help.Examples{
 		"show environments",
-		"show namespaces in una-int",
-		"show services in current una-int",
-		"show metadata for unaneta in current una-int",
-		"show jobs in current una-int",
+		"show namespaces in int",
+		"show services in current int",
+		"show metadata for billing in current int",
+		"show jobs in current int",
 	}
 )
 
@@ -54,11 +53,6 @@ func (cmd showCmd) AckMsg() (string, bool) {
 		help.UsageOpt(showCmdHelpUsage.String()),
 		help.ExamplesOpt(showCmdHelpExample.String()),
 	).String())
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd showCmd) IsAuthorized(map[string]interface{}, chatChannelInfoFn) bool {
-	return true
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

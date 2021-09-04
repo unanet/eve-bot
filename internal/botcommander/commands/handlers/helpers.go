@@ -66,7 +66,7 @@ func resolveServiceNamespace(
 		return nil, nil
 	}
 	for _, s := range svcs {
-		if strings.ToLower(s.Name) == strings.ToLower(requestedSvcName) {
+		if strings.EqualFold(s.Name, requestedSvcName) {
 			svc = s
 			break
 		}
@@ -94,7 +94,7 @@ func resolveNamespace(ctx context.Context, api interfaces.EveAPI, cmd commands.E
 	}
 
 	for _, v := range namespaces {
-		if strings.ToLower(v.Alias) == strings.ToLower(dynamicOpts[params.NamespaceName].(string)) {
+		if strings.EqualFold(v.Alias, dynamicOpts[params.NamespaceName].(string)) {
 			nv = v
 			break
 		}

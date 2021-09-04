@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -24,10 +23,10 @@ var (
 		"set {{ resources }} in {{ namespace }} {{ environment }} to {{value}}",
 	}
 	setCmdHelpExample = help.Examples{
-		"set metadata for unaneta in current una-int key=value",
-		"set metadata for unaneta in current una-int key=value key2=value2 keyN=valueN",
-		"set version for unaneta in current una-int to 20.2",
-		"set version in current una-int to 20.2",
+		"set metadata for api in current int key=value",
+		"set metadata for billing in current int key=value key2=value2 keyN=valueN",
+		"set version for api in current int to 1.3",
+		"set version in current int to 2.0",
 	}
 )
 
@@ -50,11 +49,6 @@ func (cmd setCmd) AckMsg() (string, bool) {
 		help.UsageOpt(setCmdHelpUsage.String()),
 		help.ExamplesOpt(setCmdHelpExample.String()),
 	).String())
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd setCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

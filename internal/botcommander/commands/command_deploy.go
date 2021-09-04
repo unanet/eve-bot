@@ -27,10 +27,10 @@ var (
 		"deploy {{ namespace }} in {{ environment }} services={{ service_name:service_version,service_name:service_version }} dryrun={{ true }} force={{ true }}",
 	}
 	deployCmdHelpExample = help.Examples{
-		"deploy current in una-int",
-		"deploy current in una-int services=unanetbi dryrun=true",
-		"deploy current in una-int services=unanetbi,unaneta dryrun=true force=true",
-		"deploy current in una-int services=unanetbi:20.2,unaneta",
+		"deploy current in int",
+		"deploy current in int services=api dryrun=true",
+		"deploy current in int services=api,billing dryrun=true force=true",
+		"deploy current in int services=api:1.0,billing",
 	}
 )
 
@@ -56,11 +56,6 @@ func (cmd deployCmd) AckMsg() (string, bool) {
 		help.ArgsOpt(cmd.arguments.String()),
 		help.ExamplesOpt(deployCmdHelpExample.String()),
 	).String())
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd deployCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn) || lowerEnvAuthCheck(cmd.opts)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options

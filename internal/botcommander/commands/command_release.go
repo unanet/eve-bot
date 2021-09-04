@@ -23,10 +23,10 @@ var (
 		"release {{ artifact }}:{{ optional_version }} from {{ required_feed }} to {{ optional_feed }}",
 	}
 	releaseCmdHelpExample = help.Examples{
-		"release unanet-analytics from int",
-		"release unanet-app:20.3 from int",
-		"release unanet-analytics:20.2.5 from int to prod",
-		"release unanet-analytics:20.2.5.43 from prod to int",
+		"release api from int",
+		"release api:1.3 from int",
+		"release billing:1.2.4 from int to prod",
+		"release billing:1.2.4 from prod to int",
 	}
 )
 
@@ -49,11 +49,6 @@ func (cmd releaseCmd) AckMsg() (string, bool) {
 		help.UsageOpt(releaseCmdHelpUsage.String()),
 		help.ExamplesOpt(releaseCmdHelpExample.String()),
 	).String())
-}
-
-// IsAuthorized satisfies the EveBotCommand Interface and checks the auth
-func (cmd releaseCmd) IsAuthorized(allowedChannelMap map[string]interface{}, fn chatChannelInfoFn) bool {
-	return cmd.IsHelpRequest() || validChannelAuthCheck(cmd.info.Channel, allowedChannelMap, fn)
 }
 
 // Options satisfies the EveBotCommand Interface and returns the dynamic options
@@ -91,6 +86,4 @@ func (cmd *releaseCmd) resolveDynamicOptions() {
 		cmd.opts[params.ToFeedName] = cmd.input[5]
 		return
 	}
-
-	return
 }

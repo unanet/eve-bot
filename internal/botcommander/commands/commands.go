@@ -54,7 +54,7 @@ type baseCommand struct {
 }
 
 func (bc *baseCommand) verifyInput() {
-	if bc.ValidInputLength() == false {
+	if !bc.ValidInputLength() {
 		bc.errs = append(bc.errs, fmt.Errorf("invalid input length: %v", bc.input))
 	}
 }
@@ -79,6 +79,11 @@ func (bc *baseCommand) initializeResource() {
 
 // IsHelpRequest checks if the command is a request for help
 func (bc *baseCommand) IsHelpRequest() bool {
+	// There is no help for auth
+	// @evebot auth
+	if bc.info.CommandName == AuthCmdName {
+		return false
+	}
 	if len(bc.input) == 0 ||
 		bc.input[0] == helpCmdName ||
 		bc.input[len(bc.input)-1] == helpCmdName ||
@@ -123,7 +128,7 @@ func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
 	if bc.IsHelpRequest() || bc.info.CommandName == "" {
 		return fmt.Sprintf("<@%s>...\n\n%s", bc.info.User, cmdHelp), false
 	}
-	if bc.ValidInputLength() == false {
+	if !bc.ValidInputLength() {
 		return fmt.Sprintf("Yo <@%s>, one of us goofed up...¯\\_(ツ)_/¯...I don't know what to do with: `%s`\n\nTry running: ```@evebot %s help```\n\n", bc.info.User, bc.input, bc.info.CommandName), false
 	}
 	if len(bc.BaseErrMsg()) > 0 {
@@ -133,12 +138,11 @@ func (bc *baseCommand) BaseAckMsg(cmdHelp string) (string, bool) {
 	return fmt.Sprintf("Sure <@%s>, I'll `%s` that right away. BRB!", bc.info.User, bc.info.CommandName), true
 }
 
-type chatChannelInfoFn func(context.Context, string) (chatmodels.Channel, error)
+type ChatChannelInfoFn func(context.Context, string) (chatmodels.Channel, error)
 
 // EvebotCommand interface (each evebot command needs to implement this interface)
 type EvebotCommand interface {
 	Info() ChatInfo
 	Options() CommandOptions
 	AckMsg() (string, bool)
-	IsAuthorized(allowedChannel map[string]interface{}, fn chatChannelInfoFn) bool
 }

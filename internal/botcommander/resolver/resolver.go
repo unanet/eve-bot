@@ -40,7 +40,7 @@ func (ebr *EvebotResolver) Resolve(input, channel, user string) commands.EvebotC
 	cleanCmdFields := cleanCommandField(msgFields[1:])
 	if cleanCmdFields == nil {
 		log.Logger.Error("invalid clean cmd fields")
-		return commands.NewInvalidCommand(cleanCmdFields, channel, user)
+		return commands.NewInvalidCommand(msgFields[1:], channel, user)
 	}
 
 	// make sure after you create a new command,

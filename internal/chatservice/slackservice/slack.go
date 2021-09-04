@@ -6,6 +6,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/unanet/eve-bot/internal/chatservice/chatmodels"
+	"github.com/unanet/eve-bot/internal/config"
 	"github.com/unanet/go/pkg/log"
 	"go.uber.org/zap"
 )
@@ -13,6 +14,26 @@ import (
 // Provider is the Slack provider which wraps the slack the client
 type Provider struct {
 	client *slack.Client
+}
+
+func (sp Provider) PostPrivateMessage(ctx context.Context, msg string, user string) {
+	slackUser, err := sp.client.GetUserInfoContext(ctx, user)
+	sp.handleDevOpsErrorNotification(ctx, err)
+	sp.postAuthLinkMessage(ctx, msg, slackUser.ID)
+}
+
+// PostLinkMessageThread sends a threaded message with links
+func (sp Provider) postAuthLinkMessage(ctx context.Context, url string, user string) {
+
+	msgOptionBlocks := slack.MsgOptionBlocks(
+		sectionBlockOpt(fmt.Sprintf("<@%s>! %s", user, msgAuthLink)),
+		slack.NewDividerBlock(),
+		sectionBlockOpt(fmt.Sprintf("<%s|Account Signin>", url)),
+	)
+
+	linkOpt := slack.MsgOptionEnableLinkUnfurl()
+	_, _, err := sp.client.PostMessageContext(ctx, user, msgOptionBlocks, linkOpt)
+	sp.handleDevOpsErrorNotification(ctx, err)
 }
 
 // New returns a new Slack provider
@@ -23,7 +44,7 @@ func New(c *slack.Client) Provider {
 func (sp Provider) handleDevOpsErrorNotification(ctx context.Context, err error) {
 	if err != nil {
 		log.Logger.Error("critical devops error", zap.Error(err))
-		_, _, _ = sp.client.PostMessageContext(ctx, devOpsMonitoringChannel, slack.MsgOptionText(errMessage(err), false))
+		_, _, _ = sp.client.PostMessageContext(ctx, config.Load().DevopsMonitoringChannel, slack.MsgOptionText(errMessage(err), false))
 	}
 }
 
