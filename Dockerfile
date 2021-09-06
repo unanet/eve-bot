@@ -53,8 +53,8 @@ RUN \
 ######################################
 FROM scratch
 
-ENV EVE_PORT 3000
-ENV EVE_METRICS_PORT 3001
+ENV EVEBOT_PORT 3000
+ENV EVEBOT_METRICS_PORT 3001
 
 # Import assets from the build stage image
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
@@ -72,4 +72,4 @@ CMD ["/bin/eve-bot"]
 
 
 HEALTHCHECK --interval=1m --timeout=2s --start-period=60s \
-    CMD curl -f http://localhost:${EVE_METRICS_PORT}/ || exit 1
+    CMD curl -f http://localhost:${EVEBOT_METRICS_PORT}/ || exit 1
