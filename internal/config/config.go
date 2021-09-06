@@ -37,7 +37,6 @@ type Config struct {
 	Port                    int    `split_words:"true" default:"8080"`
 	MetricsPort             int    `split_words:"true" default:"3001"`
 	ServiceName             string `split_words:"true" default:"eve"`
-	ReadOnly                bool   `split_words:"true" default:"false"`
 	AWSRegion               string `split_words:"true" required:"true"`
 	LoggingDashboardBaseURL string `split_words:"true" required:"true"`
 	UserTableName           string `split_words:"true" required:"true"`
