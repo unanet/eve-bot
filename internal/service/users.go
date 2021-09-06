@@ -23,7 +23,6 @@ type UserStore interface {
 // UserEntry struct to hold info about new user item
 type UserEntry struct {
 	UserID string
-	Email  string
 	Name   string
 	Roles  []string
 	Groups []string
@@ -101,7 +100,6 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 
 	ue := &UserEntry{
 		UserID: userID,
-		Email:  claims["email"].(string),
 		Name:   claims["preferred_username"].(string),
 		Roles:  extractClaimSlice(claims["roles"]),
 		Groups: extractClaimSlice(claims["groups"]),
