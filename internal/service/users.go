@@ -113,7 +113,7 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 
 	userEntry, err := p.userDB.PutItem(&dynamodb.PutItemInput{
 		Item:      av,
-		TableName: aws.String("eve-bot-users"),
+		TableName: aws.String(p.Cfg.UserTableName),
 	})
 	if err != nil {
 		return err
