@@ -97,6 +97,8 @@ func (p *Provider) ReadUser(userID string) (*UserEntry, error) {
 }
 
 func (p *Provider) saveUser(userID string, claims map[string]interface{}) error {
+	log.Logger.Info("save user with claims", zap.Any("claims", claims))
+
 	ue := &UserEntry{
 		UserID: userID,
 		Email:  claims["email"].(string),
