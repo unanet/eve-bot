@@ -23,11 +23,10 @@ type UserStore interface {
 
 // UserEntry struct to hold info about new user item
 type UserEntry struct {
-	UserID   string
-	Name     string
-	Roles    []string
-	Groups   []string
-	MapRoles map[string]bool
+	UserID  string
+	Name    string
+	Roles   map[string]bool
+	IsAdmin bool
 }
 
 func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) error {
@@ -120,11 +119,10 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 	log.Logger.Info("save user with claims", zap.Any("claims", claims))
 
 	ue := &UserEntry{
-		UserID:   userID,
-		Name:     claims["preferred_username"].(string),
-		Roles:    extractClaimSlice(claims["roles"]),
-		Groups:   extractClaimSlice(claims["groups"]),
-		MapRoles: extractClaimMap(claims["roles"]),
+		UserID:  userID,
+		Name:    claims["preferred_username"].(string),
+		Roles:   extractClaimMap(claims["roles"]),
+		IsAdmin: extractIsAdminRole(claims["roles"]),
 	}
 
 	log.Logger.Debug("user entry data", zap.Any("user_entry", ue))
@@ -147,14 +145,21 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 // TODO: Setup a more "polished" RBAC strategy
 // Want to be able to map incoming/dowstream groups with Roles in our system
 func (p *Provider) IsAuthorized(cmd commands.EvebotCommand, userEntry *UserEntry) bool {
+	reqRole := requestedRole(cmd)
+	log.Logger.Info("auth check",
+		zap.String("user", cmd.Info().User),
+		zap.String("command", cmd.Info().CommandName),
+		zap.String("requested_role", reqRole),
+		zap.Any("user_entry", userEntry),
+	)
 	// always allow the user to authenticate explicitly (re-login)
 	if strings.ToLower(cmd.Info().CommandName) == "auth" {
 		return true
 	}
-	if userEntry.isAdmin() {
+	if userEntry.IsAdmin {
 		return true
 	}
-	if enabled, ok := userEntry.MapRoles[requestedRole(cmd)]; enabled && ok {
+	if enabled, ok := userEntry.Roles[reqRole]; enabled && ok {
 		return true
 	}
 	return false
@@ -166,13 +171,4 @@ func requestedRole(cmd commands.EvebotCommand) string {
 		tmpRequestedRoleCmd = tmpRequestedRoleCmd + "-prod"
 	}
 	return tmpRequestedRoleCmd
-}
-
-func (e UserEntry) isAdmin() bool {
-	for _, role := range e.Roles {
-		if strings.Contains(strings.ToLower(role), "admin") {
-			return true
-		}
-	}
-	return false
 }
