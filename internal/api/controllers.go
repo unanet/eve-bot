@@ -32,7 +32,7 @@ func initController(cfg *config.Config) []Controller {
 		log.Logger.Panic("Unable to Initialize the AWS Session", zap.Error(err))
 	}
 
-	idSvc, err := identity.NewService(cfg.Identity)
+	idSvc, err := identity.NewService(cfg.Identity, identity.WithAdditionalScopesOpt([]string{"groups"}))
 	if err != nil {
 		log.Logger.Panic("Unable to Initialize the Identity Service Provider", zap.Error(err))
 	}

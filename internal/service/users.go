@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,10 +23,11 @@ type UserStore interface {
 
 // UserEntry struct to hold info about new user item
 type UserEntry struct {
-	UserID string
-	Name   string
-	Roles  []string
-	Groups []string
+	UserID   string
+	Name     string
+	Roles    []string
+	Groups   []string
+	MapRoles map[string]bool
 }
 
 func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) error {
@@ -34,7 +36,12 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 		return err
 	}
 
-	log.Logger.Info("oauth token details", zap.Any("oauth2Token", oauth2Token))
+	log.Logger.Info("oauth token details",
+		zap.Any("AccessToken", oauth2Token.AccessToken),
+		zap.Any("Expiry", oauth2Token.Expiry),
+		zap.Any("TokenType", oauth2Token.TokenType),
+		zap.Any("RefreshToken", oauth2Token.RefreshToken),
+	)
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
@@ -45,6 +52,14 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 	if err != nil {
 		return err
 	}
+
+	log.Logger.Info("oauth idToken details",
+		zap.Any("idToken", idToken),
+		zap.Any("Subject", idToken.Subject),
+		zap.Any("Nonce", idToken.Nonce),
+		zap.Any("Issuer", idToken.Issuer),
+	)
+
 	var idTokenClaims = new(json.RawMessage)
 	err = idToken.Claims(&idTokenClaims)
 	if err != nil {
@@ -59,6 +74,10 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 	if err != nil {
 		return err
 	}
+
+	log.Logger.Info("oauth claims",
+		zap.Any("claims", claims),
+	)
 
 	return p.saveUser(state, claims)
 }
@@ -101,10 +120,11 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 	log.Logger.Info("save user with claims", zap.Any("claims", claims))
 
 	ue := &UserEntry{
-		UserID: userID,
-		Name:   claims["preferred_username"].(string),
-		Roles:  extractClaimSlice(claims["roles"]),
-		Groups: extractClaimSlice(claims["groups"]),
+		UserID:   userID,
+		Name:     claims["preferred_username"].(string),
+		Roles:    extractClaimSlice(claims["roles"]),
+		Groups:   extractClaimSlice(claims["groups"]),
+		MapRoles: extractClaimMap(claims["roles"]),
 	}
 
 	log.Logger.Debug("user entry data", zap.Any("user_entry", ue))
@@ -127,60 +147,30 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 // TODO: Setup a more "polished" RBAC strategy
 // Want to be able to map incoming/dowstream groups with Roles in our system
 func (p *Provider) IsAuthorized(cmd commands.EvebotCommand, userEntry *UserEntry) bool {
-	// If the user wan't to authenticate explicitly (re-login)
+	// always allow the user to authenticate explicitly (re-login)
 	if strings.ToLower(cmd.Info().CommandName) == "auth" {
 		return true
 	}
 	if userEntry.isAdmin() {
 		return true
 	}
-	if userEntry.canWriteAll() {
-		return true
-	}
-	if userEntry.validEnvironment(extractEnv(cmd.Options())) {
+	if enabled, ok := userEntry.MapRoles[requestedRole(cmd)]; enabled && ok {
 		return true
 	}
 	return false
 }
 
-// validEnvironment check
-// TODO: refactor this with better RBAC strategy
-// Access on actions (deploy, release, set, delete, etc.)
-// Access on environment (int,dev,qa,stage,perf,prod)
-func (e UserEntry) validEnvironment(env string) bool {
-	if env == "" {
-		return true
+func requestedRole(cmd commands.EvebotCommand) string {
+	tmpRequestedRoleCmd := fmt.Sprintf("eve-%s", cmd.Info().CommandName)
+	if strings.Contains(strings.ToLower(extractEnv(cmd.Options())), "prod") {
+		tmpRequestedRoleCmd = tmpRequestedRoleCmd + "-prod"
 	}
-	for _, role := range e.Roles {
-		if strings.ToLower(role) == "write-nonprod" {
-			// Let's see if they are performing an action to something in the lower environments (int,qa,dev)
-			// Most actions can be taken against resources in the lower environments
-			// the only action that can't is the `release` command
-			switch {
-			case strings.Contains(env, "int"), strings.Contains(env, "qa"), strings.Contains(env, "dev"):
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// canWriteAll check
-// TODO: refactor this with better RBAC strategy
-// Access on actions (deploy, release, set, delete, etc.)
-// Access on environment (int,dev,qa,stage,perf,prod)
-func (e UserEntry) canWriteAll() bool {
-	for _, role := range e.Roles {
-		if strings.ToLower(role) == "write-all" {
-			return true
-		}
-	}
-	return false
+	return tmpRequestedRoleCmd
 }
 
 func (e UserEntry) isAdmin() bool {
 	for _, role := range e.Roles {
-		if strings.ToLower(role) == "admin" {
+		if strings.Contains(strings.ToLower(role), "admin") {
 			return true
 		}
 	}

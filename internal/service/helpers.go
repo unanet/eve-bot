@@ -7,6 +7,18 @@ import (
 	"go.uber.org/zap"
 )
 
+func extractClaimMap(input interface{}) map[string]bool {
+	result := make(map[string]bool)
+	if v, ok := input.([]interface{}); ok {
+		for _, param := range v {
+			result[param.(string)] = true
+		}
+
+	}
+	log.Logger.Warn("invalid type on incoming claim slice", zap.Any("input", input), zap.Reflect("type", input))
+	return result
+}
+
 func extractClaimSlice(input interface{}) []string {
 	if v, ok := input.([]interface{}); ok {
 		var paramSlice []string
