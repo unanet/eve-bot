@@ -152,17 +152,12 @@ func (p *Provider) IsAuthorized(cmd commands.EvebotCommand, userEntry *UserEntry
 		zap.String("requested_role", reqRole),
 		zap.Any("user_entry", userEntry),
 	)
-	// always allow the user to authenticate explicitly (re-login)
-	if strings.ToLower(cmd.Info().CommandName) == "auth" {
-		return true
-	}
-	if userEntry.IsAdmin {
-		return true
-	}
+	// If User has matching role (and enabled) let them pass
 	if enabled, ok := userEntry.Roles[reqRole]; enabled && ok {
 		return true
 	}
-	return false
+	// Check if admin or cmd is Help, Root or Auth command
+	return (cmd.Info().IsHelpRequest || cmd.Info().IsRootCmd || cmd.Info().IsAuthCmd || userEntry.IsAdmin)
 }
 
 func requestedRole(cmd commands.EvebotCommand) string {

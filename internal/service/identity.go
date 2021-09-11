@@ -6,8 +6,8 @@ import (
 	"github.com/coreos/go-oidc"
 )
 
-func (p *Provider) AuthCodeURL(userFQDN string) string {
-	return p.oidc.AuthCodeURL(userFQDN)
+func (p *Provider) AuthCodeURL(state string) string {
+	return p.oidc.AuthCodeURL(state)
 }
 
 func (p *Provider) Verify(ctx context.Context, input string) (*oidc.IDToken, error) {

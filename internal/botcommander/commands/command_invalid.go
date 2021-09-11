@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/unanet/eve-bot/internal/botcommander/args"
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
@@ -14,8 +15,12 @@ type invalidCmd struct {
 // NewInvalidCommand creates a New InvalidCmd that implements the EvebotCommand interface
 func NewInvalidCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := invalidCmd{baseCommand{
-		input:      cmdFields,
-		info:       ChatInfo{User: user, Channel: channel, CommandName: ""},
+		input: cmdFields,
+		info: ChatInfo{
+			User:        user,
+			Channel:     channel,
+			CommandName: "",
+		},
 		arguments:  args.Args{},
 		parameters: params.Params{},
 		opts:       make(CommandOptions),

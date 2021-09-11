@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -33,8 +34,13 @@ var (
 // NewSetCommand creates a New SetCmd that implements the EvebotCommand interface
 func NewSetCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := setCmd{baseCommand{
-		input:  cmdFields,
-		info:   ChatInfo{User: user, Channel: channel, CommandName: SetCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   SetCmdName,
+			IsHelpRequest: isHelpCmd(cmdFields, SetCmdName),
+		},
 		opts:   make(CommandOptions),
 		bounds: InputLengthBounds{Min: 7, Max: -1},
 	}}

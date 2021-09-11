@@ -37,8 +37,13 @@ var (
 // NewDeployCommand creates a New DeployCmd that implements the EvebotCommand interface
 func NewDeployCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := deployCmd{baseCommand{
-		input:      cmdFields,
-		info:       ChatInfo{User: user, Channel: channel, CommandName: DeployCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   DeployCmdName,
+			IsHelpRequest: isHelpCmd(cmdFields, DeployCmdName),
+		},
 		arguments:  args.Args{args.DefaultDryrunArg(), args.DefaultForceArg(), args.DefaultServicesArg()},
 		parameters: params.Params{params.DefaultNamespace(), params.DefaultEnvironment()},
 		opts:       make(CommandOptions),

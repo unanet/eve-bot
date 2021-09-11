@@ -33,8 +33,13 @@ var (
 // NewReleaseCommand creates a New ReleaseCmd that implements the EvebotCommand interface
 func NewReleaseCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := releaseCmd{baseCommand{
-		input:  cmdFields,
-		info:   ChatInfo{User: user, Channel: channel, CommandName: ReleaseCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   ReleaseCmdName,
+			IsHelpRequest: isHelpCmd(cmdFields, ReleaseCmdName),
+		},
 		opts:   make(CommandOptions),
 		bounds: InputLengthBounds{Min: 4, Max: 6},
 	}}

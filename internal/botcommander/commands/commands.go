@@ -38,7 +38,8 @@ func (ilb *InputLengthBounds) Valid(input []string) bool {
 
 // ChatInfo contains the Chat Command Info
 type ChatInfo struct {
-	User, Channel, CommandName string
+	User, Channel, CommandName          string
+	IsHelpRequest, IsRootCmd, IsAuthCmd bool
 }
 
 // baseCommand
@@ -84,13 +85,14 @@ func (bc *baseCommand) IsHelpRequest() bool {
 	if bc.info.CommandName == AuthCmdName {
 		return false
 	}
-	if len(bc.input) == 0 ||
-		bc.input[0] == helpCmdName ||
-		bc.input[len(bc.input)-1] == helpCmdName ||
-		(len(bc.input) == 1 && bc.input[0] == bc.info.CommandName) {
-		return true
-	}
-	return false
+	return isHelpCmd(bc.input, bc.info.CommandName)
+}
+
+func isHelpCmd(input []string, cmdName string) bool {
+	return len(input) == 0 ||
+		input[0] == helpCmdName ||
+		input[len(input)-1] == helpCmdName ||
+		(len(input) == 1 && input[0] == cmdName)
 }
 
 // ValidInputLength checks the input length

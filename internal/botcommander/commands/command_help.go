@@ -25,8 +25,13 @@ var (
 // NewHelpCommand creates a New HelpCmd that implements the EvebotCommand interface
 func NewHelpCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := helpCmd{baseCommand{
-		input:      cmdFields,
-		info:       ChatInfo{User: user, Channel: channel, CommandName: helpCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   helpCmdName,
+			IsHelpRequest: true,
+		},
 		arguments:  args.Args{},
 		parameters: params.Params{},
 		opts:       make(CommandOptions),

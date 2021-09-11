@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -31,8 +32,13 @@ var (
 // NewDeleteCommand creates a New DeleteCmd that implements the EvebotCommand interface
 func NewDeleteCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := deleteCmd{baseCommand{
-		input:  cmdFields,
-		info:   ChatInfo{User: user, Channel: channel, CommandName: DeleteCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   DeleteCmdName,
+			IsHelpRequest: isHelpCmd(cmdFields, DeleteCmdName),
+		},
 		opts:   make(CommandOptions),
 		bounds: InputLengthBounds{Min: 7, Max: -1},
 	}}
@@ -95,4 +101,3 @@ func (cmd *deleteCmd) resolveDynamicOptions() {
 		return
 	}
 }
-

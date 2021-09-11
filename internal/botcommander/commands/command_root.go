@@ -17,8 +17,14 @@ const (
 // NewRootCmd creates a New RootCmd that implements the EvebotCommand interface
 func NewRootCmd(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := rootCmd{baseCommand{
-		input:      cmdFields,
-		info:       ChatInfo{User: user, Channel: channel, CommandName: ""},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   "",
+			IsHelpRequest: true,
+			IsRootCmd:     true,
+		},
 		arguments:  args.Args{},
 		parameters: params.Params{},
 		opts:       make(CommandOptions),

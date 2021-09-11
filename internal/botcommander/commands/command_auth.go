@@ -12,8 +12,14 @@ const (
 // NewAuthCommand creates a New AuthCmd that implements the EvebotCommand interface
 func NewAuthCommand(cmdFields []string, channel, user string) EvebotCommand {
 	return authCmd{baseCommand{
-		input:  cmdFields,
-		info:   ChatInfo{User: user, Channel: channel, CommandName: AuthCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   AuthCmdName,
+			IsHelpRequest: isHelpCmd(cmdFields, AuthCmdName),
+			IsAuthCmd:     true,
+		},
 		opts:   make(CommandOptions),
 		bounds: InputLengthBounds{Min: -1, Max: -1},
 	}}

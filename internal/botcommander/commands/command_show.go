@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/botcommander/resources"
@@ -37,8 +38,13 @@ var (
 // NewShowCommand creates a New ShowCmd that implements the EvebotCommand interface
 func NewShowCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := showCmd{baseCommand{
-		input:  cmdFields,
-		info:   ChatInfo{User: user, Channel: channel, CommandName: ShowCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   ShowCmdName,
+			IsHelpRequest: isHelpCmd(cmdFields, ShowCmdName),
+		},
 		opts:   make(CommandOptions),
 		bounds: InputLengthBounds{Min: 2, Max: 7},
 	}}

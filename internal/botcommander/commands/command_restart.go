@@ -22,8 +22,13 @@ var (
 // NewRestartCommand creates a New RestartCmd that implements the EvebotCommand interface
 func NewRestartCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := restartCmd{baseCommand{
-		input:  cmdFields,
-		info:   ChatInfo{User: user, Channel: channel, CommandName: RestartCmdName},
+		input: cmdFields,
+		info: ChatInfo{
+			User:          user,
+			Channel:       channel,
+			CommandName:   RestartCmdName,
+			IsHelpRequest: isHelpCmd(cmdFields, RestartCmdName),
+		},
 		opts:   make(CommandOptions),
 		bounds: InputLengthBounds{Min: 5, Max: 5},
 	}}

@@ -203,9 +203,9 @@ func (c SlackController) handleSlackAppMentionEvent(ctx context.Context, ev *sla
 	// TODO: Add a "Request Access" process here when user is not authorized to perform action
 	// Bonus points: Send request to configurable chat group (ex: @devops assign `username` to `role`)
 	// Doubly Bonus Points: Add ability for eve to assign a user to a role
-	// @evebot assign user@domain.tld to eve-deploy-prod role
+	// @evebot assign eve-deploy-prod role to user@domain.tld
 	if !c.svc.IsAuthorized(cmd, userEntry) {
-		_ = c.svc.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action", cmd.Info().Channel, ev.ThreadTimeStamp)
+		_ = c.svc.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action\nPlease message `@devops` with an access request if needed.", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
 	}
 

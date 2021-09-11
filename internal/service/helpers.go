@@ -5,8 +5,6 @@ import (
 
 	"github.com/unanet/eve-bot/internal/botcommander/commands"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
-	"github.com/unanet/go/pkg/log"
-	"go.uber.org/zap"
 )
 
 func extractIsAdminRole(input interface{}) bool {
@@ -29,20 +27,7 @@ func extractClaimMap(input interface{}) map[string]bool {
 		}
 
 	}
-	log.Logger.Warn("invalid type on incoming claim slice", zap.Any("input", input), zap.Reflect("type", input))
 	return result
-}
-
-func extractClaimSlice(input interface{}) []string {
-	if v, ok := input.([]interface{}); ok {
-		var paramSlice []string
-		for _, param := range v {
-			paramSlice = append(paramSlice, param.(string))
-		}
-		return paramSlice
-	}
-	log.Logger.Warn("invalid type on incoming claim slice", zap.Any("input", input), zap.Reflect("type", input))
-	return []string{}
 }
 
 func extractEnv(options commands.CommandOptions) string {
