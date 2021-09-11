@@ -64,7 +64,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          buildArgs: |
+          build-args: |
             VERSION=${{ env.VERSION }}
             SHA=${{ github.sha }}
             SHORT_SHA=${{ env.SHORT_SHA }}
