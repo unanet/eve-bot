@@ -34,6 +34,8 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 		return err
 	}
 
+	log.Logger.Info("oauth token details", zap.Any("oauth2Token", oauth2Token))
+
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
 		return errors.New("failed to get id_token")
