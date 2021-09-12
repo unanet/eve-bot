@@ -35,13 +35,6 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 		return err
 	}
 
-	log.Logger.Info("oauth token details",
-		zap.Any("AccessToken", oauth2Token.AccessToken),
-		zap.Any("Expiry", oauth2Token.Expiry),
-		zap.Any("TokenType", oauth2Token.TokenType),
-		zap.Any("RefreshToken", oauth2Token.RefreshToken),
-	)
-
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
 		return errors.New("failed to get id_token")
@@ -51,13 +44,6 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 	if err != nil {
 		return err
 	}
-
-	log.Logger.Info("oauth idToken details",
-		zap.Any("idToken", idToken),
-		zap.Any("Subject", idToken.Subject),
-		zap.Any("Nonce", idToken.Nonce),
-		zap.Any("Issuer", idToken.Issuer),
-	)
 
 	var idTokenClaims = new(json.RawMessage)
 	err = idToken.Claims(&idTokenClaims)
@@ -74,9 +60,7 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 		return err
 	}
 
-	log.Logger.Info("oauth claims",
-		zap.Any("claims", claims),
-	)
+	log.Logger.Debug("oauth claims", zap.Any("claims", claims))
 
 	return p.saveUser(state, claims)
 }
