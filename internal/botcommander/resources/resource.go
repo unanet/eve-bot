@@ -29,6 +29,7 @@ type baseResource struct {
 
 // FullResourceMap is just a map of resources that are available
 // This map should never be written to, just read for Validation
+// TODO: Support the plural and singular form and then remove "jobs" entry
 var FullResourceMap = map[string]bool{
 	strings.ToLower(EnvironmentName): true,
 	strings.ToLower(NamespaceName):   true,

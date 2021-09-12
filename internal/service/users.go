@@ -107,16 +107,12 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 		return err
 	}
 
-	userEntry, err := p.userDB.PutItem(&dynamodb.PutItemInput{
+	_, err = p.userDB.PutItem(&dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String(p.Cfg.UserTableName),
 	})
-	if err != nil {
-		return err
-	}
 
-	log.Logger.Debug("saved user entry", zap.Any("user_entry", userEntry))
-	return nil
+	return err
 }
 
 // TODO: Setup a more "polished" RBAC strategy
