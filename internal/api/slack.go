@@ -165,25 +165,6 @@ func (c SlackController) handleSlackAppMentionEvent(ctx context.Context, ev *sla
 	// Resolve the input and return an EvebotCommand object
 	cmd := c.svc.CommandResolver.Resolve(ev.Text, ev.Channel, ev.User)
 
-	// SlackMaintenanceEnabled is like a "feature flag"
-	// set to true, and we are in Maintenance Mode
-	// Only Channels set to the EVEBOT_SLACK_CHANNELS_MAINTENANCE environment variable are allowed to issue commands
-	// ex:  EVEBOT_SLACK_CHANNELS_MAINTENANCE=my-evebot,evebot-tests
-	if c.svc.Cfg.SlackMaintenanceEnabled {
-		incomingChannel, err := c.svc.ChatService.GetChannelInfo(ctx, cmd.Info().Channel)
-		if err != nil {
-			// This shouldn't happen, but if it does, we don't want to be locked out from deploying eve
-			// so we will show the error (which is logged) and DevOps will take care of the issue (hopefully...)
-			c.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
-		} else {
-			// Not coming from an approved Maintenance channel Show the maintenance mode
-			if _, ok := c.allowedMaintenanceChannelMap[incomingChannel.Name]; !ok {
-				_ = c.svc.ChatService.PostMessageThread(ctx, ":construction: Sorry, but we are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
-				return
-			}
-		}
-	}
-
 	chatUser, err := c.svc.ChatService.GetUser(ctx, cmd.Info().User)
 	if err != nil {
 		c.svc.ChatService.ErrorNotificationThread(ctx, cmd.Info().User, cmd.Info().Channel, ev.ThreadTimeStamp, err)
@@ -203,9 +184,16 @@ func (c SlackController) handleSlackAppMentionEvent(ctx context.Context, ev *sla
 	// TODO: Add a "Request Access" process here when user is not authorized to perform action
 	// Bonus points: Send request to configurable chat group (ex: @devops assign `username` to `role`)
 	// Doubly Bonus Points: Add ability for eve to assign a user to a role
-	// @evebot assign eve-deploy-prod role to user@domain.tld
+	// @evebot assign user@domain.tld to eve-deploy-prod role
 	if !c.svc.IsAuthorized(cmd, userEntry) {
 		_ = c.svc.ChatService.PostMessageThread(ctx, "You are not authorized to perform this action\nPlease message `@devops` with an access request if needed.", cmd.Info().Channel, ev.ThreadTimeStamp)
+		return
+	}
+
+	// SlackMaintenanceEnabled is like a "feature flag"
+	// set to true, and we are in Maintenance Mode
+	if c.svc.Cfg.SlackMaintenanceEnabled && !userEntry.IsAdmin {
+		_ = c.svc.ChatService.PostMessageThread(ctx, ":construction: Sorry, but we are currently in maintenance mode!", cmd.Info().Channel, ev.ThreadTimeStamp)
 		return
 	}
 
