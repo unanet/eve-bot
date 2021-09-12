@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
-	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -23,17 +22,15 @@ import (
 
 // SlackController for slack routes
 type SlackController struct {
-	svc                          *service.Provider
-	exe                          interfaces.CommandExecutor
-	allowedMaintenanceChannelMap map[string]interface{}
+	svc *service.Provider
+	exe interfaces.CommandExecutor
 }
 
 // NewSlackController creates a new slack controller (route handler)
 func NewSlackController(svc *service.Provider, exe interfaces.CommandExecutor) *SlackController {
 	return &SlackController{
-		svc:                          svc,
-		exe:                          exe,
-		allowedMaintenanceChannelMap: extractChannelMap(svc.Cfg.SlackChannelsMaintenance),
+		svc: svc,
+		exe: exe,
 	}
 }
 
@@ -207,12 +204,4 @@ func (c SlackController) handleSlackAppMentionEvent(ctx context.Context, ev *sla
 		// which maps an EveBotCommand to a CommandHandler
 		go c.exe.Execute(context.TODO(), cmd, timeStamp)
 	}
-}
-
-func extractChannelMap(input string) map[string]interface{} {
-	chanMap := make(map[string]interface{})
-	for _, c := range strings.Split(input, ",") {
-		chanMap[c] = true
-	}
-	return chanMap
 }

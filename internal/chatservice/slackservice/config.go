@@ -7,9 +7,8 @@ package slackservice
 // 		EVEBOT_SLACK_CHANNELS_MAINTENANCE
 //		EVEBOT_SLACK_MAINTENANCE_ENABLED
 type Config struct {
-	SlackSigningSecret       string `split_words:"true" required:"true"`
-	SlackVerificationToken   string `split_words:"true" required:"true"`
-	SlackOauthAccessToken    string `split_words:"true" required:"true"`
-	SlackChannelsMaintenance string `split_words:"true" required:"true"`
-	SlackMaintenanceEnabled  bool   `split_words:"true" default:"false"`
+	SlackSigningSecret      string `split_words:"true" required:"true"`
+	SlackVerificationToken  string `split_words:"true" required:"true"`
+	SlackOauthAccessToken   string `split_words:"true" required:"true"`
+	SlackMaintenanceEnabled bool   `split_words:"true" default:"false"`
 }
