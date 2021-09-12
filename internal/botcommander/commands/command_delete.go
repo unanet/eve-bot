@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	deleteCmdHelpSummary = help.Summary("The `delete` command is used to delete resource values (metadata)")
+	deleteCmdHelpSummary = help.Summary("The `delete` command is used to delete resource values (metadata, pinned versions)")
 	deleteCmdHelpUsage   = help.Usage{
 		"delete {{ resources }} for {{ service }} in {{ namespace }} {{ environment }}",
 	}
