@@ -138,6 +138,10 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 	if err != nil {
 		return err
 	}
+
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	p.userCache[ue.UserID] = *ue
 	log.Logger.Debug("saved user entry", zap.Any("user_entry", userEntry))
 	return nil
 }
