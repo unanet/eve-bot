@@ -1,8 +1,6 @@
 package service
 
 import (
-	"sync"
-
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/unanet/go/pkg/identity"
 
@@ -17,10 +15,8 @@ type Provider struct {
 	CommandResolver interfaces.CommandResolver
 	EveAPI          interfaces.EveAPI
 	Cfg             *config.Config
-	mutex           sync.Mutex
 	oidc            *identity.Service
 	userDB          *dynamodb.DynamoDB
-	userCache       map[string]UserEntry
 }
 
 func OpenIDConnectParam(id *identity.Service) Option {
@@ -57,9 +53,7 @@ type Option func(*Provider)
 
 func New(cfg *config.Config, opts ...Option) *Provider {
 	svc := &Provider{
-		Cfg:       cfg,
-		mutex:     sync.Mutex{},
-		userCache: make(map[string]UserEntry),
+		Cfg: cfg,
 	}
 
 	for _, opt := range opts {

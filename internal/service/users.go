@@ -83,12 +83,6 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 
 func (p *Provider) ReadUser(userID string) (*UserEntry, error) {
 	log.Logger.Info("service provider read user", zap.String("user_id", userID))
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-	if u, ok := p.userCache[userID]; ok {
-		log.Logger.Info("user in cache", zap.Any("user", u))
-		return &u, nil
-	}
 	result, err := p.userDB.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(p.Cfg.UserTableName),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -108,8 +102,6 @@ func (p *Provider) ReadUser(userID string) (*UserEntry, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Logger.Debug("setting user cache from db", zap.Any("user_entry", entry))
-		p.userCache[entry.UserID] = entry
 		return &entry, nil
 	}
 	return nil, errs.ErrNotFound
@@ -139,9 +131,6 @@ func (p *Provider) saveUser(userID string, claims map[string]interface{}) error 
 		return err
 	}
 
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-	p.userCache[ue.UserID] = *ue
 	log.Logger.Debug("saved user entry", zap.Any("user_entry", userEntry))
 	return nil
 }
