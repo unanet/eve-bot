@@ -12,18 +12,18 @@ import (
 	"github.com/unanet/eve/pkg/eve"
 )
 
-// ReleaseHandler is the handler for the ReleaseCmd
-type ReleaseHandler struct {
+// ReleaseArtifactHandler is the handler for the ReleaseArtifactCmd
+type ReleaseArtifactHandler struct {
 	svc *service.Provider
 }
 
-// NewReleaseHandler creates a ReleaseHandler
-func NewReleaseHandler(svc *service.Provider) CommandHandler {
-	return ReleaseHandler{svc: svc}
+// NewReleaseArtifactHandler creates a ReleaseArtifactHandler
+func NewReleaseArtifactHandler(svc *service.Provider) CommandHandler {
+	return ReleaseArtifactHandler{svc: svc}
 }
 
-// Handle handles the ReleaseCmd
-func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
+// Handle handles the ReleaseArtifactCmd
+func (h ReleaseArtifactHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, timestamp string) {
 
 	dynamicOpts := cmd.Options()
 

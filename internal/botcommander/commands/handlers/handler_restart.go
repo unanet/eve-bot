@@ -11,12 +11,12 @@ import (
 	"github.com/unanet/eve/pkg/eve"
 )
 
-// ReleaseHandler is the handler for the ReleaseCmd
+// ReleaseArtifactHandler is the handler for the ReleaseArtifactCmd
 type RestartHandler struct {
 	svc *service.Provider
 }
 
-// NewReleaseHandler creates a ReleaseHandler
+// NewReleaseArtifactHandler creates a ReleaseArtifactHandler
 func NewRestartHandler(svc *service.Provider) CommandHandler {
 	return RestartHandler{svc: svc}
 }
