@@ -16,15 +16,14 @@ type factory struct {
 func NewFactory() Factory {
 	return &factory{
 		Map: map[string]func(svc *service.Provider) CommandHandler{
-			commands.DeployCmdName:           NewDeployHandler,
-			commands.ShowCmdName:             NewShowHandler,
-			commands.SetCmdName:              NewSetHandler,
-			commands.DeleteCmdName:           NewDeleteHandler,
-			commands.ReleaseArtifactCmdName:  NewReleaseArtifactHandler,
-			commands.ReleaseNamespaceCmdName: NewReleaseNamespaceHandler,
-			commands.RestartCmdName:          NewRestartHandler,
-			commands.RunCmdName:              NewRunHandler,
-			commands.AuthCmdName:             NewAuthHandler,
+			commands.DeployCmdName:  NewDeployHandler,
+			commands.ShowCmdName:    NewShowHandler,
+			commands.SetCmdName:     NewSetHandler,
+			commands.DeleteCmdName:  NewDeleteHandler,
+			commands.ReleaseCmdName: NewReleaseHandler,
+			commands.RestartCmdName: NewRestartHandler,
+			commands.RunCmdName:     NewRunHandler,
+			commands.AuthCmdName:    NewAuthHandler,
 		},
 	}
 }
