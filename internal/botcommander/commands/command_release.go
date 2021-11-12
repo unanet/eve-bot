@@ -12,7 +12,7 @@ type releaseCmd struct {
 }
 
 const (
-	// ReleaseCmdName is the ID/Key for the ReleaseArtifactCmd
+	// ReleaseCmdName is the ID/Key for the ReleaseCmd
 	ReleaseCmdName = "release"
 )
 
@@ -41,7 +41,7 @@ var (
 	}
 )
 
-// NewReleaseCommand creates a New ReleaseArtifactCmd that implements the EvebotCommand interface
+// NewReleaseCommand creates a New ReleaseCmd that implements the EvebotCommand interface
 func NewReleaseCommand(cmdFields []string, channel, user string) EvebotCommand {
 	cmd := releaseCmd{baseCommand{
 		input: cmdFields,

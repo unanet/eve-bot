@@ -15,7 +15,7 @@ import (
 	"github.com/unanet/eve/pkg/eve"
 )
 
-// ReleaseHandler is the handler for the ReleaseArtifactCmd
+// ReleaseHandler is the handler for the ReleaseCmd
 type ReleaseHandler struct {
 	svc *service.Provider
 }
