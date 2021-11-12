@@ -40,7 +40,7 @@ func (h ReleaseHandler) Handle(ctx context.Context, cmd commands.EvebotCommand, 
 	}
 }
 
-// HandleNamespaceRelease handles the ReleaseCmd for releasing a namespace
+// handleArtifactRelease handles the ReleaseCmd for releasing a namespace
 func (h ReleaseHandler) handleArtifactRelease(ctx context.Context, cmd commands.EvebotCommand, timestamp string, dynamicOpts commands.CommandOptions) {
 
 	release, err := h.svc.EveAPI.Release(ctx, eve.Release{
@@ -78,7 +78,7 @@ func (h ReleaseHandler) artifactsToReleaseForNamespace(ctx context.Context, cmd 
 	return svcs, nil
 }
 
-// HandleNamespaceRelease handles the ReleaseCmd for releasing a namespace
+// handleNamespaceRelease handles the ReleaseCmd for releasing a namespace
 func (h ReleaseHandler) handleNamespaceRelease(ctx context.Context, cmd commands.EvebotCommand, timestamp string, dynamicOpts commands.CommandOptions) {
 
 	services, err := h.artifactsToReleaseForNamespace(ctx, cmd, timestamp)
