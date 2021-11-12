@@ -2,9 +2,10 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/unanet/eve-bot/internal/botcommander/help"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
-	"strings"
 )
 
 type releaseCmd struct {

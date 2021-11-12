@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/unanet/eve-bot/internal/service"
-
 	"github.com/unanet/eve-bot/internal/botcommander/commands"
 	"github.com/unanet/eve-bot/internal/botcommander/params"
 	"github.com/unanet/eve-bot/internal/eveapi"
