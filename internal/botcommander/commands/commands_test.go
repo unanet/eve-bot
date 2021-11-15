@@ -145,7 +145,7 @@ func Test_Ack(t *testing.T) {
 		{
 			name: "test handling errs",
 			args: args {
-				input: []string{"release-namespace", "current", "dev-int", "from", "foo"},
+				input: []string{"release", "namespace", "current", "dev-int", "from", "foo"},
 				info: ChatInfo {
 					CommandName: "foo",
 				},

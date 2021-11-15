@@ -40,7 +40,7 @@ type EveAPI interface {
 	SetServiceVersion(ctx context.Context, version string, id int) (eve.Service, error)
 	SetNamespaceVersion(ctx context.Context, version string, id int) (eve.Namespace, error)
 	GetNamespaceByID(ctx context.Context, id int) (eve.Namespace, error)
-	Release(ctx context.Context, payload eve.Release) (eve.Release, error)
+	Release(ctx context.Context, payload eve.Release) ([]eve.Release, error)
 	GetMetadata(ctx context.Context, key string) (eve.Metadata, error)
 	UpsertMergeMetadata(context.Context, eve.Metadata) (eve.Metadata, error)
 	UpsertMetadataServiceMap(context.Context, eve.MetadataServiceMap) (eve.MetadataServiceMap, error)
