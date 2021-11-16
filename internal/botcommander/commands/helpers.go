@@ -108,12 +108,32 @@ func hydrateMetadataMap(keyvals []string) params.MetadataMap {
 	if len(keyvals) == 0 {
 		return nil
 	}
-	for _, s := range keyvals {
+
+	for i, s := range keyvals {
 		if strings.Contains(s, "=") {
 			argKV := strings.Split(s, "=")
-			result[argKV[0]] = strings.Join(argKV[1:], "=")
+
+			result[argKV[0]] = extractMetadataValue(argKV[1], keyvals[i+1:])
 		}
 	}
 
 	return result
+}
+
+func extractMetadataValue(initialValue string, keyvals []string) string {
+	var builder strings.Builder
+
+	// Let's not forget our initial value for a properly formatted metadata value of `FOO=BAR`.
+	// If this has a space like `FOO= BAR`, we will trim the spaces out later
+	builder.WriteString(initialValue + " ")
+
+	for _, s := range keyvals {
+		// While we iterate over our values, we want to stop if we see a `=`. This will indicate the start of a new key
+		if strings.Contains(s, "=") {
+			break
+		}
+
+		builder.WriteString(s + " ")
+	}
+	return strings.TrimSpace(builder.String())
 }
