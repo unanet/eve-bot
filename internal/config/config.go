@@ -46,9 +46,6 @@ type Config struct {
 	LoggingDashboardBaseURL string `split_words:"true" required:"true"`
 	UserTableName           string `split_words:"true" required:"true"`
 	DevopsMonitoringChannel string `split_words:"true" required:"true"`
-
-	// OIDC
-
 }
 
 // Load loads the config reading it from the environment
