@@ -1,6 +1,182 @@
 package commands
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+func Test_ValidInputLength(t *testing.T) {
+	type args struct {
+		input []string
+		bounds InputLengthBounds
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "test valid",
+			args: args{
+				input: []string{"1", "2", "3"},
+				bounds: InputLengthBounds{
+					Min: 2,
+					Max: 3,
+				},
+			},
+			want: true,
+		},
+		{
+			name: "test exact bounds",
+			args: args{
+				input: []string{"1", "2"},
+				bounds: InputLengthBounds{
+					Min: 2,
+					Max: 2,
+				},
+			},
+			want: true,
+		},
+		{
+			name: "test below min",
+			args: args{
+				input: []string{"1"},
+				bounds: InputLengthBounds{
+					Min: 2,
+					Max: 3,
+				},
+			},
+			want: false,
+		},
+		{
+			name: "test above min",
+			args: args{
+				input: []string{"1", "2", "3", "4"},
+				bounds: InputLengthBounds{
+					Min: 2,
+					Max: 3,
+				},
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+
+		bc := baseCommand{
+			input:      tt.args.input,
+			bounds: 	tt.args.bounds,
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+
+			if got := bc.ValidInputLength(); got != tt.want {
+				t.Errorf("got = %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_Ack(t *testing.T) {
+	type args struct {
+		input []string
+		bounds InputLengthBounds
+		errs []error
+		info ChatInfo
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "test for successful ack",
+			args: args {
+				input: []string{"foo", "bar"},
+				info: ChatInfo {
+					CommandName: "foo",
+				},
+				bounds: InputLengthBounds{
+					Max: 2,
+					Min: 2,
+				},
+			},
+			want: true,
+		},
+		{
+			name: "test empty",
+			args: args{
+				input: []string{},
+			},
+			want: false,
+		},
+		{
+			name: "test invalid command",
+			args: args{
+				input: []string{"test-ack"},
+			},
+			want: false,
+		},
+		{
+			name: "test help",
+			args: args{
+				input: []string{"help"},
+			},
+			want: false,
+		},
+		{
+			name: "test help from command",
+			args: args{
+				input: []string{"run", "help"},
+			},
+			want: false,
+		},
+		{
+			name: "test invalid length",
+			args: args{
+				input: []string{"run", "help"},
+				bounds: InputLengthBounds{
+					Max: 1,
+					Min: 1,
+				},
+			},
+			want: false,
+		},
+		{
+			name: "test handling errs",
+			args: args {
+				input: []string{"release", "namespace", "current", "dev-int", "from", "foo"},
+				info: ChatInfo {
+					CommandName: "foo",
+				},
+				errs: []error{
+					fmt.Errorf("test err"),
+				},
+				bounds: InputLengthBounds{
+					Max: 7,
+					Min: 5,
+				},
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+
+		bc := baseCommand{
+			input:      tt.args.input,
+			bounds: 	tt.args.bounds,
+			errs: 		tt.args.errs,
+			info: 		tt.args.info,
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+			if _, ack := bc.BaseAckMsg(""); ack != tt.want {
+				t.Errorf("got = %v\nwant %v", ack, tt.want)
+			}
+		})
+	}
+}
 
 func Test_CleanUrls(t *testing.T) {
 	type args struct {

@@ -32,7 +32,7 @@ func initController(cfg *config.Config) []Controller {
 		log.Logger.Panic("Unable to Initialize the AWS Session", zap.Error(err))
 	}
 
-	idSvc, err := identity.NewService(cfg.Identity, identity.WithAdditionalScopesOpt([]string{"groups"}))
+	idSvc, err := identity.NewValidator(cfg.Identity)
 	if err != nil {
 		log.Logger.Panic("Unable to Initialize the Identity Service Provider", zap.Error(err))
 	}
@@ -42,7 +42,7 @@ func initController(cfg *config.Config) []Controller {
 		service.DynamoParam(dynamodb.New(awsSession)),
 		service.EveAPIParam(eveAPI),
 		service.ResolverParam(resolver.New(commands.NewFactory())),
-		service.OpenIDConnectParam(idSvc),
+		service.OpenIDConnectParam(cfg, idSvc),
 	)
 
 	exe := executor.New(svc, handlers.NewFactory())

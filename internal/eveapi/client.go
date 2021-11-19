@@ -179,8 +179,8 @@ func (c *Client) GetMetadata(ctx context.Context, key string) (eve.Metadata, err
 }
 
 // Release method calls the API to move artifacts in feeds
-func (c *Client) Release(ctx context.Context, payload eve.Release) (eve.Release, error) {
-	var success eve.Release
+func (c *Client) Release(ctx context.Context, payload eve.Release) ([]eve.Release, error) {
+	var success []eve.Release
 	var failure eveerror.RestError
 
 	r, err := c.sling.New().Post(fmt.Sprintf("release")).BodyJSON(payload).Request()

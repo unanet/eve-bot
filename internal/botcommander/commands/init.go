@@ -19,15 +19,15 @@ type Factory interface {
 func NewFactory() Factory {
 	return &factory{
 		Map: map[string]func(cmdFields []string, channel string, user string) EvebotCommand{
-			helpCmdName:    NewHelpCommand,
-			DeployCmdName:  NewDeployCommand,
-			ShowCmdName:    NewShowCommand,
-			SetCmdName:     NewSetCommand,
-			DeleteCmdName:  NewDeleteCommand,
-			ReleaseCmdName: NewReleaseCommand,
-			RestartCmdName: NewRestartCommand,
-			RunCmdName:     NewRunCommand,
-			AuthCmdName:    NewAuthCommand,
+			helpCmdName:             NewHelpCommand,
+			DeployCmdName:           NewDeployCommand,
+			ShowCmdName:             NewShowCommand,
+			SetCmdName:              NewSetCommand,
+			DeleteCmdName:           NewDeleteCommand,
+			ReleaseCmdName:          NewReleaseCommand,
+			RestartCmdName:          NewRestartCommand,
+			RunCmdName:              NewRunCommand,
+			AuthCmdName:             NewAuthCommand,
 		},
 	}
 }

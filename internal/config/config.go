@@ -24,16 +24,21 @@ type (
 	// EveAPIConfig is the config for the Eve API
 	EveAPIConfig = eveapi.Config
 	// IdentityConfig is the OIDC (KeyCloak) Config data
-	IdentityConfig = identity.Config
+	IdentityConfig = identity.ValidatorConfig
 )
+
+type OIDCConfig struct {
+	ClientSecret 			string `split_words:"true" required:"true"`
+	RedirectURL  			string `split_words:"true" required:"true"`
+}
 
 // Config is the top level application config
 type Config struct {
 	LogConfig
 	SlackConfig
 	EveAPIConfig
-
 	Identity                IdentityConfig
+	Oidc					OIDCConfig
 	Port                    int    `split_words:"true" default:"8080"`
 	MetricsPort             int    `split_words:"true" default:"3001"`
 	ServiceName             string `split_words:"true" default:"eve"`
