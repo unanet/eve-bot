@@ -30,7 +30,7 @@ type UserEntry struct {
 }
 
 func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) error {
-	oauth2Token, err := p.oidc.Exchange(ctx, code)
+	oauth2Token, err := p.Exchange(ctx, code)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (p *Provider) SaveUserAuth(ctx context.Context, state string, code string) 
 		return errors.New("failed to get id_token")
 	}
 
-	idToken, err := p.oidc.Verify(ctx, rawIDToken)
+	idToken, err := p.Verify(ctx, rawIDToken)
 	if err != nil {
 		return err
 	}
