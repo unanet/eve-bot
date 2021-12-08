@@ -87,7 +87,7 @@ func (c SlackController) slackEventHandler(w http.ResponseWriter, r *http.Reques
 	case *slack.FileSharedEvent:
 		log.Logger.Info("File Uploaded", zap.Any("event", ev))
 	case *slackevents.AppMentionEvent:
-		c.handleSlackAppMentionEvent(r.Context(), ev)
+		c.handleSlackAppMentionEvent(context.TODO(), ev)
 	default:
 		log.Logger.Info("slack innerEvent", zap.Any("event", innerEvent))
 		render.Respond(w, r, errors.Wrap(unknownSlackEventError(innerEvent)))
